@@ -1,0 +1,17 @@
+**.build*/*
+**/bin/*
+*.o
+*.xe
+*.vcd
+*.s
+*.xi
+*.i
+*.a
+**/_build/*
+lib_lcd/doc/rst/_build/*
+**/run_*.log
+**/pdf/*
+**/html/*
+Installs/*
+.settings*
+examples/lcd_demo/.build*/*

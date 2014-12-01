@@ -1,0 +1,237 @@
+.. include:: ../../../README.rst
+
+Hardware characteristics
+------------------------
+
+The signals from the xCore required to drive an SDRAM are:
+
+.. _sdram_wire_table:
+
+.. list-table:: SDRAM data and signal wires
+     :class: vertical-borders horizontal-borders
+
+     * - *Clock*
+       - Clock line, this is the master clock the SDRAM will use for 
+         sampling all the other signals.
+     * - *DQ_AH*
+       - This is the 16-bit data bus and address bus multiplexed,
+         see below. 
+     * - *WE*
+       - This is  write enable(Inverted).
+     * - *RAS*
+       - This is the row address strobe(Inverted).
+     * - *CAS*
+       - This is the coloumn address strobe(Inverted).
+
+Because of the multiplexing it is important that attention is payed to the
+physical wiring of the SDRAM to the xCore. 
+
+A typical SDRAM will require the following signals:
+CLK		Clock
+CKE		Clock Enable
+CS		Chip Select
+RAS		Row Address Strobe
+CAS		Col Address Strobe
+WE		Write Enable
+DQ[15:0]	Data
+DQM		Data Input/Output Mask		
+A[11:0]		Address
+BA[1:0]		Bank Address
+
+The exact count of Address lines and Bank Address line may vary. 
+This library is designed to work with a 16 bit data bus. 
+
+The dq_ah bus is made up of 16 lines. The DQ bus is mapped directly to
+dq_ah. The address bus is mapped in order to the lower bits of dq_ah. Finally, 
+The bank address bus is mapped to the highes bits of dq_ah.
+
+Where the Address bus is 12 bit wide and the bank address is 2 bits wide
+then the following setup would be in place::
+  dq_ah[15:0] = DQ[15:0]
+  dq_ah[11:0] = A[11:0]
+  dq_ah[15:14] = BA[1:0]
+
+The DQM signal(s) is connected to the NOR of WE and CAS. An example of a suitable
+part would be the TI SN74LVC1G02. In the case that the DQM is seperated into high 
+and low componants then the output from the NOR is connected to both high and low DQM.
+
+This library assumes that CS is pulled low, i.e. the SDRAM is always selected.
+
+SDRAM API
+---------
+
+All |sdram| functions can be accessed via the ``sdram.h`` header::
+
+  #include <sdram.h>
+
+You will also have to add ``lib_sdram`` to the
+``USED_MODULES`` field of your application Makefile.
+
+|sdram| server and client are instantiated as parallel tasks that run in a
+``par`` statement. The client (application on most cases) can connect via 
+a streaming channel.
+
+.. figure:: images/sdram_task_diag.*
+
+   SDRAM task diagram
+
+For example, the following code instantiates an SDRAM server
+and connects and application to it::
+
+  out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
+  out buffered port:32   sdram_cas                   = XS1_PORT_1B;
+  out buffered port:32   sdram_ras                   = XS1_PORT_1G;
+  out buffered port:8    sdram_we                    = XS1_PORT_1C;
+  out port               sdram_clk                   = XS1_PORT_1F;
+  clock                  sdram_cb                    = XS1_CLKBLK_1;
+   
+  int main() {
+    streaming chan c_sdram[1];
+    par {
+        sdram_server(c_sdram, 1,
+              sdram_dq_ah,
+              sdram_cas,
+              sdram_ras,
+              sdram_we,
+              sdram_clk,
+              sdram_cb,
+              2, 128, 16, 8,12, 2, 64, 4096, 4);
+      application(c_sdram[0]);
+    }
+    return 0;
+  }
+
+Note that the client and SDRAM server must be on the same tile as the 
+line buffers are transfered my moving pointers from one task to another.
+
+The SDRAM library uses movable pointers to pass buffers between the client 
+and the server. This means that when the client passes a buffer to the 
+SDRAM server then whilst the server is proceessing the command the client 
+will be unable to access that buffer. To handle this that client sends 
+commands using ``sdram_read`` and ``sdram_write``, both of which will take 
+a movable pointer as an argument. To return the pointer to the client the 
+client must call ``sdram_complete`` which will take back ownership of the 
+pointer when the SDRAM server is finished processing the command.
+
+``sdram_complete`` can  be selected on to allow the client to event on data 
+becoming ready or a write completing.
+
+Client/Server model
+-------------------
+
+The SDRAM server must be instantiated at the same level as its clients. For example::
+
+chan c_sdram[1];
+par {
+        sdram_server(c_sdram, 1,  ... );
+        client_of_the_sdram_server(c_sdram[0]);
+}
+
+would be the mimimum required to correctly setup the SDRAM server and connect it to a client. An example of a multi-client system would be::
+
+chan c_sdram[4];
+par {
+	sdram_server(c_sdram, 4,  ... );
+	client_of_the_sdram_server_0(c_sdram[0]);
+	client_of_the_sdram_server_1(c_sdram[1]);
+	client_of_the_sdram_server_2(c_sdram[2]);
+	client_of_the_sdram_server_3(c_sdram[3]);
+} 
+
+Command buffering
+-----------------
+
+The SDRAM server implements a 8 slot command buffer per client. This means that the client can queue up to 8 commands to the SDRAM server through calls to ``sdram_read`` or ``sdram_write``. A successful call to ``sdram_read`` or ``sdram_write``will return 0 and issue the command to the command buffer. When the command buffer is full then a call to ``sdram_read`` or ``sdram_write`` will return 1 and not issue the command.  Commands are completed, i.e. a slot is freed, when ``sdram_complete`` returns. Commands are processed as in a first in first out ordering.
+
+
+Initialisation
+--------------
+
+Each client of the SDRAM server must declare the structure ``s_sdram_state`` once and only once and with it call ``sdram_init_state``. This will do all the required setup for the command buffering. From here on the client is able to call ``sdram_read`` and ``sdram_write`` to access the physical memory. For example::
+
+   s_sdram_state sdram_state;
+   sdram_init_state(c_server, sdram_state);
+
+where ``c_server`` is the channel to the ``sdram_server``.
+
+
+Safety through the use of movable pointers
+------------------------------------------
+The API makes use of movable pointer to aid correct multi-threaded memory handeling. ``sdram_read`` and ``sdram_write`` pass ownership of the memory from the client to the server. The client is now longer able to access the memory. The memory ownership is returned to the client on a call return from ``sdram_complete``. For example::
+
+   unsigned buffer[N];
+   unsigned * movable buffer_pointer = buffer;
+
+   //buffer_pointer is fully accessable
+
+   sdram_read (c_server, sdram_state, bank, row, col, words, move(buffer_pointer));
+
+   //during this region the buffer_pointer is null and cannot be read from or written to
+
+   sdram_complete(c_server, sdram_state, buffer_pointer);
+
+   //now buffer_pointer is accessable again
+
+During the scope of the movable pointer variable it is permissible that the pointer points at any memory location, however, at the end of the scope the pointer must point at its original instination. 
+
+For example::
+
+{
+   unsigned buffer_0[N];
+   unsigned buffer_1[N];
+   unsigned * movable buffer_pointer_0 = buffer_0;
+   unsigned * movable buffer_pointer_1 = buffer_1;
+
+   sdram_read (c_server, sdram_state, bank, row, col, words, move(buffer_pointer_0));
+   sdram_write (c_server, sdram_state, bank, row, col, words, move(buffer_pointer_1));
+
+   //both buffer_pointer_0 and buffer_pointer_1 are null here
+
+   sdram_complete(c_server, sdram_state, buffer_pointer_0);
+   sdram_complete(c_server, sdram_state, buffer_pointer_1);
+}
+
+Would be acceptable but the following would not::
+
+{
+   unsigned buffer_0[N];
+   unsigned buffer_1[N];
+   unsigned * movable buffer_pointer_0 = buffer_0;
+   unsigned * movable buffer_pointer_1 = buffer_1;
+
+   sdram_read (c_server, sdram_state, bank, row, col, words, move(buffer_pointer_0));
+   sdram_write (c_server, sdram_state, bank, row, col, words, move(buffer_pointer_1));
+
+   //both buffer_pointer_0 and buffer_pointer_1 are null here
+
+   sdram_complete(c_server, sdram_state, buffer_pointer_1);	//return to opposite pointer
+   sdram_complete(c_server, sdram_state, buffer_pointer_0);
+}
+
+as the movable pointers are no longer point at the same memory when leaving scope as they were when the were instianted. 
+
+Shutdown
+--------
+
+The ``sdram_server`` may be shutdown, i.e. the thread and all its resources may be freed, with a call to ``sdram_shutdown``.
+
+API
+...
+
+.. doxygenfunction:: sdram_server
+.. doxygenfunction:: sdram_init_state
+.. doxygenfunction:: sdram_complete
+.. doxygenfunction:: sdram_write
+.. doxygenfunction:: sdram_read
+.. doxygenfunction:: sdram_shutdown
+
+|newpage|
+
+|appendix|
+
+Known Issues
+------------
+
+There are no known issues with this library.
+
+.. include:: ../../../CHANGELOG.rst
