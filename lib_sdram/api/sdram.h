@@ -92,7 +92,7 @@ int sdram_write   (streaming chanend c_sdram_server, s_sdram_state &state, unsig
         unsigned * movable buffer);
 
 /* \fn int sdram_read   (streaming chanend c_sdram_server, s_sdram_state &state, unsigned bank, unsigned row, unsigned col, unsigned word_count, unsigned * movable buffer);
- * \brief Request the SDRAM server to perform a write operation.
+ * \brief Request the SDRAM server to perform a read operation.
  *
  *	This function will place a read command into the SDRAM command buffer if the command buffer is not full. This is a
  *	non-blocking call with a return value to indicate the successful issuing of the read to the SDRAM server.
