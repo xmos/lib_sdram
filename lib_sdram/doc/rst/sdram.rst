@@ -45,7 +45,7 @@ The dq_ah bus is made up of 16 lines. The DQ bus is mapped directly to
 dq_ah. The address bus is mapped in order to the lower bits of dq_ah. Finally, 
 the bank address bus is mapped to the higher bits of dq_ah.
 
-Where the Address bus is 12 bit wide and the bank address is 2 bits wide,
+Where the Address bus is 12 bits wide and the bank address is 2 bits wide
 the following setup would be in place::
   dq_ah[15:0] = DQ[15:0]
   dq_ah[11:0] = A[11:0]
