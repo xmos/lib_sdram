@@ -1,3 +1,4 @@
+// Copyright (c) 2015, XMOS Ltd, All rights reserved
 #ifndef SDRAM_CONTROL_H_
 #define SDRAM_CONTROL_H_
 

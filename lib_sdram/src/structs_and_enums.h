@@ -1,3 +1,4 @@
+// Copyright (c) 2015, XMOS Ltd, All rights reserved
 #ifndef STRUCTS_AND_ENUMS_H_
 #define STRUCTS_AND_ENUMS_H_
 
