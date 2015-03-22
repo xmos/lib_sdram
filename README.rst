@@ -40,11 +40,7 @@ TODO
 Software version and dependencies
 .................................
 
-This document pertains to version |version| of the SDRAM library. It is
-intended to be used with version 13.x of the xTIMEcomposer studio tools.
-
-The library does not have any dependencies (i.e. it does not rely on any
-other libraries).
+.. libdeps::
 
 Related application notes
 .........................
