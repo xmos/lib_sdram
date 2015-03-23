@@ -1,8 +1,8 @@
 SDRAM Library
-===========
+=============
 
 SDRAM Libary
------------
+------------
 
 The XMOS SDRAM module is designed for 16 bit read and write access of 
 arbitrary length at up to 62.5MHz clock rates. It uses an optimised 

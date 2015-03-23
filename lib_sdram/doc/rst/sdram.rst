@@ -47,6 +47,7 @@ the bank address bus is mapped to the higher bits of dq_ah.
 
 Where the Address bus is 12 bits wide and the bank address is 2 bits wide
 the following setup would be in place::
+
   dq_ah[15:0] = DQ[15:0]
   dq_ah[11:0] = A[11:0]
   dq_ah[15:14] = BA[1:0]
@@ -60,7 +61,7 @@ This library assumes that CS is pulled low, i.e. the SDRAM is always selected.
 SDRAM API
 ---------
 
-All |sdram| functions can be accessed via the ``sdram.h`` header::
+All SDRAM functions can be accessed via the ``sdram.h`` header::
 
   #include <sdram.h>
 
@@ -69,11 +70,8 @@ You will also have to add ``lib_sdram`` to the
 
 |sdram| server and client are instantiated as parallel tasks that run in a
 ``par`` statement. The client (application on most cases) can connect to the server via 
+
 a streaming channel.
-
-.. figure:: images/sdram_task_diag.*
-
-   SDRAM task diagram
 
 For example, the following code instantiates an SDRAM server
 and connects and application to it::
@@ -121,27 +119,27 @@ Client/Server model
 
 The SDRAM server must be instantiated at the same level as its clients. For example::
 
-chan c_sdram[1];
-par {
-        sdram_server(c_sdram, 1,  ... );
-        client_of_the_sdram_server(c_sdram[0]);
-}
+  chan c_sdram[1];
+  par {
+          sdram_server(c_sdram, 1,  ... );
+          client_of_the_sdram_server(c_sdram[0]);
+  }
 
 would be the mimimum required to correctly setup the SDRAM server and connect it to a client. An example of a multi-client system would be::
 
-chan c_sdram[4];
-par {
-	sdram_server(c_sdram, 4,  ... );
-	client_of_the_sdram_server_0(c_sdram[0]);
-	client_of_the_sdram_server_1(c_sdram[1]);
-	client_of_the_sdram_server_2(c_sdram[2]);
-	client_of_the_sdram_server_3(c_sdram[3]);
-} 
+  chan c_sdram[4];
+  par {
+  	sdram_server(c_sdram, 4,  ... );
+  	client_of_the_sdram_server_0(c_sdram[0]);
+  	client_of_the_sdram_server_1(c_sdram[1]);
+  	client_of_the_sdram_server_2(c_sdram[2]);
+  	client_of_the_sdram_server_3(c_sdram[3]);
+  } 
 
 Command buffering
 -----------------
 
-The SDRAM server implements a 8 slot command buffer per client. This means that the client can queue up to 8 commands to the SDRAM server through calls to ``sdram_read`` or ``sdram_write``. A successful call to ``sdram_read`` or ``sdram_write``will return 0 and issue the command to the command buffer. When the command buffer is full then a call to ``sdram_read`` or ``sdram_write`` will return 1 and not issue the command.  Commands are completed, i.e. a slot is freed, when ``sdram_complete`` returns. Commands are processed as in a first in first out ordering.
+The SDRAM server implements a 8 slot command buffer per client. This means that the client can queue up to 8 commands to the SDRAM server through calls to ``sdram_read`` or ``sdram_write``. A successful call to ``sdram_read`` or ``sdram_write`` will return 0 and issue the command to the command buffer. When the command buffer is full then a call to ``sdram_read`` or ``sdram_write`` will return 1 and not issue the command.  Commands are completed, i.e. a slot is freed, when ``sdram_complete`` returns. Commands are processed as in a first in first out ordering.
 
 
 Initialisation
@@ -176,37 +174,37 @@ During the scope of the movable pointer variable it is permissible that the poin
 
 For example::
 
-{
-   unsigned buffer_0[N];
-   unsigned buffer_1[N];
-   unsigned * movable buffer_pointer_0 = buffer_0;
-   unsigned * movable buffer_pointer_1 = buffer_1;
-
-   sdram_read (c_server, sdram_state, bank, row, col, words, move(buffer_pointer_0));
-   sdram_write (c_server, sdram_state, bank, row, col, words, move(buffer_pointer_1));
-
-   //both buffer_pointer_0 and buffer_pointer_1 are null here
-
-   sdram_complete(c_server, sdram_state, buffer_pointer_0);
-   sdram_complete(c_server, sdram_state, buffer_pointer_1);
-}
+  {
+     unsigned buffer_0[N];
+     unsigned buffer_1[N];
+     unsigned * movable buffer_pointer_0 = buffer_0;
+     unsigned * movable buffer_pointer_1 = buffer_1;
+  
+     sdram_read (c_server, sdram_state, bank, row, col, words, move(buffer_pointer_0));
+     sdram_write (c_server, sdram_state, bank, row, col, words, move(buffer_pointer_1));
+  
+     //both buffer_pointer_0 and buffer_pointer_1 are null here
+  
+     sdram_complete(c_server, sdram_state, buffer_pointer_0);
+     sdram_complete(c_server, sdram_state, buffer_pointer_1);
+  }
 
 Would be acceptable but the following would not::
 
-{
-   unsigned buffer_0[N];
-   unsigned buffer_1[N];
-   unsigned * movable buffer_pointer_0 = buffer_0;
-   unsigned * movable buffer_pointer_1 = buffer_1;
-
-   sdram_read (c_server, sdram_state, bank, row, col, words, move(buffer_pointer_0));
-   sdram_write (c_server, sdram_state, bank, row, col, words, move(buffer_pointer_1));
-
-   //both buffer_pointer_0 and buffer_pointer_1 are null here
-
-   sdram_complete(c_server, sdram_state, buffer_pointer_1);	//return to opposite pointer
-   sdram_complete(c_server, sdram_state, buffer_pointer_0);
-}
+  {
+     unsigned buffer_0[N];
+     unsigned buffer_1[N];
+     unsigned * movable buffer_pointer_0 = buffer_0;
+     unsigned * movable buffer_pointer_1 = buffer_1;
+  
+     sdram_read (c_server, sdram_state, bank, row, col, words, move(buffer_pointer_0));
+     sdram_write (c_server, sdram_state, bank, row, col, words, move(buffer_pointer_1));
+  
+     //both buffer_pointer_0 and buffer_pointer_1 are null here
+  
+     sdram_complete(c_server, sdram_state, buffer_pointer_1);	//return to opposite pointer
+     sdram_complete(c_server, sdram_state, buffer_pointer_0);
+  }
 
 as the movable pointers are no longer point at the same memory when leaving scope as they were when they were instantiated. 
 

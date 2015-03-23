@@ -84,8 +84,7 @@ void sdram_complete(streaming chanend c_sdram_server, s_sdram_state &state, unsi
  *  \param state              State structure.
  *  \param address            This is a word address of the location in SDRAM to write from.
  *  \param word_count         The number of words to write to the SDRAM.
- *  \param buffer             A movable pointer from which the data to be written to the SDRAM will be
- *                            read. Note, that the ownership of the pointer will pass to the SDRAM server.
+ *  \param buffer             A movable pointer from which the data to be written to the SDRAM will be read. Note, that the ownership of the pointer will pass to the SDRAM server.
  *  \return                   0 for write command has successfully be added to SDRAM command queue.
  *  \return                   1 for SDRAM command queue is full, write command has not been added.
  */
@@ -102,8 +101,7 @@ int sdram_write   (streaming chanend c_sdram_server, s_sdram_state &state, unsig
  *  \param state              State structure.
  *  \param address            This is a word address of the location in SDRAM to read from.
  *  \param word_count         The number of words to read from the SDRAM.
- *  \param buffer             A movable pointer from which the data to be read from the SDRAM will be
- *                            written. Note, that the ownership of the pointer will pass to the SDRAM server.
+ *  \param buffer             A movable pointer from which the data to be read from the SDRAM will be written. Note, that the ownership of the pointer will pass to the SDRAM server.
  *  \return                   0 for read command has successfully be added to SDRAM command queue.
  *  \return                   1 for SDRAM command queue is full, read command has not been added.
  *

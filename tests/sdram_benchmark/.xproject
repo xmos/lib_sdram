@@ -1,1 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?><xproject><repository>sc_sdram_burst</repository><partnum>XM-001915-SM</partnum></xproject>
+<?xml version="1.0" encoding="UTF-8"?>
+<xproject><repository>tests</repository>
+</xproject>
