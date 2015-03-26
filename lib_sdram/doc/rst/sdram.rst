@@ -52,11 +52,17 @@ the following setup would be in place::
   dq_ah[11:0] = A[11:0]
   dq_ah[15:14] = BA[1:0]
 
+The number of address bits plus the number of bank address bits must not exceed 16.
+
 The DQM signal(s) is connected to the NOR of WE and CAS. An example of a suitable
 part would be the TI SN74LVC1G02. In the case that the DQM is seperated into high 
 and low components then the output from the NOR is connected to both high and low DQM.
 
-This library assumes that CS is pulled low, i.e. the SDRAM is always selected.
+This library assumes that CS is pulled low, i.e. the SDRAM is always selected. If 
+control of the CS is needed then it will have to be done from the client application 
+level. This means that for the duration of the use of the SDRAM then CS will need to 
+be asserted and when the ``sdram_server`` is shutdown the CS can be desserted.
+
 
 SDRAM API
 ---------
@@ -68,9 +74,8 @@ All SDRAM functions can be accessed via the ``sdram.h`` header::
 You will also have to add ``lib_sdram`` to the
 ``USED_MODULES`` field of your application Makefile.
 
-|sdram| server and client are instantiated as parallel tasks that run in a
+SDRAM server and client are instantiated as parallel tasks that run in a
 ``par`` statement. The client (application on most cases) can connect to the server via 
-
 a streaming channel.
 
 For example, the following code instantiates an SDRAM server
