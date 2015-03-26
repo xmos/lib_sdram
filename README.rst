@@ -31,6 +31,7 @@ Components
 ...........
 
  * SDRAM server.
+ * Memory address allocator.
  
 Resource Usage
 ..............
@@ -44,6 +45,13 @@ Resource Usage
     - fn: sdram_server(c_sdram, 1,sdram_dq_ah,sdram_cas,sdram_ras,sdram_we,sdram_clk,sdram_cb,2, 128, 16, 8,12, 2, 64, 4096, 4);
     - pins: 20
     - ports: 4 (1-bit), 1 (16-bit)
+
+  * - configuration: Memory address allocator 
+    - globals: 
+    - locals:  interface memory_address_allocator_i to_memory_alloc[1];
+    - fn: memory_address_allocator( 1, to_memory_alloc, 0, 1024*1024*8);
+    - pins: 0
+    - ports: 0
 
 
 Software version and dependencies

@@ -120,7 +120,7 @@ pointer when the SDRAM server finished processing the command.
 becoming ready or completing a write.
 
 Client/Server model
--------------------
+...................
 
 The SDRAM server must be instantiated at the same level as its clients. For example::
 
@@ -142,13 +142,13 @@ would be the mimimum required to correctly setup the SDRAM server and connect it
   } 
 
 Command buffering
------------------
+.................
 
 The SDRAM server implements a 8 slot command buffer per client. This means that the client can queue up to 8 commands to the SDRAM server through calls to ``sdram_read`` or ``sdram_write``. A successful call to ``sdram_read`` or ``sdram_write`` will return 0 and issue the command to the command buffer. When the command buffer is full then a call to ``sdram_read`` or ``sdram_write`` will return 1 and not issue the command.  Commands are completed, i.e. a slot is freed, when ``sdram_complete`` returns. Commands are processed as in a first in first out ordering.
 
 
 Initialisation
---------------
+..............
 
 Each client of the SDRAM server must declare the structure ``s_sdram_state`` only once and call ``sdram_init_state``. This will do all the required setup for the command buffering. From here on the client is able to call ``sdram_read`` and ``sdram_write`` to access the physical memory. For example::
 
@@ -159,7 +159,8 @@ where ``c_server`` is the channel to the ``sdram_server``.
 
 
 Safety through the use of movable pointers
-------------------------------------------
+..........................................
+
 The API makes use of movable pointer to aid correct multi-threaded memory handling. ``sdram_read`` and ``sdram_write`` pass ownership of the memory from the client to the server. The client is no longer able to access the memory. The memory ownership is returned to the client on a call return from ``sdram_complete``. For example::
 
    unsigned buffer[N];
@@ -214,9 +215,15 @@ Would be acceptable but the following would not::
 as the movable pointers are no longer point at the same memory when leaving scope as they were when they were instantiated. 
 
 Shutdown
---------
+........
 
 The ``sdram_server`` may be shutdown, i.e. the thread and all its resources may be freed, with a call to ``sdram_shutdown``.
+
+
+Memory allocator API
+--------------------
+
+The purpose of this library is to allow multiple tasks to share a common memory address space. All of the clients may request a number of bytes from the memory space and will either be allocated a base address to use the requested amount of memory from or will recieve an error. All clients of the memory address allocator must be on the same tile.
 
 API
 ...
@@ -227,6 +234,7 @@ API
 .. doxygenfunction:: sdram_write
 .. doxygenfunction:: sdram_read
 .. doxygenfunction:: sdram_shutdown
+.. doxygenfunction:: memory_address_allocator
 
 |newpage|
 
