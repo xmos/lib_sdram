@@ -234,6 +234,8 @@ API
 .. doxygenfunction:: sdram_write
 .. doxygenfunction:: sdram_read
 .. doxygenfunction:: sdram_shutdown
+
+.. doxygeninterface:: memory_address_allocator_i
 .. doxygenfunction:: memory_address_allocator
 
 |newpage|

@@ -4,9 +4,8 @@
 #include <platform.h>
 #include "structs_and_enums.h"
 
-/* \fn void sdram_server(streaming chanend c_client[client_count], unsigned client_count, sdram_ports &p_sdram);
- * \brief The actual SDRAM server providing a software interface plus services to access the SDRAM.
- *
+/**
+ * The actual SDRAM server providing a software interface plus services to access the SDRAM.
  * This provides the software interface to the physical SDRAM. It provides services including:
  *  - Automatic SDRAM refresh,
  *  - Multi-client interface,
@@ -32,7 +31,7 @@
  *  \param refresh_ms           The count of milliseconds for a full refresh cycle.
  *  \param refresh_cycles       The count of refresh instruction per full refresh cycle.
  *  \param clock_divider        The divider of the system clock to the SDRAM clock.
- */
+ **/
 void sdram_server(streaming chanend c_client[client_count],
         const static unsigned client_count,
         out buffered port:32 dq_ah,
@@ -51,10 +50,7 @@ void sdram_server(streaming chanend c_client[client_count],
         const static unsigned refresh_cycles,
         const static unsigned clock_divider);
 
-/*
- * \fn void sdram_init_state(streaming chanend c_sdram_server, s_sdram_state &s)
- * \brief This is used to initialise the sdram_state that follows the channel to the SDRAM server.
- *
+/**
  * This is used to initialise the sdram_state that follows the channel to the SDRAM server. It must only be called
  * once on the s_sdram_state that it is initialising. A client must have only one s_sdram_state that exists for the
  * lift time of the use of the SDRAM.
@@ -63,22 +59,21 @@ void sdram_server(streaming chanend c_client[client_count],
  * \param sdram_state       State structure.
  *
  * \return                  None.
- */
+ **/
 void sdram_init_state(streaming chanend c_sdram_server, s_sdram_state &sdram_state);
 
-/*
+/**
  * This is a blocking call that may be used as a select handler. It returns an array
  * to a movable pointer. It will complete when a command has been completed by the
  * server.
- */
+ **/
 #pragma select handler
 void sdram_complete(streaming chanend c_sdram_server, s_sdram_state &state, unsigned * movable & buffer);
 
-/* \fn int sdram_write   (streaming chanend c_sdram_server, s_sdram_state &state, unsigned bank, unsigned row, unsigned col, unsigned word_count, unsigned * movable buffer);
- * \brief Request the SDRAM server to perform a write operation.
- *
- *    This function will place a write command into the SDRAM command buffer if the command buffer is not full. This is a
- *    non-blocking call with a return value to indicate the successful issuing of the write to the SDRAM server.
+/**
+ * Request the SDRAM server to perform a write operation.
+ * This function will place a write command into the SDRAM command buffer if the command buffer is not full. This is a
+ * non-blocking call with a return value to indicate the successful issuing of the write to the SDRAM server.
  *
  *  \param c_sdram_server     Chanel to the SDRAM server.
  *  \param state              State structure.
@@ -87,15 +82,14 @@ void sdram_complete(streaming chanend c_sdram_server, s_sdram_state &state, unsi
  *  \param buffer             A movable pointer from which the data to be written to the SDRAM will be read. Note, that the ownership of the pointer will pass to the SDRAM server.
  *  \return                   0 for write command has successfully be added to SDRAM command queue.
  *  \return                   1 for SDRAM command queue is full, write command has not been added.
- */
+ **/
 int sdram_write   (streaming chanend c_sdram_server, s_sdram_state &state, unsigned address, unsigned word_count,
         unsigned * movable buffer);
 
-/* \fn int sdram_read   (streaming chanend c_sdram_server, s_sdram_state &state, unsigned bank, unsigned row, unsigned col, unsigned word_count, unsigned * movable buffer);
- * \brief Request the SDRAM server to perform a read operation.
- *
- *	This function will place a read command into the SDRAM command buffer if the command buffer is not full. This is a
- *	non-blocking call with a return value to indicate the successful issuing of the read to the SDRAM server.
+/**
+ * Request the SDRAM server to perform a read operation.
+ * This function will place a read command into the SDRAM command buffer if the command buffer is not full. This is a
+ * non-blocking call with a return value to indicate the successful issuing of the read to the SDRAM server.
  *
  *  \param c_sdram_server     Chanel to the SDRAM server.
  *  \param state              State structure.
@@ -105,15 +99,15 @@ int sdram_write   (streaming chanend c_sdram_server, s_sdram_state &state, unsig
  *  \return                   0 for read command has successfully be added to SDRAM command queue.
  *  \return                   1 for SDRAM command queue is full, read command has not been added.
  *
- */
+ **/
 int sdram_read    (streaming chanend c_sdram_server, s_sdram_state &state, unsigned address, unsigned word_count,
         unsigned * movable buffer);
 
-/* \fn void sdram_shutdown(streaming chanend c_sdram_server);
- * \brief Terminates the sdram_server.
+/**
+ * Terminates the sdram_server.
  *
  * \return                  None.
- */
+ **/
 void sdram_shutdown(streaming chanend c_sdram_server);
 
 #endif /* SDRAM_H_ */

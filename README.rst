@@ -16,10 +16,12 @@ Features
 The SDRAM component has the following features:
 
   * Configurability of:
+
      - SDRAM geometry,
      - clock rate,
      - refresh properties.
   * Supports:
+
      - read,
      - write,
      - one or more clients
