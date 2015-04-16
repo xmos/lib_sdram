@@ -5,9 +5,9 @@ SDRAM Libary
 ------------
 
 The XMOS SDRAM module is designed for 16 bit read and write access of 
-arbitrary length at up to 62.5MHz clock rates. It uses an optimised 
+arbitrary length at up to 62.5MHz clock rates. It uses an optimized 
 pinout with address and data lines overlaid along with other pinout 
-optimisations in order to implement 16 bit read/write with up to 13 
+optimizations to implement 16 bit read/write with up to 13 
 address lines with a total of just 20 pins.
 
 Features
@@ -17,23 +17,23 @@ The SDRAM component has the following features:
 
   * Configurability of:
 
-     - SDRAM geometry,
-     - clock rate,
-     - refresh properties.
+     - SDRAM geometry
+     - clock rate
+     - refresh properties
   * Supports:
 
-     - read,
-     - write,
+     - read
+     - write
      - one or more clients
      - asynchronous command decoupling with a command queue of length 8 for each client
-     - refresh handled by the SDRAM component itself.
-  * Requires a single core for the server.
+     - refresh handled by the SDRAM component itself
+  * Requires a single core for the server
 
 Components
 ...........
 
- * SDRAM server.
- * Memory address allocator.
+ * SDRAM server
+ * Memory address allocator
  
 Resource Usage
 ..............
