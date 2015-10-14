@@ -234,6 +234,8 @@
 									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/gcc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/xc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/clang&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_sdram_demo}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_sdram_demo/src}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.xc.compiler.input.33430910" name="XC" superClass="com.xmos.cdt.xc.compiler.input"/>
 							</tool>
@@ -542,6 +544,8 @@
 									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/gcc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/clang&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_sdram_demo}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_sdram_demo/src}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.c.compiler.input.c.13351871" name="C" superClass="com.xmos.cdt.c.compiler.input.c"/>
 							</tool>
@@ -857,6 +861,8 @@
 									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/c++/4.2.1/xcore-xmos-elf&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/clang&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/c++/v1&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_sdram_demo}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_sdram_demo/src}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.cxx.compiler.input.cpp.72573155" name="C++" superClass="com.xmos.cdt.cxx.compiler.input.cpp"/>
 							</tool>

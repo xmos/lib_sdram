@@ -7,7 +7,7 @@
 sdram_block_write:
 
 #define WRITE_STACK_WORDS 3
-	entsp WRITE_STACK_WORDS
+	ENTSP_lu6 WRITE_STACK_WORDS
 
  	//r0 buffer pointer
 	//r1 sdram_ports struct
@@ -91,7 +91,8 @@ sdram_block_write:
 .type  sdram_block_read, @function
 sdram_block_read:
 #define READ_STACK_WORDS 6
-	entsp READ_STACK_WORDS
+    
+    ENTSP_lu6 READ_STACK_WORDS
 
  	//r0 buffer pointer
 	//r1 sdram_ports struct
