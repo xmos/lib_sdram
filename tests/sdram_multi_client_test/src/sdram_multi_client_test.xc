@@ -3,10 +3,9 @@
 #include <stdio.h>
 #include "sdram.h"
 
-/*
- * Put an sdram slice into square slot of A16 board.
- */
-
+ /*
+  * Put an SDRAM slice into square slot of A16 board, or into slot '4' of the xCore200 slice kit
+  */
 #define MAX_BUFFER_WORDS 128
 #define SDRAM_BANK_COUNT    4
 #define SDRAM_ROW_COUNT     4096
@@ -49,12 +48,22 @@ void sdram_client(streaming chanend c_server, int n) {
   test(c_server, sdram_state, n);
 }
 
+//Use port mapping according to slicekit used
+#ifdef __XS2A__
+on tile[1] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16B;
+on tile[1] : out buffered port:32   sdram_cas                   = XS1_PORT_1J;
+on tile[1] : out buffered port:32   sdram_ras                   = XS1_PORT_1I;
+on tile[1] : out buffered port:8    sdram_we                    = XS1_PORT_1K;
+on tile[1] : out port               sdram_clk                   = XS1_PORT_1L;
+on tile[1] : clock                  sdram_cb                    = XS1_CLKBLK_1;
+#else
 on tile[1] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
 on tile[1] : out buffered port:32   sdram_cas                   = XS1_PORT_1B;
 on tile[1] : out buffered port:32   sdram_ras                   = XS1_PORT_1G;
 on tile[1] : out buffered port:8    sdram_we                    = XS1_PORT_1C;
 on tile[1] : out port               sdram_clk                   = XS1_PORT_1F;
-on tile[1] : clock                  sdram_cb                    = XS1_CLKBLK_1;
+on tile[1] : clock                  sdram_cb                    = XS1_CLKBLK_2;
+#endif
 
 int main() {
   streaming chan c_sdram[7];
