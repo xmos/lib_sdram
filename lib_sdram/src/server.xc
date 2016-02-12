@@ -271,7 +271,7 @@ static void write(unsigned start_row, unsigned start_col,
 
 //TODO use the 16 bit ness to do the below correctly
 static unsigned addr_to_col(unsigned address, const static unsigned  row_words){
-    return 0xff&(address & (row_words-1))<<1;
+    return (address & (row_words-1))<<1;
 }
 static unsigned addr_to_row(unsigned address, const static unsigned col_address_bits, const static unsigned row_address_bits){
     return (address>>(col_address_bits-1)) & ((1<<row_address_bits)-1);
