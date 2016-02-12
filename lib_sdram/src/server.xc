@@ -148,7 +148,8 @@ static inline void write_impl(unsigned row, unsigned col, unsigned bank,
     }
 */
 
-    unsigned rowcol = (col << 16) | row | (bank<<BANK_SHIFT) | bank<<(BANK_SHIFT+16) | 1<<(10+16);
+    //Work out first and second 16b commands (lower word first) -  ACT followed by WRITE (no precharge)
+    unsigned rowcol = row | (bank<<BANK_SHIFT) | bank<<(BANK_SHIFT+16) |  (col << 16);
 
     unsigned t = partout_timestamped(cas, 1, CTRL_WE_NOP);
     t += WRITE_SETUP_LATENCY;
@@ -181,7 +182,9 @@ static inline void read_impl(unsigned row, unsigned col, unsigned bank,
             col = ((1<<c.col_address_bits) - 1);
     }
 */
-    unsigned rowcol = (col << 16) | row | (bank<<BANK_SHIFT) | bank<<(BANK_SHIFT+16) | 1<<(10+16);
+    //Work out first and second 16b commands (lower word first) -  ACT followed by READ (no precharge)
+    unsigned rowcol =  row | (bank<<BANK_SHIFT) | bank<<(BANK_SHIFT+16) | (col << 16);
+
 
     unsigned t = partout_timestamped(ras, 1, CTRL_RAS_NOP);
     t += READ_SETUP_LATENCY;
