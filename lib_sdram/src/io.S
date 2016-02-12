@@ -49,7 +49,6 @@ sdram_block_write:
 	ldw w_ras, 		r1[2]	//ras - TRASHES r0, buffer_pointer
 	ldw w_we, 		r1[3]	//we - TRASHES r3, word count
 	ldw w_dq_ah, 	r1[0]	//dq_ah - TRASHES r1, port struct
-
 	ldc w_two, 2
 
 .align 8
@@ -58,12 +57,14 @@ wr_loop:
     {out res[w_dq_ah], w_temp; bt new_num_words, wr_loop}
 
 wr_loop_done:
+	//Burst stop
 	setpt res[w_we], w_term_time
 	outpw res[w_we], w_two, 2
 
 	mkmsk w_temp, 32
 	out res[w_dq_ah], w_temp
 
+	//Precharge
 	add w_term_time, w_term_time, 8
 	setpt res[w_we],  w_term_time
 	outpw res[w_we],  w_two, 2
@@ -146,12 +147,14 @@ sdram_block_write:
 	//(blocking)
 	#include "sdram_block_write_body.inc"
 
+	//Burst stop
 	setpt res[w_we], w_term_time
 	outpw res[w_we], w_two, 2
 
 	mkmsk w_temp, 32
 	out res[w_dq_ah], w_temp
 
+	//Precharge
 	add w_term_time, w_term_time, 8
 	setpt res[w_we],  w_term_time
 	outpw res[w_we],  w_two, 2
@@ -264,6 +267,7 @@ sdram_block_read_jump_table:
 sdram_block_read_cleanup:
 	syncr res[dq_ah]
 
+	//Precharge
 	ldc temp, 10
 	setpt res[ras], term_time
 	outpw res[ras], temp, 2
@@ -384,6 +388,7 @@ sdram_block_read:
 
 	syncr res[dq_ah]
 
+	//Precharge
 	ldc temp, 10
 	setpt res[ras], term_time
 	outpw res[ras], temp, 2
