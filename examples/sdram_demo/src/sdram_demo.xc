@@ -9,7 +9,7 @@
   */
 
 void application(streaming chanend c_server) {
-#define BUF_WORDS (16)
+#define BUF_WORDS (8)
   unsigned read_buffer[BUF_WORDS];
   unsigned write_buffer[BUF_WORDS];
   unsigned * movable read_buffer_pointer = read_buffer;
@@ -18,6 +18,30 @@ void application(streaming chanend c_server) {
   s_sdram_state sdram_state;
   sdram_init_state(c_server, sdram_state);
 
+  printf("Start App\n");
+
+  printf("Actual read buffer=%p\n", read_buffer_pointer);
+
+  //Read initial contents
+  sdram_read (c_server, sdram_state, 0xff00, BUF_WORDS, move( read_buffer_pointer));
+  sdram_complete(c_server, sdram_state,  read_buffer_pointer);
+
+  for(unsigned i=0;i<BUF_WORDS;i++) printf("%08x %d\n", read_buffer_pointer[i], i);
+
+
+
+  //Fill the memory initially with known pattern
+  for(unsigned i=0;i<BUF_WORDS;i++){
+    write_buffer_pointer[i] = 0xdeadbeef;
+  }
+  sdram_write(c_server, sdram_state, 0xff10, BUF_WORDS, move(write_buffer_pointer));
+  sdram_complete(c_server, sdram_state, write_buffer_pointer);
+  sdram_read (c_server, sdram_state, 0x0, BUF_WORDS, move( read_buffer_pointer));
+  sdram_complete(c_server, sdram_state,  read_buffer_pointer);
+
+  for(unsigned i=0;i<BUF_WORDS;i++) printf("%08x %d\n", read_buffer_pointer[i], i);
+
+  //Fill the memory with incrementing pattern
   for(unsigned i=0;i<BUF_WORDS;i++){
     write_buffer_pointer[i] = i;
     read_buffer_pointer[i] = 0;
@@ -32,8 +56,8 @@ void application(streaming chanend c_server) {
   for(unsigned i=0;i<BUF_WORDS;i++){
     printf("%08x %d\n", read_buffer_pointer[i], i);
     if(read_buffer_pointer[i] != write_buffer_pointer[i]){
-      printf("SDRAM demo fail.\n");
-     _Exit(1);
+      printf("SDRAM demo fail. Value written %08x\n", write_buffer_pointer[i]);
+     //_Exit(1);
     }
   }
   printf("SDRAM demo complete.\n");
@@ -67,9 +91,15 @@ int main() {
               sdram_we,
               sdram_clk,
               sdram_cb,
-              2, 128, 16, 8,12, 2, 64, 4096, 4);
+#if 1
+              2, 128, 16, 8, 12, 2, 64, 4096, 6); //64Mb
+#else
+                2, 256, 16, 9, 13, 2, 64, 8192, 6); //256Mb
+#endif
+                //Note clock div 4 gives (500/ (4*2)) = 62.5MHz
+
     on tile[1]: application(c_sdram[0]);
-    on tile[1]: par(int i=0;i<6;i++) while(1);
+    //on tile[1]: par(int i=0;i<6;i++) while(1);
   }
   return 0;
 }

@@ -1,6 +1,7 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 #include <platform.h>
 #include <xclib.h>
+#include <stdio.h>
 #include "sdram.h"
 #include "control.h"
 
@@ -154,6 +155,8 @@ static inline void write_impl(unsigned row, unsigned col, unsigned bank,
     unsigned t = partout_timestamped(cas, 1, CTRL_WE_NOP);
     t += WRITE_SETUP_LATENCY;
 
+    //printf("Write buffer pointer=%p\trow_words=%x\tword_count=%x\n",buffer, row_words, word_count);
+
     dq_ah @ t<: rowcol;
 
     partout_timed(cas, 3, CTRL_CAS_ACTIVE | (CTRL_CAS_WRITE<<1) | (CTRL_CAS_NOP<<2), t);
@@ -184,6 +187,8 @@ static inline void read_impl(unsigned row, unsigned col, unsigned bank,
 */
     //Work out first and second 16b commands (lower word first) -  ACT followed by READ (no precharge)
     unsigned rowcol =  row | (bank<<BANK_SHIFT) | bank<<(BANK_SHIFT+16) | (col << 16);
+
+    //printf("Read buffer pointer=%p\trow_words=%x\tword_count=%x\n",buffer, row_words, word_count);
 
 
     unsigned t = partout_timestamped(ras, 1, CTRL_RAS_NOP);
@@ -253,7 +258,7 @@ static void write(unsigned start_row, unsigned start_col,
   unsigned remaining_words = word_count;
 
   while (1) {
-      unsigned col_count = (1<<col_address_bits);
+    unsigned col_count = (1<<col_address_bits);
     words_to_end_of_line = (col_count - current_col) / 2;
     if (words_to_end_of_line < remaining_words) {
       write_impl(current_row, current_col, bank, buffer, words_to_end_of_line, dq_ah, cas, ras, we, row_words);
@@ -299,6 +304,8 @@ static int handle_command(e_command cmd_type, sdram_cmd &cmd,
     unsigned row = addr_to_row(cmd.address, col_address_bits, row_address_bits);
     unsigned col = addr_to_col(cmd.address, row_words);
     unsigned bank = addr_to_bank(cmd.address, col_address_bits, row_address_bits, bank_address_bits);
+
+    //printf("addr=0x%x\trow=0x%x\tcol=0x%x\tbank=0x%x\n", cmd.address, row, col, bank);
 
     switch (cmd_type) {
     case SDRAM_CMD_READ: {

@@ -6,24 +6,38 @@
  /*
   * Put an SDRAM slice into square slot of A16 board, or into slot '4' of the xCore200 slice kit
   */
-#define SLOTS 8
-#define MAX_BUFFER_WORDS 256
-#define SDRAM_COL_ADDRESS_BITS 8
-#define SDRAM_ROW_ADDRESS_BITS 12
-#define SDRAM_BANK_ADDRESS_BITS 2
-#define SDRAM_COL_COUNT     256
-#define SDRAM_BANK_COUNT    4
-#define SDRAM_ROW_COUNT     4096
-#define SDRAM_ROW_WORDS     128
+#define SDRAM_256Mb 0 //Use IS45S16160D 256Mb, othewise IS42S16400D 64Mb
 
+#define CAS_LATENCY   2
+#define REFRESH_MS    64
+#define CLOCK_DIV     4 //Note clock div 4 gives (500/ (4*2)) = 62.5MHz
+#define DATA_BITS     16
+
+#if SDRAM_256Mb
+#define REFRESH_CYCLES 8192
+#define COL_ADDRESS_BITS 9
+#define ROW_ADDRESS_BITS 13
+#define BANK_ADDRESS_BITS 2
+#define BANK_COUNT    4
+#define ROW_COUNT     8192
+#define ROW_WORDS     256
+#else
+#define REFRESH_CYCLES 4096
+#define COL_ADDRESS_BITS 8
+#define ROW_ADDRESS_BITS 12
+#define BANK_ADDRESS_BITS 2
+#define BANK_COUNT    4
+#define ROW_COUNT     4096
+#define ROW_WORDS     128
+#endif
 #pragma unsafe arrays
 void application(streaming chanend c_server, s_sdram_state sdram_state) {
 #define BUF_WORDS (240)
 
-    unsigned buffer_0[SDRAM_ROW_WORDS];
-    unsigned buffer_1[SDRAM_ROW_WORDS];
-    unsigned buffer_2[SDRAM_ROW_WORDS];
-    unsigned buffer_3[SDRAM_ROW_WORDS];
+    unsigned buffer_0[ROW_WORDS];
+    unsigned buffer_1[ROW_WORDS];
+    unsigned buffer_2[ROW_WORDS];
+    unsigned buffer_3[ROW_WORDS];
 
   unsigned * movable buffer_pointer_0 = buffer_0;
   unsigned * movable buffer_pointer_1 = buffer_1;
@@ -35,10 +49,10 @@ void application(streaming chanend c_server, s_sdram_state sdram_state) {
 #define SECONDS 2
   unsigned words_since_timeout = 0;
   t :> time;
-  sdram_read(c_server, sdram_state, 0, SDRAM_ROW_WORDS, move(buffer_pointer_0));
-  sdram_read(c_server, sdram_state, 0, SDRAM_ROW_WORDS, move(buffer_pointer_1));
-  sdram_read(c_server, sdram_state, 0, SDRAM_ROW_WORDS, move(buffer_pointer_2));
-  sdram_read(c_server, sdram_state, 0, SDRAM_ROW_WORDS, move(buffer_pointer_3));
+  sdram_read(c_server, sdram_state, 0, ROW_WORDS, move(buffer_pointer_0));
+  sdram_read(c_server, sdram_state, 0, ROW_WORDS, move(buffer_pointer_1));
+  sdram_read(c_server, sdram_state, 0, ROW_WORDS, move(buffer_pointer_2));
+  sdram_read(c_server, sdram_state, 0, ROW_WORDS, move(buffer_pointer_3));
   while(1){
     select {
       case t when timerafter(time + SECONDS*100000000) :> time:
@@ -46,8 +60,8 @@ void application(streaming chanend c_server, s_sdram_state sdram_state) {
         words_since_timeout = 0;
         break;
       case sdram_complete(c_server, sdram_state, buffer_pointer_0):{
-        words_since_timeout += SDRAM_ROW_WORDS;
-        sdram_read(c_server, sdram_state, 0, SDRAM_ROW_WORDS, move(buffer_pointer_0));
+        words_since_timeout += ROW_WORDS;
+        sdram_read(c_server, sdram_state, 0, ROW_WORDS, move(buffer_pointer_0));
         break;
       }
     }
@@ -89,7 +103,15 @@ int main() {
             sdram_we,
             sdram_clk,
             sdram_cb,
-            2, 128, 16, 8,12, 2, 64, 4096, 4);
+            CAS_LATENCY,
+            ROW_WORDS,
+            DATA_BITS,
+            COL_ADDRESS_BITS,
+            ROW_ADDRESS_BITS,
+            BANK_ADDRESS_BITS,
+            REFRESH_MS,
+            REFRESH_CYCLES,
+            CLOCK_DIV);
         on tile[0]: par(int i=0;i<6;i++) while(1);
   }
   return 0;
