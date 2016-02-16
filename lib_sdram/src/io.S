@@ -30,6 +30,7 @@ sdram_block_write:
 #define w_temp 				r11
 
 
+	//Save registers
 	stw r6, sp[0]
 	stw r5, sp[2]
 	stw r7, sp[3]
@@ -46,6 +47,7 @@ sdram_block_write:
 	add w_term_time, w_term_time, r3
 	add w_term_time, w_term_time, r3
 
+	//Load port resource IDs
 	ldw w_ras, 		r1[2]	//ras - TRASHES r0, buffer_pointer
 	ldw w_we, 		r1[3]	//we - TRASHES r3, word count
 	ldw w_dq_ah, 	r1[0]	//dq_ah - TRASHES r1, port struct
@@ -53,6 +55,7 @@ sdram_block_write:
 
 .align 8
 wr_loop:
+	//Dual issue write loop
     {ldw w_temp, new_buff_ptr[new_num_words]; add new_num_words, new_num_words, 1}
     {out res[w_dq_ah], w_temp; bt new_num_words, wr_loop}
 
@@ -71,7 +74,7 @@ wr_loop_done:
 	setpt res[w_ras], w_term_time
 	outpw res[w_ras], w_two, 2
 
-
+	//Restore registers
 	ldw r6, sp[0]
 	ldw r5, sp[2]
 	ldw r7, sp[3]
@@ -209,10 +212,10 @@ sdram_block_read:
 #define new_buf_ptr			r6
 #define temp 			r11
 
+	//Save registers on stack
 	stw r4, sp[0]
 	stw r5, sp[3]
 	stw r6, sp[4]
-
 
 	//Copy buffer pointer to new_buf_ptr
 	sub new_buf_ptr, r0, 0
@@ -228,6 +231,7 @@ sdram_block_read:
 	add term_time, start_time, r3
 	add term_time, term_time, r3
 
+	//Calculate the entry point to the unrolled inner loop
 	ldc temp, 	256						//The number of in/store cycles unrolled in the jump table
 	sub jump_reg, temp, r3				//Subtract the number of words to read
 	shl jump_reg, jump_reg, 1			//Multiply by 2 (2 x 16b instructions at a time)
@@ -246,7 +250,7 @@ sdram_block_read:
 	ldc temp, 12
 	add term_time, term_time, temp
 
-
+	//Delay port read until start time
 	setpt res[dq_ah], start_time	//(blocking)
 
 .align 8
