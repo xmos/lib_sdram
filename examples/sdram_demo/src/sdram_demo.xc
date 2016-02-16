@@ -20,44 +20,35 @@ void application(streaming chanend c_server) {
 
   printf("Start App\n");
 
-  printf("Actual read buffer=%p\n", read_buffer_pointer);
-
-  //Read initial contents
-  sdram_read (c_server, sdram_state, 0xff00, BUF_WORDS, move( read_buffer_pointer));
-  sdram_complete(c_server, sdram_state,  read_buffer_pointer);
-
-  for(unsigned i=0;i<BUF_WORDS;i++) printf("%08x %d\n", read_buffer_pointer[i], i);
-
-
-
   //Fill the memory initially with known pattern
   for(unsigned i=0;i<BUF_WORDS;i++){
     write_buffer_pointer[i] = 0xdeadbeef;
   }
   sdram_write(c_server, sdram_state, 0xff10, BUF_WORDS, move(write_buffer_pointer));
   sdram_complete(c_server, sdram_state, write_buffer_pointer);
+
   sdram_read (c_server, sdram_state, 0x0, BUF_WORDS, move( read_buffer_pointer));
   sdram_complete(c_server, sdram_state,  read_buffer_pointer);
 
   for(unsigned i=0;i<BUF_WORDS;i++) printf("%08x %d\n", read_buffer_pointer[i], i);
 
-  //Fill the memory with incrementing pattern
+  //Fill the memory with address incrementing pattern
   for(unsigned i=0;i<BUF_WORDS;i++){
     write_buffer_pointer[i] = i;
-    read_buffer_pointer[i] = 0;
+    read_buffer_pointer[i] = 0; //And clear read pointer
   }
 
   sdram_write(c_server, sdram_state, 0, BUF_WORDS, move(write_buffer_pointer));
-  sdram_read (c_server, sdram_state, 0, BUF_WORDS, move( read_buffer_pointer));
-
   sdram_complete(c_server, sdram_state, write_buffer_pointer);
+
+  sdram_read (c_server, sdram_state, 0, BUF_WORDS, move( read_buffer_pointer));
   sdram_complete(c_server, sdram_state,  read_buffer_pointer);
 
   for(unsigned i=0;i<BUF_WORDS;i++){
     printf("%08x %d\n", read_buffer_pointer[i], i);
     if(read_buffer_pointer[i] != write_buffer_pointer[i]){
       printf("SDRAM demo fail. Value written %08x\n", write_buffer_pointer[i]);
-     //_Exit(1);
+     _Exit(1);
     }
   }
   printf("SDRAM demo complete.\n");
