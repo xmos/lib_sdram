@@ -12,8 +12,8 @@
   */
 #define VERBOSE_MSG 1
 
-#define SDRAM_256Mb 1 //Use IS45S16160D 256Mb, othewise IS42S16400D 64Mb
-#define FAST_TEST   1
+#define SDRAM_256Mb 0 //Use IS45S16160D 256Mb, othewise IS42S16400D 64Mb
+#define FAST_TEST   0 //Simplify read and wait only 12 seconds instead of 120 for refresh tests
 
 #define CAS_LATENCY   2
 #define REFRESH_MS    64
@@ -84,8 +84,6 @@ static void whole_memory_write_read(streaming chanend c_server, s_sdram_state &s
         for(unsigned i=0;i<TEST_WORDS;i++){
             buffer_pointer[i] = (addr + i);
         }
-        //if ((addr & 0xffff) == 0xff00) continue;
-        //if ((addr & 0xffff) == 0xff00) delay_milliseconds(100);
         sdram_write(c_server, sdram_state, addr, TEST_WORDS, move(buffer_pointer));
         sdram_complete(c_server, sdram_state, buffer_pointer);
     }
@@ -98,8 +96,6 @@ static void whole_memory_write_read(streaming chanend c_server, s_sdram_state &s
     for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS - TEST_WORDS; addr += 1){
 #endif
 
-        //if ((addr & 0xffff) == 0xff00) continue;
-        //if ((addr & 0xffff) == 0xff00) delay_milliseconds(100);
         sdram_read(c_server, sdram_state, addr, TEST_WORDS, move(buffer_pointer));
         sdram_complete(c_server, sdram_state, buffer_pointer);
 
