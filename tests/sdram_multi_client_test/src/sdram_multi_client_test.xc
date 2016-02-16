@@ -5,6 +5,7 @@
 
  /*
   * Put an SDRAM slice into square slot of A16 board, or into slot '2' of the xCore200 slice kit
+  * For xCORE200 slice kit, ensure Link switch on debug adapter is switched to "off" to avoid contention
   */
 
 //Uses IS42S16400D 64Mb part supplied on SDRAM slice

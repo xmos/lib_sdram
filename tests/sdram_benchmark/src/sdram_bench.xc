@@ -5,7 +5,9 @@
 
  /*
   * Put an SDRAM slice into 'square' slot of A16 slice kit, or into slot '2' of the xCore200 slice kit
+  * For xCORE200 slice kit, ensure Link switch on debug adapter is switched to "off" to avoid contention
   */
+
 #define SDRAM_256Mb   0 //Use IS45S16160D 256Mb, othewise default IS42S16400D 64Mb used on SDRAM slice
 
 #define CAS_LATENCY   2
