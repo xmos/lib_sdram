@@ -4,9 +4,9 @@
 #include "sdram.h"
 
  /*
-  * Put an SDRAM slice into square slot of A16 board, or into slot '4' of the xCore200 slice kit
+  * Put an SDRAM slice into 'square' slot of A16 slice kit, or into slot '2' of the xCore200 slice kit
   */
-#define SDRAM_256Mb 0 //Use IS45S16160D 256Mb, othewise IS42S16400D 64Mb
+#define SDRAM_256Mb   0 //Use IS45S16160D 256Mb, othewise default IS42S16400D 64Mb used on SDRAM slice
 
 #define CAS_LATENCY   2
 #define REFRESH_MS    64
@@ -75,28 +75,31 @@ void sdram_client(streaming chanend c_server) {
   application(c_server, sdram_state);
 }
 
-//Use port mapping according to slicekit used
 #ifdef __XS2A__
-on tile[1] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16B;
-on tile[1] : out buffered port:32   sdram_cas                   = XS1_PORT_1J;
-on tile[1] : out buffered port:32   sdram_ras                   = XS1_PORT_1I;
-on tile[1] : out buffered port:8    sdram_we                    = XS1_PORT_1K;
-on tile[1] : out port               sdram_clk                   = XS1_PORT_1L;
-on tile[1] : clock                  sdram_cb                    = XS1_CLKBLK_1;
+//Slot 2 on xCORE200 slicekit
+#define      SERVER_TILE            0
+on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16B;
+on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1J;
+on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1I;
+on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1K;
+on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1L;
+on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_2;
 #else
-on tile[1] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
-on tile[1] : out buffered port:32   sdram_cas                   = XS1_PORT_1B;
-on tile[1] : out buffered port:32   sdram_ras                   = XS1_PORT_1G;
-on tile[1] : out buffered port:8    sdram_we                    = XS1_PORT_1C;
-on tile[1] : out port               sdram_clk                   = XS1_PORT_1F;
-on tile[1] : clock                  sdram_cb                    = XS1_CLKBLK_2;
+//Square slot on A16 slicekit
+#define      SERVER_TILE            1
+on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
+on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1B;
+on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1G;
+on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1C;
+on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1F;
+on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_2;
 #endif
 
 int main() {
     streaming chan c_sdram[1];
   par {
-        on tile[1]:  sdram_client(c_sdram[0]);
-        on tile[1]:sdram_server(c_sdram, 1,
+        on tile[SERVER_TILE]:  sdram_client(c_sdram[0]);
+        on tile[SERVER_TILE]:sdram_server(c_sdram, 1,
             sdram_dq_ah,
             sdram_cas,
             sdram_ras,
