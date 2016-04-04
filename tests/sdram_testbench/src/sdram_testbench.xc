@@ -7,13 +7,12 @@
 #include "sdram.h"
 
  /*
-  * Put an SDRAM slice into 'square' slot of A16 slice kit, or into slot '2' of the xCore200 slice kit
-  * For xCORE200 slice kit, ensure Link switch on debug adapter is switched to "off" to avoid contention
+  * Put an SDRAM slice into 'square' slot of A16 slice kit, xp-wifi-mic-u216 board for xCORE200
   */
 #define VERBOSE_MSG 1
 
 #define SDRAM_256Mb   0 //Use IS42S16160D 256Mb
-#define SDRAM_128Mb   1 //Use IS42S16800D 128Mb
+#define SDRAM_128Mb   0 //Use IS42S16800D 128Mb
                         //othewise IS42S16400D 64Mb which is default on XMOS boards
 #define FAST_TEST     0 //Simplify read and wait only 12 seconds instead of 120 for refresh tests
 
@@ -400,9 +399,8 @@ void sdram_client(streaming chanend c_server) {
   _Exit(0);
 }
 
-//Use port mapping according to slicekit used
 #ifdef __XS2A__
-//Mic Array Board #2
+//xp-wifi-mic-u216 board
 #define      SERVER_TILE            1
 on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
 on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1A;

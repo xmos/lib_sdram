@@ -5,12 +5,12 @@
 #include "sdram.h"
 
  /*
-  * Put an SDRAM slice into 'square' slot of A16 slice kit, or into slot '2' of the xCore200 slice kit
-  * For xCORE200 slice kit, ensure Link switch on debug adapter is switched to "off" to avoid contention
+  * Put an SDRAM slice into 'square' slot of A16 slice kit or use xp-wifi-mic-u216 board for xCORE200
+  *
   */
 
 #define SDRAM_256Mb   0 //Use IS42S16160D 256Mb
-#define SDRAM_128Mb   1 //Use IS42S16800D 128Mb
+#define SDRAM_128Mb   0 //Use IS42S16800D 128Mb
                         //othewise IS42S16400D 64Mb which is default on XMOS boards
 #define CAS_LATENCY   2
 #define REFRESH_MS    64
@@ -96,7 +96,7 @@ void sdram_client(streaming chanend c_server) {
 }
 
 #ifdef __XS2A__
-//Slot 2 on xCORE200 slicekit
+//xp-wifi-mic-u216 board
 #define      SERVER_TILE            0
 on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16B;
 on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1J;

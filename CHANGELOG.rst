@@ -1,5 +1,13 @@
 SDRAM library change log
 ========================
+
+3.1.1
+-----
+  
+  * Remove xCORE200 Slicekit target for tests and replace with xp-wifi-mic-u216)
+  * A16 Slicekit (XS1 family) default targets for tests 
+
+
 3.1.0
 -----
 
