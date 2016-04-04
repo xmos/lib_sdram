@@ -50,6 +50,7 @@ void sdram_init(
 
   asm("setclk res[%0], %1"::"r"(cb), "r"(XS1_CLK_XCORE));
   set_clock_div(cb, clock_divider);
+  //configure_clock_ref(cb, 0); //100MHz ref clock. Doesn't work...
 
   set_port_clock(clk, cb);
   set_port_mode_clock(clk);
@@ -59,7 +60,7 @@ void sdram_init(
   set_port_clock(ras, cb);
   set_port_clock(we, cb);
 
-  set_pad_delay(dq_ah,0);
+  set_pad_delay(dq_ah, 0);
   set_port_sample_delay(dq_ah);
 
   start_clock(cb);
