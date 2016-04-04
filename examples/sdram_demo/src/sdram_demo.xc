@@ -5,8 +5,7 @@
 #include "sdram.h"
 
  /*
-  * Put an SDRAM slice into 'square' slot of A16 slice kit, or into slot '2' of the xCORE200 slice kit
-  * For xCORE200 slice kit, ensure Link switch on debug adapter is switched to "off" to avoid contention
+  * Put an SDRAM slice into 'square' slot of A16 slice kit, or use xp-wifi-mic-u216 board for xCORE200
   */
 
 void application(streaming chanend c_server) {

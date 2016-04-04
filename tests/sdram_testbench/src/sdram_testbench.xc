@@ -7,17 +7,18 @@
 #include "sdram.h"
 
  /*
-  * Put an SDRAM slice into 'square' slot of A16 slice kit, or into slot '2' of the xCore200 slice kit
-  * For xCORE200 slice kit, ensure Link switch on debug adapter is switched to "off" to avoid contention
+  * Put an SDRAM slice into 'square' slot of A16 slice kit, xp-wifi-mic-u216 board for xCORE200
   */
 #define VERBOSE_MSG 1
 
-#define SDRAM_256Mb 0 //Use IS45S16160D 256Mb, othewise IS42S16400D 64Mb
-#define FAST_TEST   0 //Simplify read and wait only 12 seconds instead of 120 for refresh tests
+#define SDRAM_256Mb   0 //Use IS42S16160D 256Mb
+#define SDRAM_128Mb   0 //Use IS42S16800D 128Mb
+                        //othewise IS42S16400D 64Mb which is default on XMOS boards
+#define FAST_TEST     0 //Simplify read and wait only 12 seconds instead of 120 for refresh tests
 
 #define CAS_LATENCY   2
 #define REFRESH_MS    64
-#define CLOCK_DIV     4 //Note clock div 4 gives (500/ (4*2)) = 62.5MHz
+#define CLOCK_DIV     4 //Note clock div 4 gives (500 / (4*2)) = 62.5MHz, div 3 gives (500 / (3*2)) = 83.3MHz
 #define DATA_BITS     16
 
 #if SDRAM_256Mb
@@ -28,6 +29,16 @@
 #define BANK_COUNT    4
 #define ROW_COUNT     8192
 #define ROW_WORDS     256
+
+#elif SDRAM_128Mb
+#define REFRESH_CYCLES 4096
+#define COL_ADDRESS_BITS 9
+#define ROW_ADDRESS_BITS 12
+#define BANK_ADDRESS_BITS 2
+#define BANK_COUNT    4
+#define ROW_COUNT     4096
+#define ROW_WORDS     256
+
 #else
 #define REFRESH_CYCLES 4096
 #define COL_ADDRESS_BITS 8
@@ -365,7 +376,13 @@ static void test_5_threads(streaming chanend c_server, s_sdram_state &sdram_stat
 }
 
 void sdram_client(streaming chanend c_server) {
-
+#if SDRAM_256Mb
+  printf("Using 256Mb SDRAM\n");
+#elif SDRAM_128Mb
+  printf("Using 128Mb SDRAM\n");
+#else
+  printf("Using 64Mb SDRAM\n");
+#endif
   set_thread_fast_mode_on();
   s_sdram_state sdram_state;
   sdram_init_state(c_server, sdram_state);
@@ -382,15 +399,14 @@ void sdram_client(streaming chanend c_server) {
   _Exit(0);
 }
 
-//Use port mapping according to slicekit used
 #ifdef __XS2A__
-//Slot 2 on xCORE200 slicekit
-#define      SERVER_TILE            0
-on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16B;
-on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1J;
-on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1I;
-on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1K;
-on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1L;
+//xp-wifi-mic-u216 board
+#define      SERVER_TILE            1
+on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
+on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1A;
+on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1B;
+on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1D;
+on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1C;
 on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_2;
 #else
 //Square slot on A16 slicekit
@@ -407,7 +423,10 @@ int main() {
   streaming chan c_sdram[1];
   par {
     on tile[SERVER_TILE]:sdram_client(c_sdram[0]);
-    on tile[SERVER_TILE]:sdram_server(c_sdram, 1,
+    on tile[SERVER_TILE]:
+    {
+        set_core_high_priority_on();
+        sdram_server(c_sdram, 1,
             sdram_dq_ah,
             sdram_cas,
             sdram_ras,
@@ -423,6 +442,7 @@ int main() {
             REFRESH_MS,
             REFRESH_CYCLES,
             CLOCK_DIV);
+    }
   }
   return 0;
 }

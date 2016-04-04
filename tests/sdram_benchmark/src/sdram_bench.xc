@@ -1,15 +1,17 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 #include <platform.h>
 #include <print.h>
+#include <stdio.h>
 #include "sdram.h"
 
  /*
-  * Put an SDRAM slice into 'square' slot of A16 slice kit, or into slot '2' of the xCore200 slice kit
-  * For xCORE200 slice kit, ensure Link switch on debug adapter is switched to "off" to avoid contention
+  * Put an SDRAM slice into 'square' slot of A16 slice kit or use xp-wifi-mic-u216 board for xCORE200
+  *
   */
 
-#define SDRAM_256Mb   0 //Use IS45S16160D 256Mb, othewise default IS42S16400D 64Mb used on SDRAM slice
-
+#define SDRAM_256Mb   0 //Use IS42S16160D 256Mb
+#define SDRAM_128Mb   0 //Use IS42S16800D 128Mb
+                        //othewise IS42S16400D 64Mb which is default on XMOS boards
 #define CAS_LATENCY   2
 #define REFRESH_MS    64
 #define CLOCK_DIV     4 //Note clock div 4 gives (500/ (4*2)) = 62.5MHz
@@ -22,6 +24,14 @@
 #define BANK_ADDRESS_BITS 2
 #define BANK_COUNT    4
 #define ROW_COUNT     8192
+#define ROW_WORDS     256
+#elif SDRAM_128Mb
+#define REFRESH_CYCLES 4096
+#define COL_ADDRESS_BITS 9
+#define ROW_ADDRESS_BITS 12
+#define BANK_ADDRESS_BITS 2
+#define BANK_COUNT    4
+#define ROW_COUNT     4096
 #define ROW_WORDS     256
 #else
 #define REFRESH_CYCLES 4096
@@ -71,6 +81,14 @@ void application(streaming chanend c_server, s_sdram_state sdram_state) {
 }
 
 void sdram_client(streaming chanend c_server) {
+#if SDRAM_256Mb
+  printf("Using 256Mb SDRAM\n");
+#elif SDRAM_128Mb
+  printf("Using 128Mb SDRAM\n");
+#else
+  printf("Using 64Mb SDRAM\n");
+#endif
+
   set_thread_fast_mode_on();
   s_sdram_state sdram_state;
   sdram_init_state(c_server, sdram_state);
@@ -78,7 +96,7 @@ void sdram_client(streaming chanend c_server) {
 }
 
 #ifdef __XS2A__
-//Slot 2 on xCORE200 slicekit
+//xp-wifi-mic-u216 board
 #define      SERVER_TILE            0
 on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16B;
 on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1J;
