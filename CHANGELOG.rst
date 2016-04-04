@@ -1,11 +1,12 @@
 SDRAM library change log
 ========================
+
 3.1.0
 -----
 
-  * Support for 9b row address (128Mb and 256Mb SDRAMs) for xCORE200 targets
+  * Support for 9b row address (128Mb and 256Mb SDRAMs) for xCORE-200 targets
   * Fixes incorrect use of READ/WRITE with auto precharge
-  * Updated example and test to support xCORE200 slicekits by defaults
+  * Updated example and test to support xCORE-200 by default
 
 3.0.2
 -----
@@ -15,7 +16,7 @@ SDRAM library change log
 3.0.1
 -----
 
-  * Added support for xCORE-200 series.
+  * Added support for xCORE-200 series
 
 3.0.0
 -----
