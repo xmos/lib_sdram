@@ -3,21 +3,40 @@
 #include <print.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <xs1.h>
 #include "sdram.h"
 
-/*
- * Put an sdram slice into square slot of A16 board.
- */
-
+ /*
+  * Put an SDRAM slice into 'square' slot of A16 slice kit, or into slot '2' of the xCore200 slice kit
+  * For xCORE200 slice kit, ensure Link switch on debug adapter is switched to "off" to avoid contention
+  */
 #define VERBOSE_MSG 1
 
+#define SDRAM_256Mb 0 //Use IS45S16160D 256Mb, othewise IS42S16400D 64Mb
+#define FAST_TEST   0 //Simplify read and wait only 12 seconds instead of 120 for refresh tests
+
+#define CAS_LATENCY   2
+#define REFRESH_MS    64
+#define CLOCK_DIV     4 //Note clock div 4 gives (500/ (4*2)) = 62.5MHz
+#define DATA_BITS     16
+
+#if SDRAM_256Mb
+#define REFRESH_CYCLES 8192
+#define COL_ADDRESS_BITS 9
+#define ROW_ADDRESS_BITS 13
+#define BANK_ADDRESS_BITS 2
+#define BANK_COUNT    4
+#define ROW_COUNT     8192
+#define ROW_WORDS     256
+#else
+#define REFRESH_CYCLES 4096
 #define COL_ADDRESS_BITS 8
 #define ROW_ADDRESS_BITS 12
 #define BANK_ADDRESS_BITS 2
-#define COL_COUNT     256
 #define BANK_COUNT    4
 #define ROW_COUNT     4096
 #define ROW_WORDS     128
+#endif
 
 #define TOTAL_MEMORY_WORDS (ROW_WORDS*ROW_COUNT*BANK_COUNT)
 
@@ -39,7 +58,9 @@ static unsigned super_pattern() {
   return c;
 }
 
+#define TEST_WORDS  (ROW_WORDS)
 #define MAX_BUFFER_WORDS 256
+
 static void whole_memory_write_read(streaming chanend c_server, s_sdram_state &sdram_state){
     unsigned buffer[MAX_BUFFER_WORDS];
     unsigned * movable buffer_pointer = buffer;
@@ -48,21 +69,41 @@ static void whole_memory_write_read(streaming chanend c_server, s_sdram_state &s
 
     if (VERBOSE_MSG) printf("Begin   : whole_memory_write_read\n");
 
-    for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += ROW_WORDS){
-        for(unsigned i=0;i<ROW_WORDS;i++)
-            buffer_pointer[i] = addr + i;
-        sdram_write(c_server, sdram_state, addr, ROW_WORDS, move(buffer_pointer));
+    //clear memory to know value
+    for(unsigned i=0;i<TEST_WORDS;i++)
+        buffer_pointer[i] = 0xdeafbeef;
+    for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += TEST_WORDS){
+        sdram_write(c_server, sdram_state, addr, TEST_WORDS, move(buffer_pointer));
+        sdram_complete(c_server, sdram_state, buffer_pointer);
+    }
+    printf("cleared\n");
+
+
+    //Fill address value into memory location
+    for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += TEST_WORDS){
+        for(unsigned i=0;i<TEST_WORDS;i++){
+            buffer_pointer[i] = (addr + i);
+        }
+        sdram_write(c_server, sdram_state, addr, TEST_WORDS, move(buffer_pointer));
         sdram_complete(c_server, sdram_state, buffer_pointer);
     }
 
-    for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS - ROW_WORDS; addr += 1){
-        sdram_read(c_server, sdram_state, addr, ROW_WORDS, move(buffer_pointer));
+    printf("written\n");
+
+#if FAST_TEST
+    for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += TEST_WORDS){
+#else
+    for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS - TEST_WORDS; addr += 1){
+#endif
+
+        sdram_read(c_server, sdram_state, addr, TEST_WORDS, move(buffer_pointer));
         sdram_complete(c_server, sdram_state, buffer_pointer);
 
-        for(unsigned i=0;i<ROW_WORDS;i++){
+        for(unsigned i=0;i<TEST_WORDS;i++){
             if(buffer_pointer[i] != (addr + i)){
                 error = 1;
-                if (VERBOSE_MSG) printf("error %08x %08x addr:0x%x i:%d\n", buffer_pointer[i], (addr + i), addr, i);
+                if (VERBOSE_MSG) printf("error read:%08x wrote:%08x base_addr:0x%x i:0x%x: Difference (r-w)=%d \n",
+                        buffer_pointer[i], (addr + i), addr, i, (buffer_pointer[i] - (addr + i)));
             }
         }
     }
@@ -79,29 +120,33 @@ static void refresh_test_1(streaming chanend c_server, s_sdram_state &sdram_stat
     if (VERBOSE_MSG) printf("Begin   : refresh_test_1\n");
 
     //write some data
-    for(unsigned i=0;i<ROW_WORDS;i++)
+    for(unsigned i=0;i<TEST_WORDS;i++)
         buffer_pointer[i] = 0xffffffff;
 
-    for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += ROW_WORDS){
-        sdram_write(c_server, sdram_state, addr, ROW_WORDS, move(buffer_pointer));
+    for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += TEST_WORDS){
+        sdram_write(c_server, sdram_state, addr, TEST_WORDS, move(buffer_pointer));
         sdram_complete(c_server, sdram_state, buffer_pointer);
     }
     //wait for 2 mins
     t:> time;
     for(unsigned j=0;j<2;j++){
         for(unsigned i=0;i<60;i++)
+#if FAST_TEST
+            t when timerafter(time + 10000000) :> time;
+#else
             t when timerafter(time + 100000000) :> time;
+#endif
     }
 
     //read it back
-    for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += ROW_WORDS){
-        for(unsigned i=0;i<ROW_WORDS;i++)
+    for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += TEST_WORDS){
+        for(unsigned i=0;i<TEST_WORDS;i++)
             buffer_pointer[i] = 0;
 
-        sdram_read(c_server, sdram_state, addr, ROW_WORDS, move(buffer_pointer));
+        sdram_read(c_server, sdram_state, addr, TEST_WORDS, move(buffer_pointer));
         sdram_complete(c_server, sdram_state, buffer_pointer);
 
-        for(unsigned i=0;i<ROW_WORDS;i++){
+        for(unsigned i=0;i<TEST_WORDS;i++){
             if(buffer_pointer[i] != 0xffffffff){
                 error = 1;
                 if (VERBOSE_MSG) printf("error %08x %08x addr:%d i:%d\n", buffer_pointer[i] , 0xffffffff, addr, i);
@@ -121,29 +166,33 @@ static void refresh_test_2(streaming chanend c_server, s_sdram_state &sdram_stat
     if (VERBOSE_MSG) printf("Begin   : refresh_test_2\n");
 
     //write some data
-    for(unsigned i=0;i<ROW_WORDS;i++)
+    for(unsigned i=0;i<TEST_WORDS;i++)
         buffer_pointer[i] = 0;
 
-    for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += ROW_WORDS){
-        sdram_write(c_server, sdram_state, addr, ROW_WORDS, move(buffer_pointer));
+    for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += TEST_WORDS){
+        sdram_write(c_server, sdram_state, addr, TEST_WORDS, move(buffer_pointer));
         sdram_complete(c_server, sdram_state, buffer_pointer);
     }
     //wait for 2 mins
     t:> time;
     for(unsigned j=0;j<2;j++){
         for(unsigned i=0;i<60;i++)
+#if FAST_TEST
+            t when timerafter(time + 10000000) :> time;
+#else
             t when timerafter(time + 100000000) :> time;
+#endif
     }
 
     //read it back
-    for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += ROW_WORDS){
-        for(unsigned i=0;i<ROW_WORDS;i++)
+    for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += TEST_WORDS){
+        for(unsigned i=0;i<TEST_WORDS;i++)
             buffer_pointer[i] = 0xffffffff;
 
-        sdram_read(c_server, sdram_state, addr, ROW_WORDS, move(buffer_pointer));
+        sdram_read(c_server, sdram_state, addr, TEST_WORDS, move(buffer_pointer));
         sdram_complete(c_server, sdram_state, buffer_pointer);
 
-        for(unsigned i=0;i<ROW_WORDS;i++){
+        for(unsigned i=0;i<TEST_WORDS;i++){
             if(buffer_pointer[i] != 0){
                 error = 1;
                 if (VERBOSE_MSG) printf("error %08x %08x addr:%d i:%d\n", buffer_pointer[i] , 0, addr, i);
@@ -175,25 +224,25 @@ static void refresh_test_3(streaming chanend c_server, s_sdram_state &sdram_stat
       int error = 0;
       if (VERBOSE_MSG) printf("Begin   : refresh_test_3\n");
       reset_super_pattern(0);
-      for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += ROW_WORDS){
-          for(unsigned i=0;i<ROW_WORDS;i++)
+      for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += TEST_WORDS){
+          for(unsigned i=0;i<TEST_WORDS;i++)
               buffer_pointer0[i] = super_pattern();
-          sdram_write(c_server, sdram_state, addr, ROW_WORDS, move(buffer_pointer0));
+          sdram_write(c_server, sdram_state, addr, TEST_WORDS, move(buffer_pointer0));
           sdram_complete(c_server, sdram_state, buffer_pointer0);
       }
 
-      sdram_read(c_server, sdram_state, 0, ROW_WORDS, move(buffer_pointer0));
-      sdram_read(c_server, sdram_state, 0, ROW_WORDS, move(buffer_pointer1));
-      sdram_read(c_server, sdram_state, 0, ROW_WORDS, move(buffer_pointer2));
-      sdram_read(c_server, sdram_state, 0, ROW_WORDS, move(buffer_pointer3));
-      sdram_read(c_server, sdram_state, 0, ROW_WORDS, move(buffer_pointer4));
-      sdram_read(c_server, sdram_state, 0, ROW_WORDS, move(buffer_pointer5));
-      sdram_read(c_server, sdram_state, 0, ROW_WORDS, move(buffer_pointer6));
-      sdram_read(c_server, sdram_state, 0, ROW_WORDS, move(buffer_pointer7));
+      sdram_read(c_server, sdram_state, 0, TEST_WORDS, move(buffer_pointer0));
+      sdram_read(c_server, sdram_state, 0, TEST_WORDS, move(buffer_pointer1));
+      sdram_read(c_server, sdram_state, 0, TEST_WORDS, move(buffer_pointer2));
+      sdram_read(c_server, sdram_state, 0, TEST_WORDS, move(buffer_pointer3));
+      sdram_read(c_server, sdram_state, 0, TEST_WORDS, move(buffer_pointer4));
+      sdram_read(c_server, sdram_state, 0, TEST_WORDS, move(buffer_pointer5));
+      sdram_read(c_server, sdram_state, 0, TEST_WORDS, move(buffer_pointer6));
+      sdram_read(c_server, sdram_state, 0, TEST_WORDS, move(buffer_pointer7));
 
       for(unsigned i=0;i<8*100000;i++){
           sdram_complete(c_server, sdram_state, buffer_pointer0);
-          sdram_read(c_server, sdram_state, 0, ROW_WORDS, move(buffer_pointer0));
+          sdram_read(c_server, sdram_state, 0, TEST_WORDS, move(buffer_pointer0));
       }
       sdram_complete(c_server, sdram_state, buffer_pointer0);
       sdram_complete(c_server, sdram_state, buffer_pointer1);
@@ -206,13 +255,13 @@ static void refresh_test_3(streaming chanend c_server, s_sdram_state &sdram_stat
 
       //read it back
       reset_super_pattern(0);
-      for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += ROW_WORDS){
-          for(unsigned i=0;i<ROW_WORDS;i++)
+      for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += TEST_WORDS){
+          for(unsigned i=0;i<TEST_WORDS;i++)
               buffer_pointer0[i] = 0;
-          sdram_read(c_server, sdram_state, addr, ROW_WORDS, move(buffer_pointer0));
+          sdram_read(c_server, sdram_state, addr, TEST_WORDS, move(buffer_pointer0));
           sdram_complete(c_server, sdram_state, buffer_pointer0);
 
-          for(unsigned i=0;i<ROW_WORDS;i++){
+          for(unsigned i=0;i<TEST_WORDS;i++){
               unsigned s = super_pattern();
               if(buffer_pointer0[i] != s){
                   error = 1;
@@ -333,25 +382,47 @@ void sdram_client(streaming chanend c_server) {
   _Exit(0);
 }
 
-on tile[1] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
-on tile[1] : out buffered port:32   sdram_cas                   = XS1_PORT_1B;
-on tile[1] : out buffered port:32   sdram_ras                   = XS1_PORT_1G;
-on tile[1] : out buffered port:8    sdram_we                    = XS1_PORT_1C;
-on tile[1] : out port               sdram_clk                   = XS1_PORT_1F;
-on tile[1] : clock                  sdram_cb                    = XS1_CLKBLK_2;
+//Use port mapping according to slicekit used
+#ifdef __XS2A__
+//Slot 2 on xCORE200 slicekit
+#define      SERVER_TILE            0
+on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16B;
+on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1J;
+on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1I;
+on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1K;
+on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1L;
+on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_2;
+#else
+//Square slot on A16 slicekit
+#define      SERVER_TILE            1
+on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
+on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1B;
+on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1G;
+on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1C;
+on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1F;
+on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_2;
+#endif
 
 int main() {
   streaming chan c_sdram[1];
   par {
-    on tile[1]:sdram_client(c_sdram[0]);
-    on tile[1]:sdram_server(c_sdram, 1,
+    on tile[SERVER_TILE]:sdram_client(c_sdram[0]);
+    on tile[SERVER_TILE]:sdram_server(c_sdram, 1,
             sdram_dq_ah,
             sdram_cas,
             sdram_ras,
             sdram_we,
             sdram_clk,
             sdram_cb,
-            2, 128, 16, 8,12, 2, 64, 4096, 4);
+            CAS_LATENCY,
+            ROW_WORDS,
+            DATA_BITS,
+            COL_ADDRESS_BITS,
+            ROW_ADDRESS_BITS,
+            BANK_ADDRESS_BITS,
+            REFRESH_MS,
+            REFRESH_CYCLES,
+            CLOCK_DIV);
   }
   return 0;
 }
