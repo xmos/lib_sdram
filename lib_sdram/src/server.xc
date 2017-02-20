@@ -5,7 +5,7 @@
 #include "sdram.h"
 #include "control.h"
 
-#define TIMER_TICKS_PER_US 250000000
+#define TIMER_TICKS_PER_US 100
 
 #define MINIMUM_REFRESH_COUNT 8
 
@@ -18,7 +18,7 @@ static void refresh(unsigned ncycles,
 #define REFRESH_MASK 0xeeeeeeee
     cas @ t <: REFRESH_MASK;
     ras @ t <: REFRESH_MASK;
-    for (unsigned i = 8; i < ncycles; i+=8){
+    for (unsigned i = MINIMUM_REFRESH_COUNT; i < ncycles; i+=MINIMUM_REFRESH_COUNT){
       cas <: REFRESH_MASK;
       ras <: REFRESH_MASK;
     }
@@ -37,9 +37,10 @@ void sdram_init(
   timer T;
   int time, t;
 
-  cas <: 0;
-  ras <: 0;
-  we <: 0;
+  //Output NOP
+  cas <: CTRL_CAS_NOP;
+  ras <: CTRL_RAS_NOP;
+  we <: CTRL_WE_NOP;
   dq_ah <: 0;
 
   sync(dq_ah);
@@ -65,42 +66,62 @@ void sdram_init(
 
   start_clock(cb);
 
-  dq_ah @ t <: 0 ;
-  t+=200;
-
-  partout(cas,1, 0);
-  partout(we, 1, 0);
-
+  //Wait 100us for clock to stabilise
   T :> time;
   T when timerafter(time + 100 * TIMER_TICKS_PER_US) :> time;
 
+  //Grab port time
   dq_ah <: 0 @ t;
   sync(dq_ah);
 
+  //200 SDRAM clocks later, issue NOP again
   t+=200;
   partout_timed(ras,1, CTRL_RAS_NOP, t);
   partout_timed(cas,1, CTRL_CAS_NOP, t);
   partout_timed(we, 1, CTRL_WE_NOP,  t);
 
+  //Wait 50us
   T :> time;
   T when timerafter(time + 50 * TIMER_TICKS_PER_US) :> time;
 
-  dq_ah <: 0x04000400 @ t;
+  //Issue PRECHARGE ALL
+  dq_ah <: 0x04000400 @ t; //Set A10 high
   sync(dq_ah);
-  t+=600;
-
+  t+=600; 
   partout_timed(ras, 2, CTRL_RAS_PRECHARGE | (CTRL_RAS_NOP<<1), t);
   partout_timed(we, 2,  CTRL_WE_PRECHARGE  | (CTRL_WE_NOP<<1),  t);
-  t+=16;
+  
+  //Wait 1us (TRP = 16ns)
+  T :> time;
+  T when timerafter(time + 1 * TIMER_TICKS_PER_US) :> time;
 
-  refresh(256, cas, ras);
+  //Issue AUTO REFRESH
+  we <: CTRL_WE_REFRESH @ t;
+  t+=100;
+  partout_timed(ras, 2, CTRL_RAS_REFRESH | (CTRL_RAS_NOP<<1), t);
+  partout_timed(cas, 2,  CTRL_CAS_REFRESH  | (CTRL_WE_NOP<<1),  t);
 
-  // set mode register
+  //Wait 1us (TRFC = 60ns)
+  T :> time;
+  T when timerafter(time + 1 * TIMER_TICKS_PER_US) :> time;
+
+  //Issue AUTO REFRESH
+  we <: CTRL_WE_REFRESH @ t;
+  t+=100;
+  partout_timed(ras, 2, CTRL_RAS_REFRESH | (CTRL_RAS_NOP<<1), t);
+  partout_timed(cas, 2,  CTRL_CAS_REFRESH  | (CTRL_WE_NOP<<1),  t);
+
+  //Wait 1us (TRFC = 60ns)
+  T :> time;
+  T when timerafter(time + 1 * TIMER_TICKS_PER_US) :> time;
+
+
+  //set mode register
   unsigned mode_reg;
   if(cas_latency == 2){
-      mode_reg = 0x00270027;
+      mode_reg = 0x00270027; //BL = Full Page, Sequential, CL=2, Std operation, Programmed burst length
   } else {
-      mode_reg = 0x00370037;
+      mode_reg = 0x00370037; //BL = Full Page, Sequential, CL=3, Std operation, Programmed burst length
   }
 
   dq_ah  <: mode_reg @ t;
@@ -109,6 +130,12 @@ void sdram_init(
   partout_timed(cas, 2, CTRL_CAS_LOAD_MODEREG | (CTRL_CAS_NOP<<1), t);
   partout_timed(ras, 2, CTRL_RAS_LOAD_MODEREG | (CTRL_RAS_NOP<<1), t);
   partout_timed(we, 2,  CTRL_WE_LOAD_MODEREG  | (CTRL_WE_NOP<<1),  t);
+
+  //Wait 1us (TMRD = 2 cycles)
+  T :> time;
+  T when timerafter(time + 1 * TIMER_TICKS_PER_US) :> time;
+
+  //Perform refresh of whole memory
   refresh(256, cas, ras);
 
 }
