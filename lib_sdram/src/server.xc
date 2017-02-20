@@ -193,7 +193,8 @@ void sdram_block_write(unsigned * buffer, sdram_ports &ports, unsigned t0, unsig
 #define WRITE_SETUP_LATENCY (80)
 #define READ_SETUP_LATENCY  (70)
 
-#define BANK_SHIFT          (13)//FIXME 15 - bank_address_bits
+#define BANK_SHIFT          (13)//This is the number of bits we need to shift up the bank address lines
+                                //They will appear on DQ13..14 using this define
 
 #define SDRAM_EXTERNAL_MEMORY_ACCESSOR 0
 

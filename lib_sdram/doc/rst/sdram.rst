@@ -36,22 +36,22 @@ A typical SDRAM requires the following signals:
 * WE		     - Write Enable
 * DQ[15:0]	- Data
 * DQM		- Data Input/Output Mask
-* A[11:0]		- Address
+* A[12:0]		- Address
 * BA[1:0]		- Bank Address
 
-The exact count of Address lines and Bank Address line may vary. 
-This library is designed to work with a 16 bit data bus. 
+The exact count of Address lines and Bank Address line may vary. The below examples assume a 256Mb SDRAM device.
+This library is designed to work with a fixed 16 bit SDRAM data bus. 
 
 The dq_ah bus is made up of 16 lines. The DQ bus is mapped directly to
 dq_ah. The address bus is mapped in order to the lower bits of dq_ah. Finally, 
 the bank address bus is mapped to the higher bits of dq_ah.
 
-Where the Address bus is 12 bits wide and the bank address is 2 bits wide
+Where the Address bus is 13 bits wide and the bank address is 2 bits wide
 the following setup is in place::
 
   dq_ah[15:0] = DQ[15:0]
-  dq_ah[11:0] = A[11:0]
-  dq_ah[15:14] = BA[1:0]
+  dq_ah[12:0] = A[12:0]
+  dq_ah[14:13] = BA[1:0]
 
 The number of address bits plus the number of bank address bits must not exceed 16.
 
