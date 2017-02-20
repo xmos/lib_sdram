@@ -51,7 +51,6 @@ void sdram_init(
 
   asm("setclk res[%0], %1"::"r"(cb), "r"(XS1_CLK_XCORE));
   set_clock_div(cb, clock_divider);
-  //configure_clock_ref(cb, 0); //100MHz ref clock. Doesn't work...
 
   set_port_clock(clk, cb);
   set_port_mode_clock(clk);
@@ -61,8 +60,46 @@ void sdram_init(
   set_port_clock(ras, cb);
   set_port_clock(we, cb);
 
-  set_pad_delay(dq_ah, 0);
-  set_port_sample_delay(dq_ah);
+  switch(clock_divider) {
+    case 3: //500 / (3 * 2) = 83.33MHz. Note the xcore cannot meet timing at this speed. Use at own risk!
+        set_pad_delay(dq_ah, 4);  //Margin approx -1.3ns hold and +200ps setup
+        set_port_sample_delay(dq_ah);
+        break;
+    case 4: // 500 / (4 * 2) = 62.50MHz. ~200ps margin
+        set_pad_delay(dq_ah, 2);
+        set_port_sample_delay(dq_ah);
+        break;
+    case 5: // 500 / (5 * 2) = 50.00MHz. ~2.2ns margin
+        set_pad_delay(dq_ah, 0);
+        set_port_sample_delay(dq_ah);
+        break;
+    case 6: // 500 / (6 * 2) = 41.67MHz. ~4.2ns margin
+        set_pad_delay(dq_ah, 4);
+        set_port_no_sample_delay(dq_ah);
+        break;
+    case 7: // 500 / (7 * 2) = 35.71MHz. ~6.2ns margin
+        set_pad_delay(dq_ah, 3);
+        set_port_no_sample_delay(dq_ah);
+        break;
+    case 8: // 500 / (8 * 2) = 31.25MHz. ~8.2ns margin 
+        set_pad_delay(dq_ah, 2);
+        set_port_no_sample_delay(dq_ah);
+        break;
+    case 9: // 500 / (9 * 2) = 27.78MHz. ~10.2ns margin
+        set_pad_delay(dq_ah, 1);
+        set_port_no_sample_delay(dq_ah);
+        break;
+    case 10: // 500 / (10 * 2) = 25.00MHz. ~12.2ns margin
+        set_pad_delay(dq_ah, 0);
+        set_port_no_sample_delay(dq_ah);
+        break;
+    default: // Frequencies lower that 25MHz can be supported by the 25MHz setting with 12.2ns margin
+             // But ideally we would change the "N" value in the assembler to increase the margin
+        __builtin_trap();
+        break;
+  }
+
+
 
   start_clock(cb);
 
