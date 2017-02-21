@@ -4,11 +4,10 @@ SDRAM Library
 SDRAM Libary
 ------------
 
-The XMOS SDRAM module is designed for 16 bit read and write access of 
-arbitrary length at up to 62.5MHz clock rates. It uses an optimized 
-pinout with address and data lines overlaid along with other pinout 
-optimizations to implement 16 bit read/write with up to 13 
-address lines with a total of just 20 pins.
+The XMOS SDRAM library is designed for read and write access of arbitrary length 32b long word buffers at up to 62.5MHz clock rates. 
+It uses an optimized pinout with address and data lines overlaid along with other pinout 
+optimizations to implement 16 bit read/writes to Single Data Rate (SDR) SDRAM devices of size up to 256Mb,
+while consuming a total of just 20 xCORE I/O pins.
 
 Features
 ........
@@ -17,17 +16,18 @@ The SDRAM component has the following features:
 
   * Configurability of:
 
-     - SDRAM geometry
-     - clock rate
+     - SDRAM capacity
+     - clock rate (62.5 to 25MHz steps are provided)
      - refresh properties
   * Supports:
 
-     - read
-     - write
+     - read of 32b long words
+     - write of 32b long words
      - one or more clients
      - asynchronous command decoupling with a command queue of length 8 for each client
      - refresh handled by the SDRAM component itself
   * Requires a single core for the server
+  * Requires 500MHz core clock operation
 
 Components
 ...........
@@ -61,11 +61,20 @@ Software version and dependencies
 
 .. libdeps::
 
+
+Known Issues
+------------
+
+The library is currently limited to the following SDRAM device capacities:
+
+ - XS1 devices can support a maximum of 64 Mb SDRAM (8 MBytes) using a 8b column address. This is a technical limitation.
+ - XS2 (xCore 200) devices can support a maximum of 256 Mb SDRAM (32 MBytes) using a 9b column address. 512 Mb devices are supportable with some modifications. Please contact Xmos for details.
+ - No Application note is provided currently. Please see https://github.com/xmos/lib_sdram/examples for simple usage examples
+
+
 Related application notes
 .........................
 
-The following application notes use this library:
-
-  * AN00170 - Using the SDRAM library
+- None
 
 

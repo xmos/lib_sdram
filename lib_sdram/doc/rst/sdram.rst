@@ -39,8 +39,8 @@ A typical SDRAM requires the following signals:
 * A[12:0]		- Address
 * BA[1:0]		- Bank Address
 
-The exact count of Address lines and Bank Address line may vary. The below examples assume a 256Mb SDRAM device.
-This library is designed to work with a fixed 16 bit SDRAM data bus. 
+The exact count of Address lines and Bank Address line may vary. The examples in this document assume a 256Mb SDRAM device.
+This library is designed to work with a fixed 16 bit SDRAM data bus, although the API provides data in long words (32 bit).
 
 The dq_ah bus is made up of 16 lines. The DQ bus is mapped directly to
 dq_ah. The address bus is mapped in order to the lower bits of dq_ah. Finally, 
@@ -56,7 +56,7 @@ the following setup is in place::
 The number of address bits plus the number of bank address bits must not exceed 16.
 
 The DQM signal(s) is connected to the NOR of WE and CAS. An example of a suitable
-part is the TI SN74LVC1G02. In the case that the DQM is seperated into high 
+part is the TI SN74LVC1G02. In the case that the DQM is separated into high 
 and low components then the output from the NOR is connected to both high and low DQM.
 
 This library assumes that CS is pulled low, i.e. the SDRAM is always selected. If 
@@ -79,7 +79,42 @@ SDRAM server and client are instantiated as parallel tasks that run in a
 ``par`` statement. The client (application on most cases) can connect to the server via 
 a streaming channel.
 
-For example, the following code instantiates an SDRAM server
+.. caution::
+  The SDRAM server must be provided with enough MIPS to keep up with the specified SDRAM clock rate.
+  For example, for 62.5MHz operation, the server core must always see a minimum of 62.5MHz. Typically
+  this will be satisfied if the core clock is 500MHz and 8 cores are used.
+
+The clock rate of the SDRAM server is controlled by the last parameter which is the clock divider. 
+The resulting SDRAM clock, assuming a 500MHz core clock, will be defined as::
+
+  500 / (2 * n)
+
+Typical supported clock rates are as listed in the below table. For each rate, the appropriate port
+delays are set to maximize the read window. See the code in ``server.xc`` for further details.
+
+.. list-table:: Supported SDRAM server clock rates
+    :class: vertical-borders horizontal-borders
+    :header-rows: 1
+
+    * - xCORE clock Divider setting
+      - Resultant SDRAM serve clock (MHz)
+    * - 4
+      - 62.5
+    * - 5
+      - 50
+    * - 6
+      - 41.66
+    * - 7
+      - 35.71
+    * - 8
+      - 31.25
+    * - 9
+      - 27.78
+    * - 10
+      - 25
+
+
+For example, the following code instantiates an SDRAM server running at 62.5MHz
 and connects an application to it::
 
   out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
@@ -92,6 +127,7 @@ and connects an application to it::
   int main() {
     streaming chan c_sdram[1];
     par {
+        //256Mb SDRAM
         sdram_server(c_sdram, 1,
               sdram_dq_ah,
               sdram_cas,
@@ -99,7 +135,15 @@ and connects an application to it::
               sdram_we,
               sdram_clk,
               sdram_cb,
-              2, 128, 16, 8,12, 2, 64, 4096, 4);
+              2,    //CAS latency
+              256,  //Row long words
+              16,   //Col bits (unused by server)
+              9,    //Col addr bits
+              13,   //Row bits
+              2,    //Bank bits
+              64,   //Milliseconds refresh
+              8192, //Refresh cycles
+              4);   //Clock divider
       application(c_sdram[0]);
     }
     return 0;
@@ -109,7 +153,7 @@ and connects an application to it::
 line buffers are transferred by moving pointers from one task to another.
 
 The SDRAM library uses movable pointers to pass buffers between the client 
-and the server. This means that if the client passes a buffer to the 
+and the server. This means that if the client passes a buffer in on-chip RAM to the 
 SDRAM server, the client cannot access that buffer while the server is 
 processing the command. To handle this the client sends 
 commands using ``sdram_read`` and ``sdram_write``, both of which take 
@@ -131,7 +175,7 @@ The SDRAM server must be instantiated at the same level as its clients. For exam
           client_of_the_sdram_server(c_sdram[0]);
   }
 
-would be the mimimum required to correctly setup the SDRAM server and connect it to a 
+would be the minimum required to correctly setup the SDRAM server and connect it to a 
 client. An example of a multi-client system would be::
 
   chan c_sdram[4];
@@ -146,7 +190,7 @@ client. An example of a multi-client system would be::
 Command buffering
 .................
 
-The SDRAM server implements a 8 slot command buffer per client. This means that the 
+The SDRAM server implements an 8 slot command buffer per client. This means that the 
 client can queue up to 8 commands to the SDRAM server through calls to ``sdram_read`` 
 or ``sdram_write``. A successful call to ``sdram_read`` or ``sdram_write`` will return 0 
 and issue the command to the command buffer. When the command buffer is full, a call to 
@@ -180,15 +224,21 @@ is returned to the client on a call return from ``sdram_complete``. For example:
    unsigned buffer[N];
    unsigned * movable buffer_pointer = buffer;
 
-   //buffer_pointer is fully accessable
+   //buffer_pointer is fully accessible
 
-   sdram_read (c_server, sdram_state, bank, row, col, words, move(buffer_pointer));
+   sdram_read (c_sdram_server, state, address, word_count, move(buffer_pointer));
 
    //during this region the buffer_pointer is null and cannot be read from or written to
 
-   sdram_complete(c_server, sdram_state, buffer_pointer);
+   sdram_complete(c_sdram_server, state, buffer_pointer);
 
-   //now buffer_pointer is accessable again
+   //now buffer_pointer is accessible again
+
+.. tip::
+  Note that, despite supporting a 16 bit SDRAM data bus width, the native word length of the API is 32 bits.
+  This means that the address provided to the read/wrote functions is the 32b address of the memory.
+  For example, address 0x0001 returns a long word (32 bit) from the 5th to 7th byte location of the SDRAM.
+  Only 32 bit operations are supported; the user should read-modify-write to support modification of smaller word sizes. 
 
 During the scope of the movable pointer variable the pointer can point at any memory location, 
 however, at the end of the scope the pointer must point at its original instantiation. 
@@ -201,9 +251,9 @@ For example the following is acceptable::
      unsigned * movable buffer_pointer_0 = buffer_0;
      unsigned * movable buffer_pointer_1 = buffer_1;
   
-     sdram_read (c_server, sdram_state, bank, row, col, words, move(buffer_pointer_0));
-     sdram_write (c_server, sdram_state, bank, row, col, words, move(buffer_pointer_1));
-  
+     sdram_read (c_sdram_server, state, address, word_count, move(buffer_pointer_0));
+     sdram_write (c_sdram_server, state, address, word_count, move(buffer_pointer_1));
+
      //both buffer_pointer_0 and buffer_pointer_1 are null here
   
      sdram_complete(c_server, sdram_state, buffer_pointer_0);
@@ -219,8 +269,8 @@ point at the same memory when leaving scope as they were when they were instanti
      unsigned * movable buffer_pointer_0 = buffer_0;
      unsigned * movable buffer_pointer_1 = buffer_1;
   
-     sdram_read (c_server, sdram_state, bank, row, col, words, move(buffer_pointer_0));
-     sdram_write (c_server, sdram_state, bank, row, col, words, move(buffer_pointer_1));
+     sdram_read (c_sdram_server, state, address, word_count, move(buffer_pointer_0));
+     sdram_write (c_sdram_server, state, address, word_count, move(buffer_pointer_1));
   
      //both buffer_pointer_0 and buffer_pointer_1 are null here
   
