@@ -61,10 +61,6 @@ void sdram_init(
   set_port_clock(we, cb);
 
   switch(clock_divider) {
-    case 3: //500 / (3 * 2) = 83.33MHz. Note the xcore cannot meet timing at this speed. Use at own risk!
-        set_pad_delay(dq_ah, 4);  //Margin approx -1.3ns hold and +200ps setup
-        set_port_sample_delay(dq_ah);
-        break;
     case 4: // 500 / (4 * 2) = 62.50MHz. ~200ps margin
         set_pad_delay(dq_ah, 2);
         set_port_sample_delay(dq_ah);
@@ -93,8 +89,9 @@ void sdram_init(
         set_pad_delay(dq_ah, 0);
         set_port_no_sample_delay(dq_ah);
         break;
-    default: // Frequencies lower that 25MHz can be supported by the 25MHz setting with 12.2ns margin
+    default: // Frequencies lower that 25MHz can be supported by the 25MHz setting with 12.2ns margin (plenty)
              // But ideally we would change the "N" value in the assembler to increase the margin
+             // 83.33MHz may be possible with compromised setup/hold times. Please contact Xmos for more info.
         __builtin_trap();
         break;
   }
