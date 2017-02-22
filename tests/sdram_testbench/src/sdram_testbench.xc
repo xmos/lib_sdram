@@ -11,10 +11,10 @@
   */
 #define VERBOSE_MSG 1
 
-#define SDRAM_256Mb   0 //Use IS42S16160D 256Mb
+#define SDRAM_256Mb   1 //Use IS42S16160D 256Mb
 #define SDRAM_128Mb   0 //Use IS42S16800D 128Mb
                         //othewise IS42S16400D 64Mb which is default on XMOS boards
-#define FAST_TEST     0 //Simplify read and wait only 12 seconds instead of 120 for refresh tests
+#define FAST_TEST     1 //Simplify read and wait only 12 seconds instead of 120 for refresh tests
 
 #define CAS_LATENCY   2
 #define REFRESH_MS    64
@@ -400,13 +400,13 @@ void sdram_client(streaming chanend c_server) {
 }
 
 #ifdef __XS2A__
-//xp-wifi-mic-u216 board
-#define      SERVER_TILE            1
-on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
-on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1A;
-on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1B;
-on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1D;
-on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1C;
+//XO-SKC-X200-1V0 Triangle slot tile 0
+#define      SERVER_TILE            0
+on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16B;
+on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1J;
+on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1I;
+on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1K;
+on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1L;
 on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_2;
 #else
 //Square slot on A16 slicekit
