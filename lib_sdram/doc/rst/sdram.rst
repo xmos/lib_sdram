@@ -137,7 +137,7 @@ and connects an application to it::
               sdram_cb,
               2,    //CAS latency
               256,  //Row long words
-              16,   //Col bits (unused by server)
+              16,   //Col bits (argument unused by server)
               9,    //Col addr bits
               13,   //Row bits
               2,    //Bank bits

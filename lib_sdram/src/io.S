@@ -44,7 +44,7 @@ sdram_block_write:
 
 	//calc burst termination time
 	add w_term_time, r2, 2
-	add w_term_time, w_term_time, r3
+	add w_term_time, w_term_time, r3 //Add word count * 2
 	add w_term_time, w_term_time, r3
 
 	//Load port resource IDs
@@ -132,7 +132,7 @@ sdram_block_write:
 	set cp, w_temp
 
 	add w_term_time, r2, 2
-	add w_term_time, w_term_time, r3
+	add w_term_time, w_term_time, r3 //Add word count * 2
 	add w_term_time, w_term_time, r3
 
 	ldw w_temp, 	sp[1+WRITE_STACK_WORDS]	//row_words
@@ -147,7 +147,7 @@ sdram_block_write:
 	ldc w_two, 2
 	bru w_temp
 
-	//(blocking)
+	//(the next IO is blocking)
 	#include "sdram_block_write_body.inc"
 
 	//Burst stop
@@ -221,7 +221,7 @@ sdram_block_read:
 	sub new_buf_ptr, r0, 0
 
 
-#define N (1) //This is an adjustment factor for turn around of 16b buffered port. Works down to about 40MHz, else should be zero
+#define N (1) //This is a timing read delay to account for latency through input path
 	//set the first input time (t+CAS+N)
 	ldw temp, 	sp[READ_STACK_WORDS+2]	//cas_latency
 	add start_time, r2, temp
@@ -229,7 +229,7 @@ sdram_block_read:
 
 	//calculate the time to issue the terminate cmd
 	add term_time, start_time, r3
-	add term_time, term_time, r3
+	add term_time, term_time, r3	//Add word count * 2
 
 	//Calculate the entry point to the unrolled inner loop
 	ldc temp, 	256						//The number of in/store cycles unrolled in the jump table
@@ -341,15 +341,14 @@ sdram_block_read:
 	ldaw temp, r0[-temp]
 	set dp, temp
 
-#define N (1) //This is an adjustment factor for turn around of 16b buffered port. Works down to about 40MHz, else should be zero
-	//set the first input time (t+CAS+N)
+#define N (1) //This is a timing read delay to account for latency through input path	//set the first input time (t+CAS+N)
 	ldw temp, 	sp[READ_STACK_WORDS+2]	//cas_latency
 	add start_time, r2, temp
 	add start_time, start_time, N
 
 	//calculate the time to issue the terminate cmd
 	add term_time, start_time, r3
-	add term_time, term_time, r3
+	add term_time, term_time, r3	//Add word count * 2
 
 	ldw temp, 	sp[READ_STACK_WORDS+1]	//row_words
 	sub jump_reg, temp, r3
