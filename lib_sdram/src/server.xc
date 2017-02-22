@@ -184,14 +184,19 @@ typedef struct {
 void sdram_block_read(unsigned * buffer, sdram_ports &ports, unsigned t0, unsigned word_count, unsigned row_words, unsigned cas_latency);
 void sdram_block_write(unsigned * buffer, sdram_ports &ports, unsigned t0, unsigned word_count, unsigned row_words);
 
-/*
- * These numbers are tuned for 62.5MIPS.
- */
-#define WRITE_SETUP_LATENCY (80)
-#define READ_SETUP_LATENCY  (70)
+//The below latency figures are to allow for the overhead of calling the ASM block read after the transaction has started
+//They are calulated assuming the SDRAM and server tasks are both running at 62.5MHz. They can be scaled down proportionally 
+//if using lower SDRAM clock rates, but the server task still runs at 62.5MHz
+#ifdef __XS2A__
+#define WRITE_SETUP_LATENCY (42)  //Simulated time with thread @ 62.5MHz is 36 thread cycles
+#define READ_SETUP_LATENCY  (50)  //Simulated time with thread @ 62.5MHz is 43 thread cycles
+#else
+#define WRITE_SETUP_LATENCY (80)  //Simulated time with thread @ 62.5MHz is 55 thread cycles
+#define READ_SETUP_LATENCY  (70)  //Simulated time with thread @ 62.5MHz is 54 thread cycles
+#endif
 
-#define BANK_SHIFT          (13)//This is the number of bits we need to shift up the bank address lines
-                                //They will appear on DQ13..14 using this define
+#define BANK_SHIFT          (13)  //This is the number of bits we need to shift up the bank address lines
+                                  //They will appear on DQ13..14 using this define
 
 static inline void write_impl(unsigned row, unsigned col, unsigned bank,
         unsigned *  buffer, unsigned word_count,
@@ -209,7 +214,7 @@ static inline void write_impl(unsigned row, unsigned col, unsigned bank,
 
     //printf("Write buffer pointer=%p\trow_words=%x\tword_count=%x\n",buffer, row_words, word_count);
 
-    dq_ah @ t<: rowcol;
+    dq_ah @ t <: rowcol;
 
     partout_timed(cas, 3, CTRL_CAS_ACTIVE | (CTRL_CAS_WRITE<<1) | (CTRL_CAS_NOP<<2), t);
     partout_timed(ras, 3, CTRL_RAS_ACTIVE | (CTRL_RAS_WRITE<<1) | (CTRL_RAS_NOP<<2), t);
