@@ -196,8 +196,6 @@ void sdram_block_write(unsigned * buffer, sdram_ports &ports, unsigned t0, unsig
 #define BANK_SHIFT          (13)//This is the number of bits we need to shift up the bank address lines
                                 //They will appear on DQ13..14 using this define
 
-#define SDRAM_EXTERNAL_MEMORY_ACCESSOR 0
-
 static inline void write_impl(unsigned row, unsigned col, unsigned bank,
         unsigned *  buffer, unsigned word_count,
         out buffered port:32 dq_ah,
@@ -205,15 +203,6 @@ static inline void write_impl(unsigned row, unsigned col, unsigned bank,
         out buffered port:32 ras,
         out buffered port:8 we,
         const static unsigned row_words) {
-
-/*
-    if(SDRAM_EXTERNAL_MEMORY_ACCESSOR){
-        if (col)
-            col = col - 1;
-        else
-            col = ((1<<c.col_address_bits) - 1);
-    }
-*/
 
     //Work out first and second 16b commands (lower word first) -  ACT followed by WRITE (no precharge)
     unsigned rowcol = row | (bank<<BANK_SHIFT) | bank<<(BANK_SHIFT+16) |  (col << 16);
@@ -243,14 +232,7 @@ static inline void read_impl(unsigned row, unsigned col, unsigned bank,
         out buffered port:8 we,
         const static unsigned row_words,
         const static unsigned cas_latency) {
-/*
-    if(SDRAM_EXTERNAL_MEMORY_ACCESSOR){
-        if (col)
-            col = col - 1;
-        else
-            col = ((1<<c.col_address_bits) - 1);
-    }
-*/
+
     //Work out first and second 16b commands (lower word first) -  ACT followed by READ (no precharge)
     unsigned rowcol =  row | (bank<<BANK_SHIFT) | bank<<(BANK_SHIFT+16) | (col << 16);
 
