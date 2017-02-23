@@ -38,9 +38,9 @@ void sdram_init(
   int time, t;
 
   //Output NOP
-  cas <: CTRL_CAS_NOP;
-  ras <: CTRL_RAS_NOP;
-  we <: CTRL_WE_NOP;
+  partout(cas, 1, CTRL_CAS_NOP);
+  partout(ras, 1, CTRL_RAS_NOP);
+  partout(we, 1, CTRL_WE_NOP);
   dq_ah <: 0;
 
   sync(dq_ah);
@@ -100,15 +100,15 @@ void sdram_init(
 
   start_clock(cb);
 
-  //Wait 100us for clock to stabilise
+  //Wait 200us for clock to stabilise
   T :> time;
-  T when timerafter(time + 100 * TIMER_TICKS_PER_US) :> time;
+  T when timerafter(time + 200 * TIMER_TICKS_PER_US) :> time;
 
   //Grab port time
   dq_ah <: 0 @ t;
   sync(dq_ah);
 
-  //200 SDRAM clocks later, issue NOP again
+  //200 SDRAM clocks later (16 * 2000 = 3200ns), issue NOP again
   t+=200;
   partout_timed(ras,1, CTRL_RAS_NOP, t);
   partout_timed(cas,1, CTRL_CAS_NOP, t);
@@ -121,27 +121,23 @@ void sdram_init(
   //Issue PRECHARGE ALL
   dq_ah <: 0x04000400 @ t; //Set A10 high
   sync(dq_ah);
-  t+=600; 
+  t+=600; // 600 * 16 = 9.6us
   partout_timed(ras, 2, CTRL_RAS_PRECHARGE | (CTRL_RAS_NOP<<1), t);
   partout_timed(we, 2,  CTRL_WE_PRECHARGE  | (CTRL_WE_NOP<<1),  t);
   
-  //Wait 1us (TRP = 16ns)
-  T :> time;
-  T when timerafter(time + 1 * TIMER_TICKS_PER_US) :> time;
+  //Set next port out for 20 clocks (20 * 16 = 320ns) (TRP = 16ns)
+  t+=20;
 
   //Issue AUTO REFRESH
-  we <: CTRL_WE_REFRESH @ t;
-  t+=100;
+  partout_timed(we, 2,  CTRL_WE_REFRESH  | (CTRL_WE_NOP<<1),  t);
   partout_timed(ras, 2, CTRL_RAS_REFRESH | (CTRL_RAS_NOP<<1), t);
   partout_timed(cas, 2,  CTRL_CAS_REFRESH  | (CTRL_WE_NOP<<1),  t);
 
-  //Wait 1us (TRFC = 60ns)
-  T :> time;
-  T when timerafter(time + 1 * TIMER_TICKS_PER_US) :> time;
+  //Set next port out for 20 clocks (20 * 16 = 320ns) (TRFC = 16ns)
+  t+=20;
 
   //Issue AUTO REFRESH
-  we <: CTRL_WE_REFRESH @ t;
-  t+=100;
+  partout_timed(we, 2,  CTRL_WE_REFRESH  | (CTRL_WE_NOP<<1),  t);
   partout_timed(ras, 2, CTRL_RAS_REFRESH | (CTRL_RAS_NOP<<1), t);
   partout_timed(cas, 2,  CTRL_CAS_REFRESH  | (CTRL_WE_NOP<<1),  t);
 
@@ -158,9 +154,10 @@ void sdram_init(
       mode_reg = 0x00370037; //BL = Full Page, Sequential, CL=3, Std operation, Programmed burst length
   }
 
+  //grab port time and load ports to set mode_reg on DQ pins
   dq_ah  <: mode_reg @ t;
   sync(dq_ah);
-  t+=256;
+  t+=20; //20 * 16 = 320ns
   partout_timed(cas, 2, CTRL_CAS_LOAD_MODEREG | (CTRL_CAS_NOP<<1), t);
   partout_timed(ras, 2, CTRL_RAS_LOAD_MODEREG | (CTRL_RAS_NOP<<1), t);
   partout_timed(we, 2,  CTRL_WE_LOAD_MODEREG  | (CTRL_WE_NOP<<1),  t);
@@ -209,6 +206,7 @@ static inline void write_impl(unsigned row, unsigned col, unsigned bank,
     //Work out first and second 16b commands (lower word first) -  ACT followed by WRITE (no precharge)
     unsigned rowcol = row | (bank<<BANK_SHIFT) | bank<<(BANK_SHIFT+16) |  (col << 16);
 
+    //Get the current port time
     unsigned t = partout_timestamped(cas, 1, CTRL_WE_NOP);
     t += WRITE_SETUP_LATENCY;
 
