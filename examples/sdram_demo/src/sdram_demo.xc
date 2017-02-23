@@ -20,21 +20,28 @@ void application(streaming chanend c_server) {
   s_sdram_state sdram_state;
   sdram_init_state(c_server, sdram_state);
 
-  printf("Start App\n");
-
-  //Fill the memory initially with known pattern
+  //Fill the memory initially with known pattern and verify
   for(unsigned i=0;i<BUF_WORDS;i++){
     write_buffer_pointer[i] = 0xdeadbeef;
+    read_buffer_pointer[i] = 0; //And clear read pointer
   }
+  //while(1){
   sdram_write(c_server, sdram_state, 0x0, BUF_WORDS, move(write_buffer_pointer));
   sdram_complete(c_server, sdram_state, write_buffer_pointer);
+  //}
 
   sdram_read (c_server, sdram_state, 0x0, BUF_WORDS, move( read_buffer_pointer));
   sdram_complete(c_server, sdram_state,  read_buffer_pointer);
 
-  for(unsigned i=0;i<BUF_WORDS;i++) printf("%08x %d\n", read_buffer_pointer[i], i);
+  for(unsigned i=0;i<BUF_WORDS;i++) {
+    //printf("%08x %d\n", read_buffer_pointer[i], i);
+    if(read_buffer_pointer[i] != write_buffer_pointer[i]){
+      printf("SDRAM demo fail.\nValue written at long word adress 0x%x is %08x but value read %08x\n", i, write_buffer_pointer[i], read_buffer_pointer[i]);
+      _Exit(1);
+    }
+  }
 
-  //Fill the memory with address incrementing pattern
+  //Fill the memory with address incrementing pattern and verify
   for(unsigned i=0;i<BUF_WORDS;i++){
     write_buffer_pointer[i] = i;
     read_buffer_pointer[i] = 0; //And clear read pointer
@@ -47,13 +54,13 @@ void application(streaming chanend c_server) {
   sdram_complete(c_server, sdram_state,  read_buffer_pointer);
 
   for(unsigned i=0;i<BUF_WORDS;i++){
-    printf("%08x %d\n", read_buffer_pointer[i], i);
+    //printf("%08x %d\n", read_buffer_pointer[i], i);
     if(read_buffer_pointer[i] != write_buffer_pointer[i]){
-      printf("SDRAM demo fail. Value written %08x\t Value read %08x\n", write_buffer_pointer[i], read_buffer_pointer[i]);
+      printf("SDRAM demo fail.\nValue written at long word adress 0x%x is %08x but value read %08x\n", i, write_buffer_pointer[i], read_buffer_pointer[i]);
      _Exit(1);
     }
   }
-  printf("SDRAM demo complete.\n");
+  printf("SDRAM demo complete with no errors.\n");
   _Exit(0);
 }
 

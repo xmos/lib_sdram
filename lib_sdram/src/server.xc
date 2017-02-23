@@ -110,8 +110,8 @@ void sdram_init(
 
   //200 SDRAM clocks later (16 * 2000 = 3200ns), issue NOP again
   t+=200;
-  partout_timed(ras,1, CTRL_RAS_NOP, t);
-  partout_timed(cas,1, CTRL_CAS_NOP, t);
+  partout_timed(ras, 1, CTRL_RAS_NOP, t);
+  partout_timed(cas, 1, CTRL_CAS_NOP, t);
   partout_timed(we, 1, CTRL_WE_NOP,  t);
 
   //Wait 50us
@@ -213,7 +213,7 @@ static inline void write_impl(unsigned row, unsigned col, unsigned bank,
     //printf("Write buffer pointer=%p\trow_words=%x\tword_count=%x\n",buffer, row_words, word_count);
 
     dq_ah @ t <: rowcol;
-
+    
     partout_timed(cas, 3, CTRL_CAS_ACTIVE | (CTRL_CAS_WRITE<<1) | (CTRL_CAS_NOP<<2), t);
     partout_timed(ras, 3, CTRL_RAS_ACTIVE | (CTRL_RAS_WRITE<<1) | (CTRL_RAS_NOP<<2), t);
     partout_timed(we , 3, CTRL_WE_ACTIVE  | (CTRL_WE_WRITE<<1)  | (CTRL_WE_NOP<<2), t);
