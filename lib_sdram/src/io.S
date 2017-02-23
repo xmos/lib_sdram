@@ -272,7 +272,7 @@ sdram_block_read_cleanup:
 	syncr res[dq_ah]
 
 	//Precharge
-	ldc temp, 10
+	ldc temp, 2
 	setpt res[ras], term_time
 	outpw res[ras], temp, 2
 	setpt res[we],  term_time
@@ -392,7 +392,7 @@ sdram_block_read:
 	syncr res[dq_ah]
 
 	//Precharge
-	ldc temp, 10
+	ldc temp, 2
 	setpt res[ras], term_time
 	outpw res[ras], temp, 2
 	setpt res[we],  term_time
