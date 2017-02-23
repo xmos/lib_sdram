@@ -70,7 +70,7 @@ static unsigned super_pattern() {
 }
 
 #define TEST_WORDS  (ROW_WORDS)
-#define MAX_BUFFER_WORDS 256
+#define MAX_BUFFER_WORDS 512  //Allows for 512Mb SDRAM 
 
 static void whole_memory_write_read(streaming chanend c_server, s_sdram_state &sdram_state){
     unsigned buffer[MAX_BUFFER_WORDS];
@@ -80,14 +80,15 @@ static void whole_memory_write_read(streaming chanend c_server, s_sdram_state &s
 
     if (VERBOSE_MSG) printf("Begin   : whole_memory_write_read\n");
 
+    const unsigned clear_word = 0xdeafbeef;
     //clear memory to know value
     for(unsigned i=0;i<TEST_WORDS;i++)
-        buffer_pointer[i] = 0xdeafbeef;
+        buffer_pointer[i] = clear_word;
     for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += TEST_WORDS){
         sdram_write(c_server, sdram_state, addr, TEST_WORDS, move(buffer_pointer));
         sdram_complete(c_server, sdram_state, buffer_pointer);
     }
-    printf("cleared\n");
+    printf("cleared all memory to 0x%x\n", clear_word);
 
 
     //Fill address value into memory location
@@ -99,7 +100,7 @@ static void whole_memory_write_read(streaming chanend c_server, s_sdram_state &s
         sdram_complete(c_server, sdram_state, buffer_pointer);
     }
 
-    printf("written\n");
+    printf("written incrementing pattern\n");
 
 #if FAST_TEST
     for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += TEST_WORDS){
@@ -113,7 +114,7 @@ static void whole_memory_write_read(streaming chanend c_server, s_sdram_state &s
         for(unsigned i=0;i<TEST_WORDS;i++){
             if(buffer_pointer[i] != (addr + i)){
                 error = 1;
-                if (VERBOSE_MSG) printf("error read:%08x wrote:%08x base_addr:0x%x i:0x%x: Difference (r-w)=%d \n",
+                if (VERBOSE_MSG) printf("error read: %08x wrote: %08x base_addr: 0x%x idx: 0x%x: Difference (r-w)=%d \n",
                         buffer_pointer[i], (addr + i), addr, i, (buffer_pointer[i] - (addr + i)));
             }
         }
@@ -389,11 +390,11 @@ void sdram_client(streaming chanend c_server) {
 
   if (VERBOSE_MSG)
     printf("Test suite begin\n");
-  test_8_threads(c_server, sdram_state);
-  test_7_threads(c_server, sdram_state);
-  test_6_threads(c_server, sdram_state);
-  test_5_threads(c_server, sdram_state);
   test_4_threads(c_server, sdram_state);
+  test_5_threads(c_server, sdram_state);
+  test_6_threads(c_server, sdram_state);
+  test_7_threads(c_server, sdram_state);
+  test_8_threads(c_server, sdram_state);
   if (VERBOSE_MSG)
     printf("Test suite completed\n");
   _Exit(0);
