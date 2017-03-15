@@ -23,13 +23,13 @@
  *  \param clk                  The SDRAM clock.
  *  \param cb                   Clock block to control the ports.
  *  \param cas_latency          The CAS latency.
- *  \param row_words            The number of words in a SDRAM row.
- *  \param col_bits             The count of bits for a memory location.
- *  \param col_address_bits     The number of bits in the coloumn address bus.
+ *  \param row_words            The number of 32b words in a SDRAM row (half the number of columns).
+ *  \param col_bits             The count of bits for a memory location, normally 16.
+ *  \param col_address_bits     The number of bits in the column address bus.
  *  \param row_address_bits     The number of bits in the row address bus.
  *  \param bank_address_bits    The number of bits in the bank address bus.
  *  \param refresh_ms           The count of milliseconds for a full refresh cycle.
- *  \param refresh_cycles       The count of refresh instruction per full refresh cycle.
+ *  \param refresh_cycles       The count of refresh instructions per full refresh cycle.
  *  \param clock_divider        The divider of the system clock to the SDRAM clock.
  **/
 void sdram_server(streaming chanend c_client[client_count],
