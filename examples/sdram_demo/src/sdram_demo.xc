@@ -103,7 +103,7 @@ int main() {
                                                   //Note clock div 4 gives (500/ (4*2)) = 62.5MHz
 
     on tile[SERVER_TILE]: application(c_sdram[0]);
-    on tile[SERVER_TILE]: par(int i=0;i<6;i++) while(1);
+    on tile[SERVER_TILE]: par(int i=0;i<6;i++) while(1); //Consume the remaining MHz
   }
   return 0;
 }
