@@ -5,7 +5,7 @@
 #include "sdram.h"
 #include "control.h"
 
-#define TIMER_TICKS_PER_US 250000000
+#define TIMER_TICKS_PER_US 100
 
 #define MINIMUM_REFRESH_COUNT 8
 
@@ -18,7 +18,7 @@ static void refresh(unsigned ncycles,
 #define REFRESH_MASK 0xeeeeeeee
     cas @ t <: REFRESH_MASK;
     ras @ t <: REFRESH_MASK;
-    for (unsigned i = 8; i < ncycles; i+=8){
+    for (unsigned i = MINIMUM_REFRESH_COUNT; i < ncycles; i+=MINIMUM_REFRESH_COUNT){
       cas <: REFRESH_MASK;
       ras <: REFRESH_MASK;
     }
@@ -37,9 +37,10 @@ void sdram_init(
   timer T;
   int time, t;
 
-  cas <: 0;
-  ras <: 0;
-  we <: 0;
+  //Output NOP
+  partout(cas, 1, CTRL_CAS_NOP);
+  partout(ras, 1, CTRL_RAS_NOP);
+  partout(we, 1, CTRL_WE_NOP);
   dq_ah <: 0;
 
   sync(dq_ah);
@@ -50,7 +51,6 @@ void sdram_init(
 
   asm("setclk res[%0], %1"::"r"(cb), "r"(XS1_CLK_XCORE));
   set_clock_div(cb, clock_divider);
-  //configure_clock_ref(cb, 0); //100MHz ref clock. Doesn't work...
 
   set_port_clock(clk, cb);
   set_port_mode_clock(clk);
@@ -60,55 +60,113 @@ void sdram_init(
   set_port_clock(ras, cb);
   set_port_clock(we, cb);
 
-  set_pad_delay(dq_ah, 0);
-  set_port_sample_delay(dq_ah);
+  switch(clock_divider) {
+    case 4: // 500 / (4 * 2) = 62.50MHz. ~200ps margin
+        set_pad_delay(dq_ah, 2);
+        set_port_sample_delay(dq_ah);
+        break;
+    case 5: // 500 / (5 * 2) = 50.00MHz. ~2.2ns margin
+        set_pad_delay(dq_ah, 0);
+        set_port_sample_delay(dq_ah);
+        break;
+    case 6: // 500 / (6 * 2) = 41.67MHz. ~4.2ns margin
+        set_pad_delay(dq_ah, 4);
+        set_port_no_sample_delay(dq_ah);
+        break;
+    case 7: // 500 / (7 * 2) = 35.71MHz. ~6.2ns margin
+        set_pad_delay(dq_ah, 3);
+        set_port_no_sample_delay(dq_ah);
+        break;
+    case 8: // 500 / (8 * 2) = 31.25MHz. ~8.2ns margin 
+        set_pad_delay(dq_ah, 2);
+        set_port_no_sample_delay(dq_ah);
+        break;
+    case 9: // 500 / (9 * 2) = 27.78MHz. ~10.2ns margin
+        set_pad_delay(dq_ah, 1);
+        set_port_no_sample_delay(dq_ah);
+        break;
+    case 10: // 500 / (10 * 2) = 25.00MHz. ~12.2ns margin
+        set_pad_delay(dq_ah, 0);
+        set_port_no_sample_delay(dq_ah);
+        break;
+    default: // Frequencies lower that 25MHz can be supported by the 25MHz setting with 12.2ns margin (plenty)
+             // But ideally we would change the "N" value in the assembler to increase the margin
+             // 83.33MHz may be possible with compromised setup/hold times. Please contact Xmos for more info.
+        __builtin_trap();
+        break;
+  }
+
+
 
   start_clock(cb);
 
-  dq_ah @ t <: 0 ;
-  t+=200;
-
-  partout(cas,1, 0);
-  partout(we, 1, 0);
-
+  //Wait 200us for clock to stabilise
   T :> time;
-  T when timerafter(time + 100 * TIMER_TICKS_PER_US) :> time;
+  T when timerafter(time + 200 * TIMER_TICKS_PER_US) :> time;
 
+  //Grab port time
   dq_ah <: 0 @ t;
   sync(dq_ah);
 
+  //200 SDRAM clocks later (16 * 2000 = 3200ns), issue NOP again
   t+=200;
-  partout_timed(ras,1, CTRL_RAS_NOP, t);
-  partout_timed(cas,1, CTRL_CAS_NOP, t);
+  partout_timed(ras, 1, CTRL_RAS_NOP, t);
+  partout_timed(cas, 1, CTRL_CAS_NOP, t);
   partout_timed(we, 1, CTRL_WE_NOP,  t);
 
+  //Wait 50us
   T :> time;
   T when timerafter(time + 50 * TIMER_TICKS_PER_US) :> time;
 
-  dq_ah <: 0x04000400 @ t;
+  //Issue PRECHARGE ALL
+  dq_ah <: 0x04000400 @ t; //Set A10 high
   sync(dq_ah);
-  t+=600;
-
+  t+=600; // 600 * 16 = 9.6us
   partout_timed(ras, 2, CTRL_RAS_PRECHARGE | (CTRL_RAS_NOP<<1), t);
   partout_timed(we, 2,  CTRL_WE_PRECHARGE  | (CTRL_WE_NOP<<1),  t);
-  t+=16;
+  
+  //Set next port out for 20 clocks (20 * 16 = 320ns) (TRP = 16ns)
+  t+=20;
 
-  refresh(256, cas, ras);
+  //Issue AUTO REFRESH
+  partout_timed(we, 2,  CTRL_WE_REFRESH  | (CTRL_WE_NOP<<1),  t);
+  partout_timed(ras, 2, CTRL_RAS_REFRESH | (CTRL_RAS_NOP<<1), t);
+  partout_timed(cas, 2,  CTRL_CAS_REFRESH  | (CTRL_WE_NOP<<1),  t);
 
-  // set mode register
+  //Set next port out for 20 clocks (20 * 16 = 320ns) (TRFC = 16ns)
+  t+=20;
+
+  //Issue AUTO REFRESH
+  partout_timed(we, 2,  CTRL_WE_REFRESH  | (CTRL_WE_NOP<<1),  t);
+  partout_timed(ras, 2, CTRL_RAS_REFRESH | (CTRL_RAS_NOP<<1), t);
+  partout_timed(cas, 2,  CTRL_CAS_REFRESH  | (CTRL_WE_NOP<<1),  t);
+
+  //Wait 1us (TRFC = 60ns)
+  T :> time;
+  T when timerafter(time + 1 * TIMER_TICKS_PER_US) :> time;
+
+
+  //set mode register
   unsigned mode_reg;
   if(cas_latency == 2){
-      mode_reg = 0x00270027;
+      mode_reg = 0x00270027; //BL = Full Page, Sequential, CL=2, Std operation, Programmed burst length
   } else {
-      mode_reg = 0x00370037;
+      mode_reg = 0x00370037; //BL = Full Page, Sequential, CL=3, Std operation, Programmed burst length
   }
 
+  //grab port time and load ports to set mode_reg on DQ pins
   dq_ah  <: mode_reg @ t;
   sync(dq_ah);
-  t+=256;
+  t+=20; //20 * 16 = 320ns
   partout_timed(cas, 2, CTRL_CAS_LOAD_MODEREG | (CTRL_CAS_NOP<<1), t);
   partout_timed(ras, 2, CTRL_RAS_LOAD_MODEREG | (CTRL_RAS_NOP<<1), t);
   partout_timed(we, 2,  CTRL_WE_LOAD_MODEREG  | (CTRL_WE_NOP<<1),  t);
+
+  //Wait 1us (TMRD = 2 cycles)
+  T :> time;
+  T when timerafter(time + 1 * TIMER_TICKS_PER_US) :> time;
+
+  //Perform refresh of whole memory
   refresh(256, cas, ras);
 
 }
@@ -123,15 +181,19 @@ typedef struct {
 void sdram_block_read(unsigned * buffer, sdram_ports &ports, unsigned t0, unsigned word_count, unsigned row_words, unsigned cas_latency);
 void sdram_block_write(unsigned * buffer, sdram_ports &ports, unsigned t0, unsigned word_count, unsigned row_words);
 
-/*
- * These numbers are tuned for 62.5MIPS.
- */
-#define WRITE_SETUP_LATENCY (80)
-#define READ_SETUP_LATENCY  (70)
+//The below latency figures are to allow for the overhead of calling the ASM block read after the transaction has started
+//They are calulated assuming the SDRAM and server tasks are both running at 62.5MHz. They can be scaled down proportionally 
+//if using lower SDRAM clock rates, but the server task still runs at 62.5MHz
+#ifdef __XS2A__
+#define WRITE_SETUP_LATENCY (42)  //Simulated time with thread @ 62.5MHz is 36 thread cycles
+#define READ_SETUP_LATENCY  (50)  //Simulated time with thread @ 62.5MHz is 43 thread cycles
+#else
+#define WRITE_SETUP_LATENCY (80)  //Simulated time with thread @ 62.5MHz is 55 thread cycles
+#define READ_SETUP_LATENCY  (70)  //Simulated time with thread @ 62.5MHz is 54 thread cycles
+#endif
 
-#define BANK_SHIFT          (13)//FIXME 15 - bank_address_bits
-
-#define SDRAM_EXTERNAL_MEMORY_ACCESSOR 0
+#define BANK_SHIFT          (13)  //This is the number of bits we need to shift up the bank address lines
+                                  //They will appear on DQ13..14 using this define
 
 static inline void write_impl(unsigned row, unsigned col, unsigned bank,
         unsigned *  buffer, unsigned word_count,
@@ -141,25 +203,17 @@ static inline void write_impl(unsigned row, unsigned col, unsigned bank,
         out buffered port:8 we,
         const static unsigned row_words) {
 
-/*
-    if(SDRAM_EXTERNAL_MEMORY_ACCESSOR){
-        if (col)
-            col = col - 1;
-        else
-            col = ((1<<c.col_address_bits) - 1);
-    }
-*/
-
     //Work out first and second 16b commands (lower word first) -  ACT followed by WRITE (no precharge)
     unsigned rowcol = row | (bank<<BANK_SHIFT) | bank<<(BANK_SHIFT+16) |  (col << 16);
 
+    //Get the current port time
     unsigned t = partout_timestamped(cas, 1, CTRL_WE_NOP);
     t += WRITE_SETUP_LATENCY;
 
     //printf("Write buffer pointer=%p\trow_words=%x\tword_count=%x\n",buffer, row_words, word_count);
 
-    dq_ah @ t<: rowcol;
-
+    dq_ah @ t <: rowcol;
+    
     partout_timed(cas, 3, CTRL_CAS_ACTIVE | (CTRL_CAS_WRITE<<1) | (CTRL_CAS_NOP<<2), t);
     partout_timed(ras, 3, CTRL_RAS_ACTIVE | (CTRL_RAS_WRITE<<1) | (CTRL_RAS_NOP<<2), t);
     partout_timed(we , 3, CTRL_WE_ACTIVE  | (CTRL_WE_WRITE<<1)  | (CTRL_WE_NOP<<2), t);
@@ -178,14 +232,7 @@ static inline void read_impl(unsigned row, unsigned col, unsigned bank,
         out buffered port:8 we,
         const static unsigned row_words,
         const static unsigned cas_latency) {
-/*
-    if(SDRAM_EXTERNAL_MEMORY_ACCESSOR){
-        if (col)
-            col = col - 1;
-        else
-            col = ((1<<c.col_address_bits) - 1);
-    }
-*/
+
     //Work out first and second 16b commands (lower word first) -  ACT followed by READ (no precharge)
     unsigned rowcol =  row | (bank<<BANK_SHIFT) | bank<<(BANK_SHIFT+16) | (col << 16);
 

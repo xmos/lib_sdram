@@ -53,7 +53,7 @@ void sdram_server(streaming chanend c_client[client_count],
 /**
  * This is used to initialise the sdram_state that follows the channel to the SDRAM server. It must only be called
  * once on the s_sdram_state that it is initialising. A client must have only one s_sdram_state that exists for the
- * lift time of the use of the SDRAM.
+ * life time of the use of the SDRAM.
  *
  * \param c_sdram_server    Chanel to the SDRAM server.
  * \param sdram_state       State structure.
@@ -71,14 +71,14 @@ void sdram_init_state(streaming chanend c_sdram_server, s_sdram_state &sdram_sta
 void sdram_complete(streaming chanend c_sdram_server, s_sdram_state &state, unsigned * movable & buffer);
 
 /**
- * Request the SDRAM server to perform a write operation.
+ * Request the SDRAM server to perform a write operation of a number of long (32b) words.
  * This function will place a write command into the SDRAM command buffer if the command buffer is not full. This is a
  * non-blocking call with a return value to indicate the successful issuing of the write to the SDRAM server.
  *
  *  \param c_sdram_server     Chanel to the SDRAM server.
  *  \param state              State structure.
- *  \param address            This is a word address of the location in SDRAM to write from.
- *  \param word_count         The number of words to write to the SDRAM.
+ *  \param address            This is a long word address of the location in SDRAM to write from.
+ *  \param word_count         The number of long words to be written to the SDRAM.
  *  \param buffer             A movable pointer from which the data to be written to the SDRAM will be read. Note, that the ownership of the pointer will pass to the SDRAM server.
  *  \return                   0 for write command has successfully be added to SDRAM command queue.
  *  \return                   1 for SDRAM command queue is full, write command has not been added.
@@ -87,14 +87,14 @@ int sdram_write   (streaming chanend c_sdram_server, s_sdram_state &state, unsig
         unsigned * movable buffer);
 
 /**
- * Request the SDRAM server to perform a read operation.
+ * Request the SDRAM server to perform a read operation of a number of long (32b) words.
  * This function will place a read command into the SDRAM command buffer if the command buffer is not full. This is a
  * non-blocking call with a return value to indicate the successful issuing of the read to the SDRAM server.
  *
  *  \param c_sdram_server     Chanel to the SDRAM server.
  *  \param state              State structure.
- *  \param address            This is a word address of the location in SDRAM to read from.
- *  \param word_count         The number of words to read from the SDRAM.
+ *  \param address            This is a long word address of the location in SDRAM to read from.
+ *  \param word_count         The number of long words to be read from the SDRAM.
  *  \param buffer             A movable pointer from which the data to be read from the SDRAM will be written. Note, that the ownership of the pointer will pass to the SDRAM server.
  *  \return                   0 for read command has successfully be added to SDRAM command queue.
  *  \return                   1 for SDRAM command queue is full, read command has not been added.

@@ -11,10 +11,10 @@
   */
 #define VERBOSE_MSG 1
 
-#define SDRAM_256Mb   0 //Use IS42S16160D 256Mb
+#define SDRAM_256Mb   1 //Use IS42S16160D 256Mb
 #define SDRAM_128Mb   0 //Use IS42S16800D 128Mb
                         //othewise IS42S16400D 64Mb which is default on XMOS boards
-#define FAST_TEST     0 //Simplify read and wait only 12 seconds instead of 120 for refresh tests
+#define FAST_TEST     1 //Simplify read and wait only 12 seconds instead of 120 for refresh tests
 
 #define CAS_LATENCY   2
 #define REFRESH_MS    64
@@ -70,7 +70,7 @@ static unsigned super_pattern() {
 }
 
 #define TEST_WORDS  (ROW_WORDS)
-#define MAX_BUFFER_WORDS 256
+#define MAX_BUFFER_WORDS 512  //Allows for 512Mb SDRAM 
 
 static void whole_memory_write_read(streaming chanend c_server, s_sdram_state &sdram_state){
     unsigned buffer[MAX_BUFFER_WORDS];
@@ -80,14 +80,15 @@ static void whole_memory_write_read(streaming chanend c_server, s_sdram_state &s
 
     if (VERBOSE_MSG) printf("Begin   : whole_memory_write_read\n");
 
+    const unsigned clear_word = 0xdeafbeef;
     //clear memory to know value
     for(unsigned i=0;i<TEST_WORDS;i++)
-        buffer_pointer[i] = 0xdeafbeef;
+        buffer_pointer[i] = clear_word;
     for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += TEST_WORDS){
         sdram_write(c_server, sdram_state, addr, TEST_WORDS, move(buffer_pointer));
         sdram_complete(c_server, sdram_state, buffer_pointer);
     }
-    printf("cleared\n");
+    printf("cleared all memory to 0x%x\n", clear_word);
 
 
     //Fill address value into memory location
@@ -99,7 +100,7 @@ static void whole_memory_write_read(streaming chanend c_server, s_sdram_state &s
         sdram_complete(c_server, sdram_state, buffer_pointer);
     }
 
-    printf("written\n");
+    printf("written incrementing pattern\n");
 
 #if FAST_TEST
     for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += TEST_WORDS){
@@ -113,7 +114,7 @@ static void whole_memory_write_read(streaming chanend c_server, s_sdram_state &s
         for(unsigned i=0;i<TEST_WORDS;i++){
             if(buffer_pointer[i] != (addr + i)){
                 error = 1;
-                if (VERBOSE_MSG) printf("error read:%08x wrote:%08x base_addr:0x%x i:0x%x: Difference (r-w)=%d \n",
+                if (VERBOSE_MSG) printf("error read: %08x wrote: %08x base_addr: 0x%x idx: 0x%x: Difference (r-w)=%d \n",
                         buffer_pointer[i], (addr + i), addr, i, (buffer_pointer[i] - (addr + i)));
             }
         }
@@ -389,24 +390,24 @@ void sdram_client(streaming chanend c_server) {
 
   if (VERBOSE_MSG)
     printf("Test suite begin\n");
-  test_8_threads(c_server, sdram_state);
-  test_7_threads(c_server, sdram_state);
-  test_6_threads(c_server, sdram_state);
-  test_5_threads(c_server, sdram_state);
   test_4_threads(c_server, sdram_state);
+  test_5_threads(c_server, sdram_state);
+  test_6_threads(c_server, sdram_state);
+  test_7_threads(c_server, sdram_state);
+  test_8_threads(c_server, sdram_state);
   if (VERBOSE_MSG)
     printf("Test suite completed\n");
   _Exit(0);
 }
 
 #ifdef __XS2A__
-//xp-wifi-mic-u216 board
-#define      SERVER_TILE            1
-on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
-on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1A;
-on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1B;
-on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1D;
-on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1C;
+//XO-SKC-X200-1V0 Triangle slot tile 0
+#define      SERVER_TILE            0
+on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16B;
+on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1J;
+on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1I;
+on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1K;
+on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1L;
 on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_2;
 #else
 //Square slot on A16 slicekit

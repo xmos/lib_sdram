@@ -16,3 +16,4 @@ Installs/*
 .settings*
 examples/lcd_demo/.build*/*
 *.swp
+examples/sdram_demo/.build*

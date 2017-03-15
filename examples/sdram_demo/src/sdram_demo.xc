@@ -4,9 +4,11 @@
 #include <stdlib.h>
 #include "sdram.h"
 
- /*
-  * Put an SDRAM slice into 'square' slot of A16 slice kit, or use xp-wifi-mic-u216 board for xCORE200
-  */
+//For XS1, put an SDRAM slice into 'square' slot of A16 slice kit
+//For XS2 (xCORE200) put an SDRAM slice into the 'triangle' slot of tile 0 of the XP-SKC-X200 slice kit
+//If using 256Mb slice, then define USE_256Mb below, otherwise leave commented out
+
+#define USE_256Mb   1
 
 void application(streaming chanend c_server) {
 #define BUF_WORDS (8)
@@ -18,46 +20,53 @@ void application(streaming chanend c_server) {
   s_sdram_state sdram_state;
   sdram_init_state(c_server, sdram_state);
 
-  printf("Start App\n");
-
-  //Fill the memory initially with known pattern
+  //Fill the memory initially with known pattern and verify
   for(unsigned i=0;i<BUF_WORDS;i++){
     write_buffer_pointer[i] = 0xdeadbeef;
+    read_buffer_pointer[i] = 0; //And clear read pointer
   }
-  sdram_write(c_server, sdram_state, 0xff10, BUF_WORDS, move(write_buffer_pointer));
+  //while(1){
+  sdram_write(c_server, sdram_state, 0x0, BUF_WORDS, move(write_buffer_pointer));
   sdram_complete(c_server, sdram_state, write_buffer_pointer);
+  //}
 
   sdram_read (c_server, sdram_state, 0x0, BUF_WORDS, move( read_buffer_pointer));
   sdram_complete(c_server, sdram_state,  read_buffer_pointer);
 
-  for(unsigned i=0;i<BUF_WORDS;i++) printf("%08x %d\n", read_buffer_pointer[i], i);
+  for(unsigned i=0;i<BUF_WORDS;i++) {
+    //printf("%08x %d\n", read_buffer_pointer[i], i);
+    if(read_buffer_pointer[i] != write_buffer_pointer[i]){
+      printf("SDRAM demo fail.\nValue written at long word adress 0x%x is %08x but value read %08x\n", i, write_buffer_pointer[i], read_buffer_pointer[i]);
+      _Exit(1);
+    }
+  }
 
-  //Fill the memory with address incrementing pattern
+  //Fill the memory with address incrementing pattern and verify
   for(unsigned i=0;i<BUF_WORDS;i++){
     write_buffer_pointer[i] = i;
     read_buffer_pointer[i] = 0; //And clear read pointer
   }
 
-  sdram_write(c_server, sdram_state, 0, BUF_WORDS, move(write_buffer_pointer));
+  sdram_write(c_server, sdram_state, 0x0, BUF_WORDS, move(write_buffer_pointer));
   sdram_complete(c_server, sdram_state, write_buffer_pointer);
 
-  sdram_read (c_server, sdram_state, 0, BUF_WORDS, move( read_buffer_pointer));
+  sdram_read (c_server, sdram_state, 0x0, BUF_WORDS, move( read_buffer_pointer));
   sdram_complete(c_server, sdram_state,  read_buffer_pointer);
 
   for(unsigned i=0;i<BUF_WORDS;i++){
-    printf("%08x %d\n", read_buffer_pointer[i], i);
+    //printf("%08x %d\n", read_buffer_pointer[i], i);
     if(read_buffer_pointer[i] != write_buffer_pointer[i]){
-      printf("SDRAM demo fail. Value written %08x\n", write_buffer_pointer[i]);
+      printf("SDRAM demo fail.\nValue written at long word adress 0x%x is %08x but value read %08x\n", i, write_buffer_pointer[i], read_buffer_pointer[i]);
      _Exit(1);
     }
   }
-  printf("SDRAM demo complete.\n");
+  printf("SDRAM demo complete with no errors.\n");
   _Exit(0);
 }
 
 //Use port mapping according to slicekit used
 #ifdef __XS2A__
-//Slot 2 on xCORE200 slicekit
+//Triangle slot tile 0 for XU216
 #define      SERVER_TILE            0
 on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16B;
 on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1J;
