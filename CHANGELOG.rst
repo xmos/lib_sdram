@@ -1,6 +1,14 @@
 SDRAM library change log
 ========================
 
+3.2.0
+-----
+  * Automatic setting of port delays for a given clock divider
+  * Fixes to initialization
+  * Improved read and write latency
+  * Documentaion and API fixes
+  * Support for new xCORE-200 Slice Kit in examples
+
 3.1.0
 -----
 
