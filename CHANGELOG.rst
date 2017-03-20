@@ -3,6 +3,7 @@ SDRAM library change log
 
 3.2.0
 -----
+
   * Automatic setting of port delays for a given clock divider
   * Fixes to initialization
   * Improved read and write latency
