@@ -220,12 +220,9 @@ sdram_block_read:
 	//Copy buffer pointer to new_buf_ptr
 	sub new_buf_ptr, r0, 0
 
-
-#define N (1) //This is a timing read delay to account for latency through input path
 	//set the first input time (t+CAS+N)
 	ldw temp, 	sp[READ_STACK_WORDS+2]	//cas_latency
 	add start_time, r2, temp
-	add start_time, start_time, N
 
 	//calculate the time to issue the terminate cmd
 	add term_time, start_time, r3
@@ -341,10 +338,8 @@ sdram_block_read:
 	ldaw temp, r0[-temp]
 	set dp, temp
 
-#define N (1) //This is a timing read delay to account for latency through input path	//set the first input time (t+CAS+N)
 	ldw temp, 	sp[READ_STACK_WORDS+2]	//cas_latency
 	add start_time, r2, temp
-	add start_time, start_time, N
 
 	//calculate the time to issue the terminate cmd
 	add term_time, start_time, r3

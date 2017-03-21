@@ -24,16 +24,21 @@ static void refresh(unsigned ncycles,
     }
 }
 
-void sdram_init(
+static unsigned sdram_init(
         out buffered port:32 dq_ah,
         out buffered port:32 cas,
         out buffered port:32 ras,
         out buffered port:8 we,
         out port clk,
         clock cb,
-        const static unsigned cas_latency,
+        unsigned cas_latency,
         const static unsigned clock_divider
 ) {
+  //This parameter is used to delay the read by a whole number of sdram clocks
+  //It is used to compensate for the large round trip delay time of the xcore IO
+
+  unsigned read_delay_whole_clocks = 0;
+
   timer T;
   int time, t;
 
@@ -61,31 +66,43 @@ void sdram_init(
   set_port_clock(we, cb);
 
   switch(clock_divider) {
-    case 4: // 500 / (4 * 2) = 62.50MHz. ~200ps margin
+    case 3: // 500 / (3 * 2) = 83.33MHz. -1.8ns margin
+        read_delay_whole_clocks = 2;
         set_pad_delay(dq_ah, 2);
         set_port_sample_delay(dq_ah);
         break;
+    case 4: // 500 / (4 * 2) = 62.50MHz. ~200ps margin
+        read_delay_whole_clocks = 2;
+        set_pad_delay(dq_ah, 2);
+        set_port_no_sample_delay(dq_ah);
+        break;
     case 5: // 500 / (5 * 2) = 50.00MHz. ~2.2ns margin
+        read_delay_whole_clocks = 1;
         set_pad_delay(dq_ah, 0);
         set_port_sample_delay(dq_ah);
         break;
     case 6: // 500 / (6 * 2) = 41.67MHz. ~4.2ns margin
-        set_pad_delay(dq_ah, 4);
-        set_port_no_sample_delay(dq_ah);
+        read_delay_whole_clocks = 1;
+        set_pad_delay(dq_ah, 2);
+        set_port_sample_delay(dq_ah);
         break;
     case 7: // 500 / (7 * 2) = 35.71MHz. ~6.2ns margin
-        set_pad_delay(dq_ah, 3);
-        set_port_no_sample_delay(dq_ah);
+        read_delay_whole_clocks = 1;
+        set_pad_delay(dq_ah, 4);
+        set_port_sample_delay(dq_ah);
         break;
-    case 8: // 500 / (8 * 2) = 31.25MHz. ~8.2ns margin 
-        set_pad_delay(dq_ah, 2);
-        set_port_no_sample_delay(dq_ah);
+    case 8: // 500 / (8 * 2) = 31.25MHz. ~7.7ns margin 
+        read_delay_whole_clocks = 1;
+        set_pad_delay(dq_ah, 5);
+        set_port_sample_delay(dq_ah);
         break;
-    case 9: // 500 / (9 * 2) = 27.78MHz. ~10.2ns margin
-        set_pad_delay(dq_ah, 1);
+    case 9: // 500 / (9 * 2) = 27.78MHz. ~8.2ns margin
+        read_delay_whole_clocks = 1;
+        set_pad_delay(dq_ah, 0);
         set_port_no_sample_delay(dq_ah);
         break;
     case 10: // 500 / (10 * 2) = 25.00MHz. ~12.2ns margin
+        read_delay_whole_clocks = 1;
         set_pad_delay(dq_ah, 0);
         set_port_no_sample_delay(dq_ah);
         break;
@@ -169,6 +186,8 @@ void sdram_init(
   //Perform refresh of whole memory
   refresh(256, cas, ras);
 
+  return (cas_latency + read_delay_whole_clocks);
+
 }
 
 typedef struct {
@@ -231,7 +250,7 @@ static inline void read_impl(unsigned row, unsigned col, unsigned bank,
         out buffered port:32 ras,
         out buffered port:8 we,
         const static unsigned row_words,
-        const static unsigned cas_latency) {
+        unsigned cas_latency) {
 
     //Work out first and second 16b commands (lower word first) -  ACT followed by READ (no precharge)
     unsigned rowcol =  row | (bank<<BANK_SHIFT) | bank<<(BANK_SHIFT+16) | (col << 16);
@@ -260,7 +279,7 @@ static void read(unsigned start_row, unsigned start_col,
     out buffered port:32 ras,
     out buffered port:8 we,
     const static unsigned row_words,
-    const static unsigned cas_latency,
+    unsigned cas_latency,
     const static unsigned col_address_bits,
     const static unsigned row_address_bits,
     const static unsigned bank_address_bits) {
@@ -296,7 +315,7 @@ static void write(unsigned start_row, unsigned start_col,
     out buffered port:32 ras,
     out buffered port:8 we,
     const static unsigned row_words,
-    const static unsigned cas_latency,
+    unsigned cas_latency,
     const static unsigned col_address_bits,
     const static unsigned row_address_bits,
     const static unsigned bank_address_bits) {
@@ -344,7 +363,7 @@ static int handle_command(e_command cmd_type, sdram_cmd &cmd,
         out buffered port:32 ras,
         out buffered port:8 we,
         const static unsigned row_words,
-        const static unsigned cas_latency,
+        unsigned cas_latency,
         const static unsigned col_address_bits,
         const static unsigned row_address_bits,
         const static unsigned bank_address_bits) {
@@ -386,7 +405,7 @@ void sdram_server(streaming chanend c_client[client_count],
         out buffered port:8 we,
         out port clk,
         clock cb,
-        const static unsigned cas_latency,
+        unsigned cas_latency,
         const static unsigned row_words,
         const static unsigned col_bits,
         const static unsigned col_address_bits,
@@ -407,7 +426,7 @@ void sdram_server(streaming chanend c_client[client_count],
         cmd_buffer[i]->buffer = null;
     }
 
-    sdram_init(dq_ah, cas, ras, we, clk, cb, cas_latency, clock_divider);
+    cas_latency = sdram_init(dq_ah, cas, ras, we, clk, cb, cas_latency, clock_divider);
 
     unsafe {
         for(unsigned i=0;i<client_count;i++){
