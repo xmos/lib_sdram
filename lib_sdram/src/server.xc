@@ -42,11 +42,16 @@ static unsigned sdram_init(
   timer T;
   int time, t;
 
+  //Do input from dq_ah to get it off the bus. Note asm to get around direction type of port
+  //This will help avoid contention if the code restarts with SDRAM in read mode
+
+  unsigned tmp;
+  asm volatile("in %0, res[%1]" : "=r"(tmp)  : "r"(dq_ah));
+
   //Output NOP
   partout(cas, 1, CTRL_CAS_NOP);
   partout(ras, 1, CTRL_RAS_NOP);
   partout(we, 1, CTRL_WE_NOP);
-  dq_ah <: 0;
 
   sync(dq_ah);
   stop_clock(cb);
