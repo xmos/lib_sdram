@@ -6,9 +6,9 @@
 #include <xs1.h>
 #include "sdram.h"
 
- /*
-  * Put an SDRAM slice into 'square' slot of A16 slice kit, xp-wifi-mic-u216 board for xCORE200
-  */
+//For XS2 (xCORE200) put an SDRAM slice into the 'triangle' slot of tile 0 of the XP-SKC-X200 slice kit
+//If using 256Mb slice, then define USE_256Mb below, otherwise leave commented out
+
 #define VERBOSE_MSG 1
 
 #define SDRAM_256Mb   1 //Use IS42S16160D 256Mb
@@ -18,7 +18,7 @@
 
 #define CAS_LATENCY   2
 #define REFRESH_MS    64
-#define CLOCK_DIV     4 //Note clock div 4 gives (500 / (4*2)) = 62.5MHz, div 3 gives (500 / (3*2)) = 83.3MHz
+#define CLOCK_DIV     3 //Note clock div 4 gives (500 / (4*2)) = 62.5MHz, div 3 gives (500 / (3*2)) = 83.3MHz
 #define DATA_BITS     16
 
 #if SDRAM_256Mb
