@@ -8,7 +8,7 @@
 //For XS2 (xCORE200) put an SDRAM slice into the 'triangle' slot of tile 0 of the XP-SKC-X200 slice kit
 //If using 256Mb slice, then define USE_256Mb below, otherwise leave commented out
 
-#define USE_256Mb   1
+#define USE_256Mb   1 //Else will assume 64Mb
 
 void application(streaming chanend c_server) {
 #define BUF_WORDS (8)
@@ -96,7 +96,7 @@ int main() {
               sdram_clk,
               sdram_cb,
 #if USE_256Mb
-              2, 256, 16, 9, 13, 2, 64, 8192, 4); //IS45S16160D 256Mb option
+              2, 256, 16, 9, 13, 2, 64, 8192, 4); //IS45S16160D 256Mb option or similar
 #else
               2, 128, 16, 8, 12, 2, 64, 4096, 4); //Uses IS42S16400D 64Mb part supplied on SDRAM slice
 #endif

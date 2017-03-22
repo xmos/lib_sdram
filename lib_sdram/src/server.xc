@@ -42,8 +42,8 @@ static unsigned sdram_init(
   timer T;
   int time, t;
 
-  //Do input from dq_ah to get it off the bus. Note asm to get around direction type of port
-  //This will help avoid contention if the code restarts with SDRAM in read mode
+  //Do input from dq_ah to get it off the bus. Note use of asm to get around direction type of port
+  //This will help avoid contention if the code restarts with SDRAM in read mode for any reason
 
   unsigned tmp;
   asm volatile("in %0, res[%1]" : "=r"(tmp)  : "r"(dq_ah));
@@ -70,50 +70,54 @@ static unsigned sdram_init(
   set_port_clock(ras, cb);
   set_port_clock(we, cb);
 
+  //Setup pad and internal read delays to compensate for round trip delays
+  //SDRAM used for timing calcs has 6ns max access (clock to data) time and 2.5ns min hold time 
+  //Timings assume use of any combination of ports. Greater timing margins can be obtained 
+  //by choosing specific ports. Please consult the "IO timings for xCORE200" document for details
   switch(clock_divider) {
-    case 3: // 500 / (3 * 2) = 83.33MHz. -1.8ns margin
+    case 4: // 500 / (4 * 2) = 62.50MHz. ~700ps margin
         read_delay_whole_clocks = 2;
-        set_pad_delay(dq_ah, 2);
-        set_port_sample_delay(dq_ah);
-        break;
-    case 4: // 500 / (4 * 2) = 62.50MHz. ~200ps margin
-        read_delay_whole_clocks = 2;
-        set_pad_delay(dq_ah, 2);
         set_port_no_sample_delay(dq_ah);
-        break;
-    case 5: // 500 / (5 * 2) = 50.00MHz. ~2.2ns margin
-        read_delay_whole_clocks = 1;
-        set_pad_delay(dq_ah, 0);
-        set_port_sample_delay(dq_ah);
-        break;
-    case 6: // 500 / (6 * 2) = 41.67MHz. ~4.2ns margin
-        read_delay_whole_clocks = 1;
         set_pad_delay(dq_ah, 2);
-        set_port_sample_delay(dq_ah);
         break;
-    case 7: // 500 / (7 * 2) = 35.71MHz. ~6.2ns margin
+    case 5: // 500 / (5 * 2) = 50.00MHz. ~2.7ns margin
         read_delay_whole_clocks = 1;
+        set_port_sample_delay(dq_ah);
+        set_pad_delay(dq_ah, 0);
+        break;
+    case 6: // 500 / (6 * 2) = 41.67MHz. ~4.7ns margin
+        read_delay_whole_clocks = 1;
+        set_port_sample_delay(dq_ah);
+        set_pad_delay(dq_ah, 2);
+        break;
+    case 7: // 500 / (7 * 2) = 35.71MHz. ~6.7ns margin
+        read_delay_whole_clocks = 1;
+        set_port_sample_delay(dq_ah);
         set_pad_delay(dq_ah, 4);
-        set_port_sample_delay(dq_ah);
         break;
-    case 8: // 500 / (8 * 2) = 31.25MHz. ~7.7ns margin 
+    case 8: // 500 / (8 * 2) = 31.25MHz. ~7.5ns margin 
         read_delay_whole_clocks = 1;
+        set_port_sample_delay(dq_ah);
         set_pad_delay(dq_ah, 5);
-        set_port_sample_delay(dq_ah);
         break;
-    case 9: // 500 / (9 * 2) = 27.78MHz. ~8.2ns margin
+    case 9: // 500 / (9 * 2) = 27.78MHz. ~8.7ns margin
         read_delay_whole_clocks = 1;
-        set_pad_delay(dq_ah, 0);
         set_port_no_sample_delay(dq_ah);
+        set_pad_delay(dq_ah, 0);
         break;
-    case 10: // 500 / (10 * 2) = 25.00MHz. ~12.2ns margin
+    case 10: // 500 / (10 * 2) = 25.00MHz. ~12.7ns margin
         read_delay_whole_clocks = 1;
-        set_pad_delay(dq_ah, 0);
         set_port_no_sample_delay(dq_ah);
+        set_pad_delay(dq_ah, 0);
         break;
-    default: // Frequencies lower that 25MHz can be supported by the 25MHz setting with 12.2ns margin (plenty)
-             // But ideally we would change the "N" value in the assembler to increase the margin
-             // 83.33MHz may be possible with compromised setup/hold times. Please contact Xmos for more info.
+    // 83.33MHz may be possible with compromised setup/hold times and specific port usage.
+    //case 3: // 500 / (3 * 2) = 83.33MHz.
+    //    read_delay_whole_clocks = 2;
+    //    set_port_sample_delay(dq_ah);
+    //    set_pad_delay(dq_ah, 2);
+    //    break;
+    default: // Support for any frequency lower that 25MHz can be implemented by using 
+             // the 25MHz delay settings which will provide 12.7ns margin (plenty)
         __builtin_trap();
         break;
   }
