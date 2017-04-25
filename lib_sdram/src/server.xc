@@ -72,40 +72,41 @@ static unsigned sdram_init(
 
   //Setup pad and internal read delays to compensate for round trip delays
   //SDRAM used for timing calcs has 6ns max access (clock to data) time and 2.5ns min hold time 
-  //Timings assume use of any combination of ports. Greater timing margins can be obtained 
+  //Timing also includes 1.4ns of PCB round trip delay (correct for XCORE200 slicekit) 
+  //Timings assume use of any combination of ports ( setup = 21.3ns and hold = -11ns) Greater timing margins can be obtained 
   //by choosing specific ports. Please consult the "IO timings for xCORE200" document for details
   switch(clock_divider) {
-    case 4: // 500 / (4 * 2) = 62.50MHz. ~700ps margin
-        read_delay_whole_clocks = 2;
+    case 4: // 500 / (4 * 2) = 62.50MHz. ~100ps margin
+        read_delay_whole_clocks = 3;
         set_port_no_sample_delay(dq_ah);
         set_pad_delay(dq_ah, 2);
         break;
-    case 5: // 500 / (5 * 2) = 50.00MHz. ~2.7ns margin
+    case 5: // 500 / (5 * 2) = 50.00MHz. ~2.1ns margin
         read_delay_whole_clocks = 1;
         set_port_sample_delay(dq_ah);
-        set_pad_delay(dq_ah, 0);
+        set_pad_delay(dq_ah, 1);
         break;
-    case 6: // 500 / (6 * 2) = 41.67MHz. ~4.7ns margin
+    case 6: // 500 / (6 * 2) = 41.67MHz. ~4.1ns margin
         read_delay_whole_clocks = 1;
         set_port_sample_delay(dq_ah);
-        set_pad_delay(dq_ah, 2);
+        set_pad_delay(dq_ah, 3);
         break;
-    case 7: // 500 / (7 * 2) = 35.71MHz. ~6.7ns margin
-        read_delay_whole_clocks = 1;
-        set_port_sample_delay(dq_ah);
-        set_pad_delay(dq_ah, 4);
-        break;
-    case 8: // 500 / (8 * 2) = 31.25MHz. ~7.5ns margin 
+    case 7: // 500 / (7 * 2) = 35.71MHz. ~6.1ns margin
         read_delay_whole_clocks = 1;
         set_port_sample_delay(dq_ah);
         set_pad_delay(dq_ah, 5);
         break;
-    case 9: // 500 / (9 * 2) = 27.78MHz. ~8.7ns margin
+    case 8: // 500 / (8 * 2) = 31.25MHz. ~6.1ns margin 
         read_delay_whole_clocks = 1;
         set_port_no_sample_delay(dq_ah);
         set_pad_delay(dq_ah, 0);
         break;
-    case 10: // 500 / (10 * 2) = 25.00MHz. ~12.7ns margin
+    case 9: // 500 / (9 * 2) = 27.78MHz. ~10.1ns margin
+        read_delay_whole_clocks = 1;
+        set_port_no_sample_delay(dq_ah);
+        set_pad_delay(dq_ah, 0);
+        break;
+    case 10: // 500 / (10 * 2) = 25.00MHz. ~12.1ns margin
         read_delay_whole_clocks = 1;
         set_port_no_sample_delay(dq_ah);
         set_pad_delay(dq_ah, 0);
