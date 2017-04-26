@@ -2,7 +2,7 @@
 # compiled for. It either refers to an XN file in the source directories
 # or a valid argument for the --target option when compiling
 ifeq ($(CONFIG), xs2) 
-	TARGET = SLICEKIT-XU216
+	TARGET = SLICEKIT-XC200-X1
 endif
 ifeq ($(CONFIG), xs1) 
 	TARGET = SLICEKIT-A16
