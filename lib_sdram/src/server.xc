@@ -24,24 +24,34 @@ static void refresh(unsigned ncycles,
     }
 }
 
-void sdram_init(
+static unsigned sdram_init(
         out buffered port:32 dq_ah,
         out buffered port:32 cas,
         out buffered port:32 ras,
         out buffered port:8 we,
         out port clk,
         clock cb,
-        const static unsigned cas_latency,
+        unsigned cas_latency,
         const static unsigned clock_divider
 ) {
+  //This parameter is used to delay the read by a whole number of sdram clocks
+  //It is used to compensate for the large round trip delay time of the xcore IO
+
+  unsigned read_delay_whole_clocks = 0;
+
   timer T;
   int time, t;
+
+  //Do input from dq_ah to get it off the bus. Note use of asm to get around direction type of port
+  //This will help avoid contention if the code restarts with SDRAM in read mode for any reason
+
+  unsigned tmp;
+  asm volatile("in %0, res[%1]" : "=r"(tmp)  : "r"(dq_ah));
 
   //Output NOP
   partout(cas, 1, CTRL_CAS_NOP);
   partout(ras, 1, CTRL_RAS_NOP);
   partout(we, 1, CTRL_WE_NOP);
-  dq_ah <: 0;
 
   sync(dq_ah);
   stop_clock(cb);
@@ -60,38 +70,55 @@ void sdram_init(
   set_port_clock(ras, cb);
   set_port_clock(we, cb);
 
+  //Setup pad and internal read delays to compensate for round trip delays
+  //SDRAM used for timing calcs has 6ns max access (clock to data) time and 2.5ns min hold time 
+  //Timing also includes 1.4ns of PCB round trip delay (correct for XCORE200 slicekit) 
+  //Timings assume use of any combination of ports ( setup = 21.3ns and hold = -11ns) Greater timing margins can be obtained 
+  //by choosing specific ports. Please consult the "IO timings for xCORE200" document for details
   switch(clock_divider) {
-    case 4: // 500 / (4 * 2) = 62.50MHz. ~200ps margin
+    case 4: // 500 / (4 * 2) = 62.50MHz. ~100ps margin
+        read_delay_whole_clocks = 3;
+        set_port_no_sample_delay(dq_ah);
         set_pad_delay(dq_ah, 2);
+        break;
+    case 5: // 500 / (5 * 2) = 50.00MHz. ~2.1ns margin
+        read_delay_whole_clocks = 1;
         set_port_sample_delay(dq_ah);
-        break;
-    case 5: // 500 / (5 * 2) = 50.00MHz. ~2.2ns margin
-        set_pad_delay(dq_ah, 0);
-        set_port_sample_delay(dq_ah);
-        break;
-    case 6: // 500 / (6 * 2) = 41.67MHz. ~4.2ns margin
-        set_pad_delay(dq_ah, 4);
-        set_port_no_sample_delay(dq_ah);
-        break;
-    case 7: // 500 / (7 * 2) = 35.71MHz. ~6.2ns margin
-        set_pad_delay(dq_ah, 3);
-        set_port_no_sample_delay(dq_ah);
-        break;
-    case 8: // 500 / (8 * 2) = 31.25MHz. ~8.2ns margin 
-        set_pad_delay(dq_ah, 2);
-        set_port_no_sample_delay(dq_ah);
-        break;
-    case 9: // 500 / (9 * 2) = 27.78MHz. ~10.2ns margin
         set_pad_delay(dq_ah, 1);
-        set_port_no_sample_delay(dq_ah);
         break;
-    case 10: // 500 / (10 * 2) = 25.00MHz. ~12.2ns margin
+    case 6: // 500 / (6 * 2) = 41.67MHz. ~4.1ns margin
+        read_delay_whole_clocks = 1;
+        set_port_sample_delay(dq_ah);
+        set_pad_delay(dq_ah, 3);
+        break;
+    case 7: // 500 / (7 * 2) = 35.71MHz. ~6.1ns margin
+        read_delay_whole_clocks = 1;
+        set_port_sample_delay(dq_ah);
+        set_pad_delay(dq_ah, 5);
+        break;
+    case 8: // 500 / (8 * 2) = 31.25MHz. ~6.1ns margin 
+        read_delay_whole_clocks = 1;
+        set_port_no_sample_delay(dq_ah);
         set_pad_delay(dq_ah, 0);
-        set_port_no_sample_delay(dq_ah);
         break;
-    default: // Frequencies lower that 25MHz can be supported by the 25MHz setting with 12.2ns margin (plenty)
-             // But ideally we would change the "N" value in the assembler to increase the margin
-             // 83.33MHz may be possible with compromised setup/hold times. Please contact Xmos for more info.
+    case 9: // 500 / (9 * 2) = 27.78MHz. ~10.1ns margin
+        read_delay_whole_clocks = 1;
+        set_port_no_sample_delay(dq_ah);
+        set_pad_delay(dq_ah, 0);
+        break;
+    case 10: // 500 / (10 * 2) = 25.00MHz. ~12.1ns margin
+        read_delay_whole_clocks = 1;
+        set_port_no_sample_delay(dq_ah);
+        set_pad_delay(dq_ah, 0);
+        break;
+    // 83.33MHz may be possible with compromised setup/hold times and specific port usage.
+    //case 3: // 500 / (3 * 2) = 83.33MHz.
+    //    read_delay_whole_clocks = 2;
+    //    set_port_sample_delay(dq_ah);
+    //    set_pad_delay(dq_ah, 2);
+    //    break;
+    default: // Support for any frequency lower that 25MHz can be implemented by using 
+             // the 25MHz delay settings which will provide 12.7ns margin (plenty)
         __builtin_trap();
         break;
   }
@@ -169,6 +196,8 @@ void sdram_init(
   //Perform refresh of whole memory
   refresh(256, cas, ras);
 
+  return (cas_latency + read_delay_whole_clocks);
+
 }
 
 typedef struct {
@@ -231,7 +260,7 @@ static inline void read_impl(unsigned row, unsigned col, unsigned bank,
         out buffered port:32 ras,
         out buffered port:8 we,
         const static unsigned row_words,
-        const static unsigned cas_latency) {
+        unsigned cas_latency) {
 
     //Work out first and second 16b commands (lower word first) -  ACT followed by READ (no precharge)
     unsigned rowcol =  row | (bank<<BANK_SHIFT) | bank<<(BANK_SHIFT+16) | (col << 16);
@@ -260,7 +289,7 @@ static void read(unsigned start_row, unsigned start_col,
     out buffered port:32 ras,
     out buffered port:8 we,
     const static unsigned row_words,
-    const static unsigned cas_latency,
+    unsigned cas_latency,
     const static unsigned col_address_bits,
     const static unsigned row_address_bits,
     const static unsigned bank_address_bits) {
@@ -296,7 +325,7 @@ static void write(unsigned start_row, unsigned start_col,
     out buffered port:32 ras,
     out buffered port:8 we,
     const static unsigned row_words,
-    const static unsigned cas_latency,
+    unsigned cas_latency,
     const static unsigned col_address_bits,
     const static unsigned row_address_bits,
     const static unsigned bank_address_bits) {
@@ -344,7 +373,7 @@ static int handle_command(e_command cmd_type, sdram_cmd &cmd,
         out buffered port:32 ras,
         out buffered port:8 we,
         const static unsigned row_words,
-        const static unsigned cas_latency,
+        unsigned cas_latency,
         const static unsigned col_address_bits,
         const static unsigned row_address_bits,
         const static unsigned bank_address_bits) {
@@ -386,7 +415,7 @@ void sdram_server(streaming chanend c_client[client_count],
         out buffered port:8 we,
         out port clk,
         clock cb,
-        const static unsigned cas_latency,
+        unsigned cas_latency,
         const static unsigned row_words,
         const static unsigned col_bits,
         const static unsigned col_address_bits,
@@ -407,7 +436,7 @@ void sdram_server(streaming chanend c_client[client_count],
         cmd_buffer[i]->buffer = null;
     }
 
-    sdram_init(dq_ah, cas, ras, we, clk, cb, cas_latency, clock_divider);
+    cas_latency = sdram_init(dq_ah, cas, ras, we, clk, cb, cas_latency, clock_divider);
 
     unsafe {
         for(unsigned i=0;i<client_count;i++){
