@@ -77,7 +77,7 @@ static unsigned sdram_init(
   //by choosing specific ports. Please consult the "IO timings for xCORE200" document for details
   switch(clock_divider) {
     case 4: // 500 / (4 * 2) = 62.50MHz. ~100ps margin
-        read_delay_whole_clocks = 3;
+        read_delay_whole_clocks = 2;
         set_port_no_sample_delay(dq_ah);
         set_pad_delay(dq_ah, 2);
         break;
