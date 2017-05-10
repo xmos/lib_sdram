@@ -75,8 +75,8 @@ All SDRAM functions can be accessed via the ``sdram.h`` header::
 You also have to add ``lib_sdram`` to the
 ``USED_MODULES`` field of your application Makefile.
 
-SDRAM server and client are instantiated as parallel tasks that run in a
-``par`` statement. The client (application on most cases) can connect to the server via 
+SDRAM server and client are instantiated as concurrent tasks that run in a
+``par`` statement. The client (your application) connects to the SDRAM server via 
 a streaming channel.
 
 .. caution::
@@ -178,7 +178,7 @@ The SDRAM server must be instantiated at the same level as its clients. For exam
 would be the minimum required to correctly setup the SDRAM server and connect it to a 
 client. An example of a multi-client system would be::
 
-  chan c_sdram[4];
+  streaming chan c_sdram[4];
   par {
   	sdram_server(c_sdram, 4,  ... );
   	client_of_the_sdram_server_0(c_sdram[0]);
@@ -237,7 +237,7 @@ is returned to the client on a call return from ``sdram_complete``. For example:
 .. tip::
   Note that, despite supporting a 16 bit SDRAM data bus width, the native word length of the API is 32 bits.
   This means that the address provided to the read/wrote functions is the 32b address of the memory.
-  For example, address 0x0001 returns a long word (32 bit) from the 5th to 7th byte location of the SDRAM.
+  For example, address 0x0001 returns a long word (32 bit) from the 4th to 7th byte location of the SDRAM.
   Only 32 bit operations are supported; the user should read-modify-write to support modification of smaller word sizes. 
 
 During the scope of the movable pointer variable the pointer can point at any memory location, 
@@ -295,7 +295,7 @@ and will either be allocated a base address to use the requested amount of memor
 or will receive an error. All clients of the memory address allocator must be on the same tile.
 
 API
-...
+---
 
 .. doxygenfunction:: sdram_server
 .. doxygenfunction:: sdram_init_state
@@ -310,10 +310,5 @@ API
 |newpage|
 
 |appendix|
-
-Known Issues
-------------
-
-There are no known issues with this library.
 
 .. include:: ../../../CHANGELOG.rst
