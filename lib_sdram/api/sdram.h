@@ -55,7 +55,7 @@ void sdram_server(streaming chanend c_client[client_count],
  * once on the s_sdram_state that it is initialising. A client must have only one s_sdram_state that exists for the
  * life time of the use of the SDRAM.
  *
- * \param c_sdram_server    Chanel to the SDRAM server.
+ * \param c_sdram_server    Channel to the SDRAM server.
  * \param sdram_state       State structure.
  *
  * \return                  None.
@@ -75,7 +75,7 @@ void sdram_complete(streaming chanend c_sdram_server, s_sdram_state &state, unsi
  * This function will place a write command into the SDRAM command buffer if the command buffer is not full. This is a
  * non-blocking call with a return value to indicate the successful issuing of the write to the SDRAM server.
  *
- *  \param c_sdram_server     Chanel to the SDRAM server.
+ *  \param c_sdram_server     Channel to the SDRAM server.
  *  \param state              State structure.
  *  \param address            This is a long word address of the location in SDRAM to write from.
  *  \param word_count         The number of long words to be written to the SDRAM.
@@ -91,7 +91,7 @@ int sdram_write   (streaming chanend c_sdram_server, s_sdram_state &state, unsig
  * This function will place a read command into the SDRAM command buffer if the command buffer is not full. This is a
  * non-blocking call with a return value to indicate the successful issuing of the read to the SDRAM server.
  *
- *  \param c_sdram_server     Chanel to the SDRAM server.
+ *  \param c_sdram_server     Channel to the SDRAM server.
  *  \param state              State structure.
  *  \param address            This is a long word address of the location in SDRAM to read from.
  *  \param word_count         The number of long words to be read from the SDRAM.
@@ -104,9 +104,11 @@ int sdram_read    (streaming chanend c_sdram_server, s_sdram_state &state, unsig
         unsigned * movable buffer);
 
 /**
- * Terminates the sdram_server.
+ * Terminates the SDRAM server.
  *
- * \return                  None.
+ *  \param c_sdram_server     Channel to the SDRAM server.
+ *
+ *  \return                  None.
  **/
 void sdram_shutdown(streaming chanend c_sdram_server);
 
