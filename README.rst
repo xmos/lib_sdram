@@ -67,8 +67,8 @@ Known Issues
 
 The library is currently limited to the following SDRAM device capacities:
 
- - XS1 devices can support a maximum of 64 Mb SDRAM (8 MBytes) using a 8b column address. This is a technical limitation.
- - XS2 (xCore 200) devices can support a maximum of 256 Mb SDRAM (32 MBytes) using a 9b column address. 512 Mb devices are supportable with some modifications. Please contact Xmos for details.
+ - XS1 devices can support a maximum of 64 Mb SDRAM (8 MBytes) using a 8b column address. This is a technical limitation due to addressing modes in the XS1 device and cannot be worked around.
+ - XS2 (xCORE-200) devices can support a maximum of 256 Mb SDRAM (32 MBytes) using a 9b column address. 512 Mb devices are supportable with some modifications. Please see https://github.com/xmos/lib_sdram/issues/20 for details.
  - No Application note is provided currently. Please see https://github.com/xmos/lib_sdram/examples for simple usage examples
 
 
