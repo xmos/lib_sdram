@@ -97,7 +97,7 @@ delays are set to maximize the read window. See the code in ``server.xc`` for fu
     :header-rows: 1
 
     * - xCORE clock Divider setting
-      - Resultant SDRAM serve clock (MHz)
+      - SDRAM server clock (MHz)
     * - 4
       - 62.5
     * - 5
