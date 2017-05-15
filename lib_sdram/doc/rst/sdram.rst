@@ -26,7 +26,7 @@ The signals from the xCORE required to drive an SDRAM are:
 Because of the multiplexing attention must paid to the
 physical wiring of the SDRAM to the xCORE. 
 
-A typical SDRAM requires the following signals:
+A typical 256Mb SDRAM requires the following signals:
 
 * CLK		- Clock
 * CKE		- Clock Enable
@@ -38,6 +38,12 @@ A typical SDRAM requires the following signals:
 * DQM		- Data Input/Output Mask
 * A[12:0]		- Address
 * BA[1:0]		- Bank Address
+
+.. figure:: images/sdram_hookup.pdf
+   :width: 80%
+
+   Example connection between xCORE to 256Mb SDRAM
+
 
 The exact count of Address lines and Bank Address line may vary. The examples in this document assume a 256Mb SDRAM device.
 This library is designed to work with a fixed 16 bit SDRAM data bus, although the API provides data in long words (32 bit).
@@ -169,7 +175,7 @@ Client/Server model
 
 The SDRAM server must be instantiated at the same level as its clients. For example::
 
-  chan c_sdram[1];
+  streaming chan c_sdram[1];
   par {
           sdram_server(c_sdram, 1,  ... );
           client_of_the_sdram_server(c_sdram[0]);
@@ -210,7 +216,7 @@ For example::
    s_sdram_state sdram_state;
    sdram_init_state(c_server, sdram_state);
 
-where ``c_server`` is the channel to the ``sdram_server``.
+where ``c_server`` is the streaming channel to the ``sdram_server``.
 
 
 Safety through the use of movable pointers
