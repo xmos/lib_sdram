@@ -26,7 +26,7 @@ The signals from the xCORE required to drive an SDRAM are:
 Because of the multiplexing attention must paid to the
 physical wiring of the SDRAM to the xCORE. 
 
-A typical SDRAM requires the following signals:
+A typical 256Mb SDRAM requires the following signals:
 
 * CLK		- Clock
 * CKE		- Clock Enable
@@ -38,6 +38,12 @@ A typical SDRAM requires the following signals:
 * DQM		- Data Input/Output Mask
 * A[12:0]		- Address
 * BA[1:0]		- Bank Address
+
+.. figure:: images/sdram_hookup.pdf
+   :width: 80%
+
+   Example connection between xCORE to 256Mb SDRAM
+
 
 The exact count of Address lines and Bank Address line may vary. The examples in this document assume a 256Mb SDRAM device.
 This library is designed to work with a fixed 16 bit SDRAM data bus, although the API provides data in long words (32 bit).
@@ -75,8 +81,8 @@ All SDRAM functions can be accessed via the ``sdram.h`` header::
 You also have to add ``lib_sdram`` to the
 ``USED_MODULES`` field of your application Makefile.
 
-SDRAM server and client are instantiated as parallel tasks that run in a
-``par`` statement. The client (application on most cases) can connect to the server via 
+SDRAM server and client are instantiated as concurrent tasks that run in a
+``par`` statement. The client (your application) connects to the SDRAM server via 
 a streaming channel.
 
 .. caution::
@@ -97,7 +103,7 @@ delays are set to maximize the read window. See the code in ``server.xc`` for fu
     :header-rows: 1
 
     * - xCORE clock Divider setting
-      - Resultant SDRAM serve clock (MHz)
+      - SDRAM server clock (MHz)
     * - 4
       - 62.5
     * - 5
@@ -169,7 +175,7 @@ Client/Server model
 
 The SDRAM server must be instantiated at the same level as its clients. For example::
 
-  chan c_sdram[1];
+  streaming chan c_sdram[1];
   par {
           sdram_server(c_sdram, 1,  ... );
           client_of_the_sdram_server(c_sdram[0]);
@@ -178,7 +184,7 @@ The SDRAM server must be instantiated at the same level as its clients. For exam
 would be the minimum required to correctly setup the SDRAM server and connect it to a 
 client. An example of a multi-client system would be::
 
-  chan c_sdram[4];
+  streaming chan c_sdram[4];
   par {
   	sdram_server(c_sdram, 4,  ... );
   	client_of_the_sdram_server_0(c_sdram[0]);
@@ -210,7 +216,7 @@ For example::
    s_sdram_state sdram_state;
    sdram_init_state(c_server, sdram_state);
 
-where ``c_server`` is the channel to the ``sdram_server``.
+where ``c_server`` is the streaming channel to the ``sdram_server``.
 
 
 Safety through the use of movable pointers
@@ -237,7 +243,7 @@ is returned to the client on a call return from ``sdram_complete``. For example:
 .. tip::
   Note that, despite supporting a 16 bit SDRAM data bus width, the native word length of the API is 32 bits.
   This means that the address provided to the read/wrote functions is the 32b address of the memory.
-  For example, address 0x0001 returns a long word (32 bit) from the 5th to 7th byte location of the SDRAM.
+  For example, address 0x0001 returns a long word (32 bit) from the 4th to 7th byte location of the SDRAM.
   Only 32 bit operations are supported; the user should read-modify-write to support modification of smaller word sizes. 
 
 During the scope of the movable pointer variable the pointer can point at any memory location, 
@@ -295,7 +301,7 @@ and will either be allocated a base address to use the requested amount of memor
 or will receive an error. All clients of the memory address allocator must be on the same tile.
 
 API
-...
+---
 
 .. doxygenfunction:: sdram_server
 .. doxygenfunction:: sdram_init_state
@@ -310,10 +316,5 @@ API
 |newpage|
 
 |appendix|
-
-Known Issues
-------------
-
-There are no known issues with this library.
 
 .. include:: ../../../CHANGELOG.rst
