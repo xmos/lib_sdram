@@ -11,7 +11,7 @@
 #define USE_256Mb   1 //Else will assume 64Mb
 
 void application(streaming chanend c_server) {
-#define BUF_WORDS (8)
+#define BUF_WORDS (16)
   unsigned read_buffer[BUF_WORDS];
   unsigned write_buffer[BUF_WORDS];
   unsigned * movable read_buffer_pointer = read_buffer;
@@ -41,9 +41,9 @@ void application(streaming chanend c_server) {
     }
   }
 
-  //Fill the memory with address incrementing pattern and verify
+  //Fill the memory with address walking one pattern and verify
   for(unsigned i=0;i<BUF_WORDS;i++){
-    write_buffer_pointer[i] = i;
+    write_buffer_pointer[i] = 1 << i;
     read_buffer_pointer[i] = 0; //And clear read pointer
   }
 
