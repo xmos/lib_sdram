@@ -1,6 +1,11 @@
 SDRAM library change log
 ========================
 
+3.3.0
+-----
+
+  * CHANGED: Use XMOS Public Licence Version 1
+
 3.2.0
 -----
 
