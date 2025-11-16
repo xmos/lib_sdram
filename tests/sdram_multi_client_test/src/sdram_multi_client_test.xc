@@ -104,7 +104,9 @@ int main() {
           }
           printf("Success\n");
       }
-    on tile[SERVER_TILE]:sdram_server(c_sdram, 1,
+    on tile[SERVER_TILE]:{
+      set_thread_fast_mode_on();
+      sdram_server(c_sdram, 7,
             sdram_dq_ah,
             sdram_cas,
             sdram_ras,
@@ -112,7 +114,7 @@ int main() {
             sdram_clk,
             sdram_cb,
             2, 128, 16, 8,12, 2, 64, 4096, 4);
+    }
   }
   return 0;
 }
-
