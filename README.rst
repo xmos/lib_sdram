@@ -4,8 +4,8 @@ SDRAM Library
 SDRAM Libary
 ------------
 
-The XMOS SDRAM library is designed for read and write access of arbitrary length 32b long word buffers at up to 62.5MHz clock rates. 
-It uses an optimized pinout with address and data lines overlaid along with other pinout 
+The XMOS SDRAM library is designed for read and write access of arbitrary length 32b long word buffers at up to 62.5MHz clock rates.
+It uses an optimized pinout with address and data lines overlaid along with other pinout
 optimizations to implement 16 bit read/writes to Single Data Rate (SDR) SDRAM devices of size up to 256Mb,
 while consuming a total of just 20 xCORE I/O pins.
 
@@ -46,9 +46,7 @@ Related application notes
 .........................
 
 - I/O Timings for xCORE200 [#]_.
+- I/O Timings for xcore-ai [#]_.
 
 .. [#] https://www.xmos.com/download/private/I-O-timings-for-xCORE200%281.0%29.pdf
-
-
-
-
+.. [#] https://www.xmos.com/download/xcore_ai-I-O-Timings(7).pdf/
