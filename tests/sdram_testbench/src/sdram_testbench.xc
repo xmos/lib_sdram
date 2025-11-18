@@ -7,19 +7,32 @@
 #include <xs1.h>
 #include "sdram.h"
 
+#define VERBOSE_MSG    1
+#define MAX_ERRORS    10 // max number of errors reported per test
+#define JTAG_IO_PRINT  0 // set to 0 when using xrun --xscope
+                         // set to 1 for xrun --io
+
+static void verbose_print(unsigned char* msg)
+{
+#if VERBOSE_MSG
+    printstr(msg);
+#if JTAG_IO_PRINT
+    delay_milliseconds(20); // allow server to recover
+#endif
+#endif
+}
+
 //For XS2 (xCORE200) put an SDRAM slice into the 'triangle' slot of tile 0 of the XP-SKC-X200 slice kit
 //If using 256Mb slice, then define USE_256Mb below, otherwise leave commented out
-
-#define VERBOSE_MSG 1
 
 #define SDRAM_256Mb   1 //Use IS42S16160D 256Mb
 #define SDRAM_128Mb   0 //Use IS42S16800D 128Mb
                         //othewise IS42S16400D 64Mb which is default on XMOS boards
+
 #define FAST_TEST     1 //Simplify read and wait only 12 seconds instead of 120 for refresh tests
 
 #define CAS_LATENCY   2
 #define REFRESH_MS    64
-#define CLOCK_DIV     4 //Note clock div 4 gives (500 / (4*2)) = 62.5MHz
 #define DATA_BITS     16
 
 #if SDRAM_256Mb
@@ -71,15 +84,15 @@ static unsigned super_pattern() {
 }
 
 #define TEST_WORDS  (ROW_WORDS)
-#define MAX_BUFFER_WORDS 512  //Allows for 512Mb SDRAM 
+#define MAX_BUFFER_WORDS 512  //Allows for 512Mb SDRAM
 
-static void whole_memory_write_read(streaming chanend c_server, s_sdram_state &sdram_state){
+static unsigned whole_memory_write_read(streaming chanend c_server, s_sdram_state &sdram_state){
     unsigned buffer[MAX_BUFFER_WORDS];
     unsigned * movable buffer_pointer = buffer;
 
     int error = 0;
 
-    if (VERBOSE_MSG) printf("Begin   : whole_memory_write_read\n");
+    verbose_print("Begin   : whole_memory_write_read\n");
 
     const unsigned clear_word = 0xdeafbeef;
     //clear memory to know value
@@ -89,8 +102,7 @@ static void whole_memory_write_read(streaming chanend c_server, s_sdram_state &s
         sdram_write(c_server, sdram_state, addr, TEST_WORDS, move(buffer_pointer));
         sdram_complete(c_server, sdram_state, buffer_pointer);
     }
-    printf("cleared all memory to 0x%x\n", clear_word);
-
+    verbose_print("cleared all memory to 0xdeafbeef\n");
 
     //Fill address value into memory location
     for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += TEST_WORDS){
@@ -101,7 +113,7 @@ static void whole_memory_write_read(streaming chanend c_server, s_sdram_state &s
         sdram_complete(c_server, sdram_state, buffer_pointer);
     }
 
-    printf("written incrementing pattern\n");
+    verbose_print("written incrementing pattern\n");
 
 #if FAST_TEST
     for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += TEST_WORDS){
@@ -114,23 +126,26 @@ static void whole_memory_write_read(streaming chanend c_server, s_sdram_state &s
 
         for(unsigned i=0;i<TEST_WORDS;i++){
             if(buffer_pointer[i] != (addr + i)){
-                error = 1;
-                if (VERBOSE_MSG) printf("error read: %08x wrote: %08x base_addr: 0x%x idx: 0x%x: Difference (r-w)=%d \n",
+                error += 1;
+                if (VERBOSE_MSG && error < MAX_ERRORS){
+                    printf("error read: %08x wrote: %08x base_addr: 0x%x idx: 0x%x: Difference (r-w)=%d \n",
                         buffer_pointer[i], (addr + i), addr, i, (buffer_pointer[i] - (addr + i)));
+                }
             }
         }
     }
-    if (VERBOSE_MSG) printf("Complete: whole_memory_write_read\t");
-    if (VERBOSE_MSG) printf(error?"fail\n":"pass\n");
+    verbose_print("Complete: whole_memory_write_read\t");
+    verbose_print(error?"fail\n":"pass\n");
+    return error == 0;
 }
 
-static void refresh_test_1(streaming chanend c_server, s_sdram_state &sdram_state){
+static unsigned refresh_test_1(streaming chanend c_server, s_sdram_state &sdram_state){
     timer t;
     unsigned time;
     unsigned buffer[MAX_BUFFER_WORDS];
     unsigned * movable buffer_pointer = buffer;
     int error = 0;
-    if (VERBOSE_MSG) printf("Begin   : refresh_test_1\n");
+    verbose_print("Begin   : refresh_test_1\n");
 
     //write some data
     for(unsigned i=0;i<TEST_WORDS;i++)
@@ -161,22 +176,25 @@ static void refresh_test_1(streaming chanend c_server, s_sdram_state &sdram_stat
 
         for(unsigned i=0;i<TEST_WORDS;i++){
             if(buffer_pointer[i] != 0xffffffff){
-                error = 1;
-                if (VERBOSE_MSG) printf("error %08x %08x addr:%d i:%d\n", buffer_pointer[i] , 0xffffffff, addr, i);
+                error += 1;
+                if (VERBOSE_MSG && error < MAX_ERRORS){
+                    printf("error %08x %08x addr:%d i:%d\n", buffer_pointer[i] , 0xffffffff, addr, i);
+                }
             }
         }
     }
-    if (VERBOSE_MSG) printf("Complete: refresh_test_1\t\t");
-    if (VERBOSE_MSG) printf(error?"fail\n":"pass\n");
+    verbose_print("Complete: refresh_test_1\t\t");
+    verbose_print(error?"fail\n":"pass\n");
+    return error == 0;
 }
 
-static void refresh_test_2(streaming chanend c_server, s_sdram_state &sdram_state){
+static unsigned refresh_test_2(streaming chanend c_server, s_sdram_state &sdram_state){
     timer t;
     unsigned time;
     unsigned buffer[MAX_BUFFER_WORDS];
     unsigned * movable buffer_pointer = buffer;
     int error = 0;
-    if (VERBOSE_MSG) printf("Begin   : refresh_test_2\n");
+    verbose_print("Begin   : refresh_test_2\n");
 
     //write some data
     for(unsigned i=0;i<TEST_WORDS;i++)
@@ -207,16 +225,19 @@ static void refresh_test_2(streaming chanend c_server, s_sdram_state &sdram_stat
 
         for(unsigned i=0;i<TEST_WORDS;i++){
             if(buffer_pointer[i] != 0){
-                error = 1;
-                if (VERBOSE_MSG) printf("error %08x %08x addr:%d i:%d\n", buffer_pointer[i] , 0, addr, i);
+                error += 1;
+                if (VERBOSE_MSG && error < MAX_ERRORS){
+                    printf("error %08x %08x addr:%d i:%d\n", buffer_pointer[i] , 0, addr, i);
+                }
             }
         }
     }
-    if (VERBOSE_MSG) printf("Complete: refresh_test_2\t\t");
-    if (VERBOSE_MSG) printf(error?"fail\n":"pass\n");
+    verbose_print("Complete: refresh_test_2\t\t");
+    verbose_print(error?"fail\n":"pass\n");
+    return error == 0;
 }
 
-static void refresh_test_3(streaming chanend c_server, s_sdram_state &sdram_state){
+static unsigned refresh_test_3(streaming chanend c_server, s_sdram_state &sdram_state){
     unsigned buffer0[MAX_BUFFER_WORDS];
     unsigned buffer1[MAX_BUFFER_WORDS];
     unsigned buffer2[MAX_BUFFER_WORDS];
@@ -235,7 +256,7 @@ static void refresh_test_3(streaming chanend c_server, s_sdram_state &sdram_stat
     unsigned * movable buffer_pointer7 = buffer7;
 
       int error = 0;
-      if (VERBOSE_MSG) printf("Begin   : refresh_test_3\n");
+      verbose_print("Begin   : refresh_test_3\n");
       reset_super_pattern(0);
       for(unsigned addr = 0; addr < TOTAL_MEMORY_WORDS; addr += TEST_WORDS){
           for(unsigned i=0;i<TEST_WORDS;i++)
@@ -277,20 +298,25 @@ static void refresh_test_3(streaming chanend c_server, s_sdram_state &sdram_stat
           for(unsigned i=0;i<TEST_WORDS;i++){
               unsigned s = super_pattern();
               if(buffer_pointer0[i] != s){
-                  error = 1;
-                  if (VERBOSE_MSG) printf("error %08x %08x addr:%x i:%d\n", buffer_pointer0[i] , s, addr, i);
+                  error += 1;
+                  if (VERBOSE_MSG && error < MAX_ERRORS){
+                      printf("error %08x %08x addr:%x i:%d\n", buffer_pointer0[i] , s, addr, i);
+                  }
               }
           }
       }
-      if (VERBOSE_MSG) printf("Complete: refresh_test_3\t\t");
-      if (VERBOSE_MSG) printf(error?"fail\n":"pass\n");
+      verbose_print("Complete: refresh_test_3\t\t");
+      verbose_print(error?"fail\n":"pass\n");
+      return error == 0;
 }
 
-static void testbench_single_thread(streaming chanend c_server, s_sdram_state &sdram_state) {
-  whole_memory_write_read(c_server, sdram_state);
-  refresh_test_1(c_server, sdram_state);
-  refresh_test_2(c_server, sdram_state);
-  refresh_test_3(c_server, sdram_state);
+static unsigned testbench_single_thread(streaming chanend c_server, s_sdram_state &sdram_state) {
+  unsigned success = 1;
+  success = whole_memory_write_read(c_server, sdram_state);
+  success &= refresh_test_1(c_server, sdram_state);
+  success &= refresh_test_2(c_server, sdram_state);
+  success &= refresh_test_3(c_server, sdram_state);
+  return success;
 }
 
 static void load_thread(chanend in_t, chanend out_t) {
@@ -299,31 +325,32 @@ static void load_thread(chanend in_t, chanend out_t) {
   out_t <: 1;
 }
 
-static void testbench(streaming chanend c_server, s_sdram_state &sdram_state, chanend in_t, chanend out_t) {
-  testbench_single_thread(c_server, sdram_state);
+static unsigned testbench(streaming chanend c_server, s_sdram_state &sdram_state, chanend in_t, chanend out_t) {
+  unsigned success = testbench_single_thread(c_server, sdram_state);
   out_t <: 1;
   in_t :> int;
+  return success;
 }
 
-static void test_4_threads(streaming chanend c_server, s_sdram_state &sdram_state) {
+static unsigned test_4_threads(streaming chanend c_server, s_sdram_state &sdram_state) {
   chan c[3];
-  if (VERBOSE_MSG)
-    printf("4 threaded test suite start\n");
+  verbose_print("4 threaded test suite start\n");
+  unsigned success;
   par {
-    testbench(c_server, sdram_state, c[0], c[1]);
+    success = testbench(c_server, sdram_state, c[0], c[1]);
     load_thread(c[1], c[2]);
     load_thread(c[2], c[0]);
   }
-  if (VERBOSE_MSG)
-    printf("4 threaded test suite completed\n");
+  verbose_print("4 threaded test suite completed\n");
+  return success;
 }
 
-static void test_8_threads(streaming chanend c_server, s_sdram_state &sdram_state) {
+static unsigned test_8_threads(streaming chanend c_server, s_sdram_state &sdram_state) {
   chan c[7];
-  if (VERBOSE_MSG)
-    printf("8 threaded test suite start\n");
+  verbose_print("8 threaded test suite start\n");
+  unsigned success;
   par {
-    testbench(c_server, sdram_state, c[0], c[1]);
+    success = testbench(c_server, sdram_state, c[0], c[1]);
     load_thread(c[1], c[2]);
     load_thread(c[2], c[3]);
     load_thread(c[3], c[4]);
@@ -331,79 +358,89 @@ static void test_8_threads(streaming chanend c_server, s_sdram_state &sdram_stat
     load_thread(c[5], c[6]);
     load_thread(c[6], c[0]);
   }
-  if (VERBOSE_MSG)
-    printf("8 threaded test suite completed\n");
+  verbose_print("8 threaded test suite completed\n");
+  return success;
 }
-static void test_7_threads(streaming chanend c_server, s_sdram_state &sdram_state) {
+static unsigned test_7_threads(streaming chanend c_server, s_sdram_state &sdram_state) {
   chan c[6];
-  if (VERBOSE_MSG)
-    printf("7 threaded test suite start\n");
+  verbose_print("7 threaded test suite start\n");
+  unsigned success;
   par {
-    testbench(c_server, sdram_state, c[0], c[1]);
+    success = testbench(c_server, sdram_state, c[0], c[1]);
     load_thread(c[1], c[2]);
     load_thread(c[2], c[3]);
     load_thread(c[3], c[4]);
     load_thread(c[4], c[5]);
     load_thread(c[5], c[0]);
   }
-  if (VERBOSE_MSG)
-    printf("7 threaded test suite completed\n");
+  verbose_print("7 threaded test suite completed\n");
+  return success;
 }
-static void test_6_threads(streaming chanend c_server, s_sdram_state &sdram_state) {
+static unsigned test_6_threads(streaming chanend c_server, s_sdram_state &sdram_state) {
   chan c[5];
-  if (VERBOSE_MSG)
-    printf("6 threaded test suite start\n");
+  verbose_print("6 threaded test suite start\n");
+  unsigned success;
   par {
-    testbench(c_server, sdram_state, c[0], c[1]);
+    success = testbench(c_server, sdram_state, c[0], c[1]);
     load_thread(c[1], c[2]);
     load_thread(c[2], c[3]);
     load_thread(c[3], c[4]);
     load_thread(c[4], c[0]);
   }
-  if (VERBOSE_MSG)
-    printf("6 threaded test suite completed\n");
+  verbose_print("6 threaded test suite completed\n");
+  return success;
 }
-static void test_5_threads(streaming chanend c_server, s_sdram_state &sdram_state) {
+static unsigned test_5_threads(streaming chanend c_server, s_sdram_state &sdram_state) {
   chan c[4];
-  if (VERBOSE_MSG)
-    printf("5 threaded test suite start\n");
+  verbose_print("5 threaded test suite start\n");
+  unsigned success;
   par {
-    testbench(c_server, sdram_state, c[0], c[1]);
+    success = testbench(c_server, sdram_state, c[0], c[1]);
     load_thread(c[1], c[2]);
     load_thread(c[2], c[3]);
     load_thread(c[3], c[0]);
   }
-  if (VERBOSE_MSG)
-    printf("5 threaded test suite completed\n");
+  verbose_print("5 threaded test suite completed\n");
+  return success;
 }
 
 void sdram_client(streaming chanend c_server) {
 #if SDRAM_256Mb
-  printf("Using 256Mb SDRAM\n");
+  verbose_print("Using 256Mb SDRAM\n");
 #elif SDRAM_128Mb
-  printf("Using 128Mb SDRAM\n");
+  verbose_print("Using 128Mb SDRAM\n");
 #else
-  printf("Using 64Mb SDRAM\n");
+  verbose_print("Using 64Mb SDRAM\n");
 #endif
   set_thread_fast_mode_on();
   s_sdram_state sdram_state;
   sdram_init_state(c_server, sdram_state);
 
-  if (VERBOSE_MSG)
-    printf("Test suite begin\n");
-  test_4_threads(c_server, sdram_state);
-  test_5_threads(c_server, sdram_state);
-  test_6_threads(c_server, sdram_state);
-  test_7_threads(c_server, sdram_state);
-  test_8_threads(c_server, sdram_state);
-  if (VERBOSE_MSG)
-    printf("Test suite completed\n");
+  verbose_print("Test bench begin\n");
+  unsigned success = test_4_threads(c_server, sdram_state);
+  success &= test_5_threads(c_server, sdram_state);
+  success &= test_6_threads(c_server, sdram_state);
+  success &= test_7_threads(c_server, sdram_state);
+  success &= test_8_threads(c_server, sdram_state);
+  verbose_print("Test bench completed\t\t\t");
+  printf(success?"pass\n":"fail\n");
   _Exit(0);
 }
 
-#ifdef __XS2A__
-//XO-SKC-X200-1V0 Triangle slot tile 0
-#define      SERVER_TILE            0
+#if defined(__XS3A__)
+// SDRAM test board for XU316
+#define CLOCK_DIV   5 // (600/ (5*2)) = 60.0MHz
+#define SERVER_TILE 1
+on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
+on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1A;
+on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1P;
+on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1M;
+on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1F;
+on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_1;
+#elif defined(__XS2A__)
+//Triangle slot tile 0 for XU216
+#define CLOCK_DIV   4 // (500/ (4*2)) = 62.5MHz
+#define SERVER_TILE 0
 on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16B;
 on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1J;
 on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1I;
@@ -412,7 +449,8 @@ on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_
 on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_2;
 #else
 //Square slot on A16 slicekit
-#define      SERVER_TILE            1
+#define CLOCK_DIV   4  // (500/ (4*2)) = 62.5MHz
+#define SERVER_TILE 1
 on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
 on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1B;
 on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1G;
@@ -448,4 +486,3 @@ int main() {
   }
   return 0;
 }
-

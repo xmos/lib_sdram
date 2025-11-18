@@ -3,6 +3,7 @@ include($ENV{XMOS_CMAKE_PATH}/xcommon.cmake)
 project(sdram_multi_client_test)
 
 set(APP_HW_TARGET           SLICEKIT-XC200-X1.xn)
+#set(APP_HW_TARGET           xcore_ai_sdram_test_board.xn)
 
 set(APP_DEPENDENT_MODULES   "lib_sdram")
 set(APP_INCLUDES src)

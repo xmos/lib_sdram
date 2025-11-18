@@ -12,7 +12,6 @@
                         //othewise IS42S16400D 64Mb which is default on XMOS boards
 #define CAS_LATENCY   2
 #define REFRESH_MS    64
-#define CLOCK_DIV     4 //Note clock div 4 gives (500/ (4*2)) = 62.5MHz
 #define DATA_BITS     16
 
 #if SDRAM_256Mb
@@ -80,14 +79,37 @@ void sdram_client(streaming chanend c_server, int n) {
   test(c_server, sdram_state, n);
 }
 
+#if defined(__XS3A__)
+// SDRAM test board for XU316
+#define CLOCK_DIV   5 // (600/ (5*2)) = 60.0MHz
+#define SERVER_TILE 1
+on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
+on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1A;
+on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1P;
+on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1M;
+on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1F;
+on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_1;
+#elif defined(__XS2A__)
 //Triangle slot tile 0 for XU216
-#define      SERVER_TILE            0
+#define CLOCK_DIV   4 // (500/ (4*2)) = 62.5MHz
+#define SERVER_TILE 0
 on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16B;
 on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1J;
 on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1I;
 on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1K;
 on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1L;
 on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_2;
+#else
+//Square slot on A16 slicekit
+#define CLOCK_DIV   4  // (500/ (4*2)) = 62.5MHz
+#define SERVER_TILE 1
+on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
+on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1B;
+on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1G;
+on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1C;
+on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1F;
+on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_2;
+#endif
 
 int main() {
   streaming chan c_sdram[7];
@@ -113,7 +135,15 @@ int main() {
             sdram_we,
             sdram_clk,
             sdram_cb,
-            2, 128, 16, 8,12, 2, 64, 4096, 4);
+            CAS_LATENCY,
+            ROW_WORDS,
+            DATA_BITS,
+            COL_ADDRESS_BITS,
+            ROW_ADDRESS_BITS,
+            BANK_ADDRESS_BITS,
+            REFRESH_MS,
+            REFRESH_CYCLES,
+            CLOCK_DIV);
     }
   }
   return 0;

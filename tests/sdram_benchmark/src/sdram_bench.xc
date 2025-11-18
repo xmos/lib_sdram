@@ -5,15 +5,19 @@
 #include <stdio.h>
 #include "sdram.h"
 
+#define JTAG_IO_PRINT 0 // set to 0 when using xrun --xscope
+                        // set to 1 for xrun --io
+
+
 //For XS2 (xCORE200) put an SDRAM slice into the 'triangle' slot of tile 0 of the XP-SKC-X200 slice kit
 //If using 256Mb slice, then define USE_256Mb below, otherwise leave commented out
 
 #define SDRAM_256Mb   1 //Use IS42S16160D 256Mb or similar
 #define SDRAM_128Mb   0 //Use IS42S16800D 128Mb
                         //othewise IS42S16400D 64Mb which is default on XMOS boards
+
 #define CAS_LATENCY   2
 #define REFRESH_MS    64
-#define CLOCK_DIV     4 //Note clock div 4 gives (500/ (4*2)) = 62.5MHz
 #define DATA_BITS     16
 
 #if SDRAM_256Mb
@@ -42,6 +46,12 @@
 #define ROW_WORDS     128
 #endif
 
+unsigned timer_is_after(timer t, unsigned time)
+{
+  unsigned now;
+  t :> now;
+  return timeafter(now, time);
+}
 
 #pragma unsafe arrays
 void application(streaming chanend c_server, s_sdram_state sdram_state) {
@@ -67,6 +77,19 @@ void application(streaming chanend c_server, s_sdram_state sdram_state) {
   sdram_read(c_server, sdram_state, 0, BUF_WORDS, move(buffer_pointer_2));
   sdram_read(c_server, sdram_state, 0, BUF_WORDS, move(buffer_pointer_3));
   while(1){
+#if JTAG_IO_PRINT
+    // avoid slow JTAG IO results printing to
+    // interrupt SDRAM server reading command
+    sdram_complete(c_server, sdram_state, buffer_pointer_0);
+    words_since_timeout += BUF_WORDS;
+    if (timer_is_after(t, time + SECONDS*100000000))
+    {
+      printintln(words_since_timeout*4/SECONDS);
+      words_since_timeout = 0;
+      t :> time;
+    }
+    sdram_read(c_server, sdram_state, 0, BUF_WORDS, move(buffer_pointer_0));
+#else
     select {
       case t when timerafter(time + SECONDS*100000000) :> time:
         printintln(words_since_timeout*4/SECONDS);
@@ -78,6 +101,7 @@ void application(streaming chanend c_server, s_sdram_state sdram_state) {
         break;
       }
     }
+#endif
   }
 }
 
@@ -96,14 +120,37 @@ void sdram_client(streaming chanend c_server) {
   application(c_server, sdram_state);
 }
 
+#if defined(__XS3A__)
+// SDRAM test board for XU316
+#define CLOCK_DIV   5 // (600/ (5*2)) = 60.0MHz
+#define SERVER_TILE 1
+on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
+on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1A;
+on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1P;
+on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1M;
+on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1F;
+on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_1;
+#elif defined(__XS2A__)
 //Triangle slot tile 0 for XU216
-#define      SERVER_TILE            0
+#define CLOCK_DIV   4 // (500/ (4*2)) = 62.5MHz
+#define SERVER_TILE 0
 on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16B;
 on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1J;
 on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1I;
 on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1K;
 on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1L;
 on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_2;
+#else
+//Square slot on A16 slicekit
+#define CLOCK_DIV   4  // (500/ (4*2)) = 62.5MHz
+#define SERVER_TILE 1
+on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
+on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1B;
+on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1G;
+on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1C;
+on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1F;
+on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_2;
+#endif
 
 int main() {
     streaming chan c_sdram[1];
