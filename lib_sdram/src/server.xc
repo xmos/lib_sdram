@@ -71,10 +71,50 @@ static unsigned sdram_init(
   set_port_clock(ras, cb);
   set_port_clock(we, cb);
 
+#ifdef __XS3A__ // assuming 600MHz clock
+  // See tools/sdram_timing_calculations how values for xcore-ai are selected.
+  // Settings below are for pins X1D00..X1D71, 3.3V 5pF 4mA, IS42S16400D-7
+  // with some corrections towards earlier reads after HW tests.
+  switch(clock_divider) {
+    case 5: // Tclk = 60.00MHz
+        read_delay_whole_clocks = 1;
+        set_port_sample_delay(dq_ah);
+        set_pad_delay(dq_ah, 0);
+        break;
+    case 6: // Tclk = 50.00MHz
+        read_delay_whole_clocks = 1;
+        set_port_sample_delay(dq_ah);
+        set_pad_delay(dq_ah, 2);
+        break;
+    case 7: // Tclk = 42.86MHz
+        read_delay_whole_clocks = 1;
+        set_port_sample_delay(dq_ah);
+        set_pad_delay(dq_ah, 4);
+        break;
+    case 8: // Tclk = 37.50MHz
+        read_delay_whole_clocks = 1;
+        set_port_sample_delay(dq_ah);
+        set_pad_delay(dq_ah, 5);
+        break;
+    case 9: // Tclk = 33.33MHz
+        read_delay_whole_clocks = 1;
+        set_port_no_sample_delay(dq_ah);
+        set_pad_delay(dq_ah, 0);
+        break;
+    case 10: // Tclk = 30.00MHz
+        read_delay_whole_clocks = 1;
+        set_port_no_sample_delay(dq_ah);
+        set_pad_delay(dq_ah, 1);
+        break;
+    default:
+        __builtin_trap();
+        break;
+  }
+#else // assuming 500MHz clock
   //Setup pad and internal read delays to compensate for round trip delays
-  //SDRAM used for timing calcs has 6ns max access (clock to data) time and 2.5ns min hold time 
-  //Timing also includes 1.4ns of PCB round trip delay (correct for XCORE200 slicekit) 
-  //Timings assume use of any combination of ports ( setup = 21.3ns and hold = -11ns) Greater timing margins can be obtained 
+  //SDRAM used for timing calcs has 6ns max access (clock to data) time and 2.5ns min hold time
+  //Timing also includes 1.4ns of PCB round trip delay (correct for XCORE200 slicekit)
+  //Timings assume use of any combination of ports ( setup = 21.3ns and hold = -11ns) Greater timing margins can be obtained
   //by choosing specific ports. Please consult the "IO timings for xCORE200" document for details
   switch(clock_divider) {
     case 4: // 500 / (4 * 2) = 62.50MHz. ~100ps margin
@@ -97,7 +137,7 @@ static unsigned sdram_init(
         set_port_sample_delay(dq_ah);
         set_pad_delay(dq_ah, 5);
         break;
-    case 8: // 500 / (8 * 2) = 31.25MHz. ~6.1ns margin 
+    case 8: // 500 / (8 * 2) = 31.25MHz. ~6.1ns margin
         read_delay_whole_clocks = 1;
         set_port_no_sample_delay(dq_ah);
         set_pad_delay(dq_ah, 0);
@@ -118,13 +158,12 @@ static unsigned sdram_init(
     //    set_port_sample_delay(dq_ah);
     //    set_pad_delay(dq_ah, 2);
     //    break;
-    default: // Support for any frequency lower that 25MHz can be implemented by using 
+    default: // Support for any frequency lower that 25MHz can be implemented by using
              // the 25MHz delay settings which will provide 12.7ns margin (plenty)
         __builtin_trap();
         break;
   }
-
-
+#endif
 
   start_clock(cb);
 
@@ -152,7 +191,7 @@ static unsigned sdram_init(
   t+=600; // 600 * 16 = 9.6us
   partout_timed(ras, 2, CTRL_RAS_PRECHARGE | (CTRL_RAS_NOP<<1), t);
   partout_timed(we, 2,  CTRL_WE_PRECHARGE  | (CTRL_WE_NOP<<1),  t);
-  
+
   //Set next port out for 20 clocks (20 * 16 = 320ns) (TRP = 16ns)
   t+=20;
 
@@ -212,9 +251,9 @@ void sdram_block_read(unsigned * buffer, sdram_ports &ports, unsigned t0, unsign
 void sdram_block_write(unsigned * buffer, sdram_ports &ports, unsigned t0, unsigned word_count, unsigned row_words);
 
 //The below latency figures are to allow for the overhead of calling the ASM block read after the transaction has started
-//They are calulated assuming the SDRAM and server tasks are both running at 62.5MHz. They can be scaled down proportionally 
+//They are calulated assuming the SDRAM and server tasks are both running at 62.5MHz. They can be scaled down proportionally
 //if using lower SDRAM clock rates, but the server task still runs at 62.5MHz
-#ifdef __XS2A__
+#if defined(__XS2A__) || defined (__XS3A__)
 #define WRITE_SETUP_LATENCY (42)  //Simulated time with thread @ 62.5MHz is 36 thread cycles
 #define READ_SETUP_LATENCY  (50)  //Simulated time with thread @ 62.5MHz is 43 thread cycles
 #else
@@ -243,7 +282,7 @@ static inline void write_impl(unsigned row, unsigned col, unsigned bank,
     //printf("Write buffer pointer=%p\trow_words=%x\tword_count=%x\n",buffer, row_words, word_count);
 
     dq_ah @ t <: rowcol;
-    
+
     partout_timed(cas, 3, CTRL_CAS_ACTIVE | (CTRL_CAS_WRITE<<1) | (CTRL_CAS_NOP<<2), t);
     partout_timed(ras, 3, CTRL_RAS_ACTIVE | (CTRL_RAS_WRITE<<1) | (CTRL_RAS_NOP<<2), t);
     partout_timed(we , 3, CTRL_WE_ACTIVE  | (CTRL_WE_WRITE<<1)  | (CTRL_WE_NOP<<2), t);
