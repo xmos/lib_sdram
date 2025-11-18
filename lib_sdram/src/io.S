@@ -203,7 +203,7 @@ sdram_block_read:
 	//r2 t0	- start time
 	//r3 word_count
 	//sp[1] row_words
-	//sp[2] cas_latency
+	//sp[2] read_time_offset
 
 #define ras	 			r0
 #define dq_ah	 		r1
@@ -223,7 +223,7 @@ sdram_block_read:
 	sub new_buf_ptr, r0, 0
 
 	//set the first input time (t+CAS+N)
-	ldw temp, 	sp[READ_STACK_WORDS+2]	//cas_latency
+	ldw temp, 	sp[READ_STACK_WORDS+2]	//read_time_offset
 	add start_time, r2, temp
 
 	//calculate the time to issue the terminate cmd
@@ -315,7 +315,7 @@ sdram_block_read:
 	//r2 t0	- start time
 	//r3 word_count
 	//sp[1] row_words
-	//sp[2] cas_latency
+	//sp[2] read_time_offset
 
 #define ras	 			r0
 #define dq_ah	 		r1
@@ -340,7 +340,7 @@ sdram_block_read:
 	ldaw temp, r0[-temp]
 	set dp, temp
 
-	ldw temp, 	sp[READ_STACK_WORDS+2]	//cas_latency
+	ldw temp, 	sp[READ_STACK_WORDS+2]	//read_time_offset
 	add start_time, r2, temp
 
 	//calculate the time to issue the terminate cmd

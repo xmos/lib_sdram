@@ -247,7 +247,7 @@ typedef struct {
   unsigned we;
 } sdram_ports;
 
-void sdram_block_read(unsigned * buffer, sdram_ports &ports, unsigned t0, unsigned word_count, unsigned row_words, unsigned cas_latency);
+void sdram_block_read(unsigned * buffer, sdram_ports &ports, unsigned t0, unsigned word_count, unsigned row_words, unsigned read_time_offset);
 void sdram_block_write(unsigned * buffer, sdram_ports &ports, unsigned t0, unsigned word_count, unsigned row_words);
 
 //The below latency figures are to allow for the overhead of calling the ASM block read after the transaction has started
@@ -300,7 +300,7 @@ static inline void read_impl(unsigned row, unsigned col, unsigned bank,
         out buffered port:32 ras,
         out buffered port:8 we,
         const static unsigned row_words,
-        unsigned cas_latency) {
+        unsigned read_time_offset) {
 
     //Work out first and second 16b commands (lower word first) -  ACT followed by READ (no precharge)
     unsigned rowcol =  row | (bank<<BANK_SHIFT) | bank<<(BANK_SHIFT+16) | (col << 16);
@@ -318,7 +318,7 @@ static inline void read_impl(unsigned row, unsigned col, unsigned bank,
 
     unsafe {
         sdram_ports ports = {*(unsigned*)&dq_ah, *(unsigned*)&cas,*(unsigned*)&ras, *(unsigned*)&we};
-        sdram_block_read( buffer, ports, t, word_count, row_words, cas_latency);
+        sdram_block_read( buffer, ports, t, word_count, row_words, read_time_offset);
     }
 }
 
@@ -329,7 +329,7 @@ static void read(unsigned start_row, unsigned start_col,
     out buffered port:32 ras,
     out buffered port:8 we,
     const static unsigned row_words,
-    unsigned cas_latency,
+    unsigned read_time_offset,
     const static unsigned col_address_bits,
     const static unsigned row_address_bits,
     const static unsigned bank_address_bits) {
@@ -342,13 +342,13 @@ static void read(unsigned start_row, unsigned start_col,
     unsigned col_count = (1<<col_address_bits);
     words_to_end_of_line = (col_count - current_col) / 2;
     if (words_to_end_of_line < remaining_words) {
-      read_impl(current_row, current_col, bank, buffer, words_to_end_of_line, dq_ah, cas, ras, we, row_words, cas_latency);
+      read_impl(current_row, current_col, bank, buffer, words_to_end_of_line, dq_ah, cas, ras, we, row_words, read_time_offset);
       current_col = 0;
       current_row++;
       buffer +=  words_to_end_of_line;
       remaining_words -= words_to_end_of_line;
     } else {
-      read_impl(current_row, current_col, bank, buffer, remaining_words, dq_ah, cas, ras, we, row_words, cas_latency);
+      read_impl(current_row, current_col, bank, buffer, remaining_words, dq_ah, cas, ras, we, row_words, read_time_offset);
       return;
     }
     if(current_row>>row_address_bits){
@@ -365,7 +365,6 @@ static void write(unsigned start_row, unsigned start_col,
     out buffered port:32 ras,
     out buffered port:8 we,
     const static unsigned row_words,
-    unsigned cas_latency,
     const static unsigned col_address_bits,
     const static unsigned row_address_bits,
     const static unsigned bank_address_bits) {
@@ -413,7 +412,7 @@ static int handle_command(e_command cmd_type, sdram_cmd &cmd,
         out buffered port:32 ras,
         out buffered port:8 we,
         const static unsigned row_words,
-        unsigned cas_latency,
+        unsigned read_time_offset,
         const static unsigned col_address_bits,
         const static unsigned row_address_bits,
         const static unsigned bank_address_bits) {
@@ -427,12 +426,12 @@ static int handle_command(e_command cmd_type, sdram_cmd &cmd,
     switch (cmd_type) {
     case SDRAM_CMD_READ: {
       read(row, col, bank, cmd.buffer, cmd.word_count, dq_ah, cas, ras, we,
-              row_words, cas_latency, col_address_bits, row_address_bits, bank_address_bits);
+              row_words, read_time_offset, col_address_bits, row_address_bits, bank_address_bits);
       break;
     }
     case SDRAM_CMD_WRITE: {
       write(row, col, bank, cmd.buffer, cmd.word_count, dq_ah, cas, ras, we,
-              row_words, cas_latency, col_address_bits, row_address_bits, bank_address_bits);
+              row_words, col_address_bits, row_address_bits, bank_address_bits);
       break;
     }
     default:
@@ -455,7 +454,7 @@ void sdram_server(streaming chanend c_client[client_count],
         out buffered port:8 we,
         out port clk,
         clock cb,
-        unsigned cas_latency,
+        const static unsigned cas_latency,
         const static unsigned row_words,
         const static unsigned col_bits,
         const static unsigned col_address_bits,
@@ -476,7 +475,7 @@ void sdram_server(streaming chanend c_client[client_count],
         cmd_buffer[i]->buffer = null;
     }
 
-    cas_latency = sdram_init(dq_ah, cas, ras, we, clk, cb, cas_latency, clock_divider);
+    unsigned read_time_offset = sdram_init(dq_ah, cas, ras, we, clk, cb, cas_latency, clock_divider);
 
     unsafe {
         for(unsigned i=0;i<client_count;i++){
@@ -515,7 +514,7 @@ void sdram_server(streaming chanend c_client[client_count],
             }
 
             handle_command(cmd, cmd_buffer[i][head[i]%SDRAM_MAX_CMD_BUFFER],dq_ah, cas, ras, we,
-                    row_words, cas_latency, col_address_bits, row_address_bits, bank_address_bits);
+                    row_words, read_time_offset, col_address_bits, row_address_bits, bank_address_bits);
             head[i]++;
             c_client[i] <: d;
             break;
