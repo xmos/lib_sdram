@@ -25,8 +25,23 @@ static void refresh(unsigned ncycles,
     }
 }
 
-static void select_delays(
-        const static unsigned clock_divider,
+/**
+ * Function used by sdram_server to get default read time settings
+ * depending on the clock divider.
+ * See comments below for assumptions the function makes about the hardware.
+ * If the default delays do not fit your hardware situation,
+ * consider using sdram_server_with_delays.
+ *
+ *  \param clock_divider  The divider of the system clock to the SDRAM clock.
+ *  \param read_delay_whole_clocks Returns the number of SDRAM clock cycles (Tclk)
+ *                        to defer input reading
+ *  \param sample_delay   Returns 1 for an extra 1/2 Tclk input reading delay, 0 for none
+ *  \param pad_delay      Returns the number of core clock cycles (Tcore) to delay the input
+ *                        signal, in range 0..5. This has the effect of reading input earlier.
+ *
+ **/
+static void select_default_delays(
+        const unsigned clock_divider,
         unsigned& read_delay_whole_clocks,
         unsigned& sample_delay,
         unsigned& pad_delay) {
@@ -135,7 +150,7 @@ static void sdram_init(
         out port clk,
         clock cb,
         unsigned cas_latency,
-        const static unsigned clock_divider,
+        unsigned clock_divider,
         unsigned sample_delay,
         unsigned pad_delay) {
 
@@ -459,7 +474,7 @@ static int handle_command(e_command cmd_type, sdram_cmd &cmd,
 #define XCORE_CLOCKS_PER_MS 100000
 
 #pragma unsafe arrays
-void sdram_server(streaming chanend c_client[client_count],
+void sdram_server_with_delays(streaming chanend c_client[client_count],
         const static unsigned client_count,
         out buffered port:32 dq_ah,
         out buffered port:32 cas,
@@ -475,7 +490,11 @@ void sdram_server(streaming chanend c_client[client_count],
         const static unsigned bank_address_bits,
         const static unsigned refresh_ms,
         const static unsigned refresh_cycles,
-        const static unsigned clock_divider){
+        unsigned clock_divider,
+        unsigned read_delay_whole_clocks,
+        unsigned sample_delay,
+        unsigned pad_delay) {
+
     timer t;
     unsigned time;
     sdram_cmd cmd_buffer[7][SDRAM_MAX_CMD_BUFFER];
@@ -487,12 +506,6 @@ void sdram_server(streaming chanend c_client[client_count],
         cmd_buffer[i]->word_count = 0;
         cmd_buffer[i]->buffer = null;
     }
-
-    unsigned read_delay_whole_clocks;
-    unsigned sample_delay;
-    unsigned pad_delay;
-
-    select_delays(clock_divider, read_delay_whole_clocks, sample_delay, pad_delay);
 
     sdram_init(dq_ah, cas, ras, we, clk, cb, cas_latency,
                clock_divider, sample_delay, pad_delay);
@@ -546,4 +559,36 @@ void sdram_server(streaming chanend c_client[client_count],
        }
      }
    }
+}
+
+#pragma unsafe arrays
+void sdram_server(streaming chanend c_client[client_count],
+        const static unsigned client_count,
+        out buffered port:32 dq_ah,
+        out buffered port:32 cas,
+        out buffered port:32 ras,
+        out buffered port:8 we,
+        out port clk,
+        clock cb,
+        const static unsigned cas_latency,
+        const static unsigned row_words,
+        const static unsigned col_bits,
+        const static unsigned col_address_bits,
+        const static unsigned row_address_bits,
+        const static unsigned bank_address_bits,
+        const static unsigned refresh_ms,
+        const static unsigned refresh_cycles,
+        const unsigned clock_divider){
+
+  unsigned read_delay_whole_clocks;
+  unsigned sample_delay;
+  unsigned pad_delay;
+
+  select_default_delays(clock_divider, read_delay_whole_clocks, sample_delay, pad_delay);
+
+  sdram_server_with_delays(c_client, client_count,
+    dq_ah, cas, ras, we, clk, cb,
+    cas_latency, row_words, col_bits, col_address_bits,
+    row_address_bits, bank_address_bits, refresh_ms, refresh_cycles,
+    clock_divider, read_delay_whole_clocks, sample_delay, pad_delay);
 }

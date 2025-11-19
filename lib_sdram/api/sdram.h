@@ -52,6 +52,56 @@ void sdram_server(streaming chanend c_client[client_count],
         const static unsigned clock_divider);
 
 /**
+ * Same as ``sdram_server``, but with a non-const-static clock divider
+ * and additional timing parameters adjusting the data input window.
+ * ``sdram_server`` uses defaults for these parameters depending on the clock divider.
+ * Refer to tools/sdram_timing_calculations for more information.
+ *
+ *  \param c_client             This is an ordered array of the streaming channels to the clients. It is in client
+ *                              priority order(element 0 being the highest priority).
+ *  \param client_count         The number of clients.
+ *  \param dq_ah                The data and address bus port.
+ *  \param cas                  The CAS signal port.
+ *  \param ras                  The RAS signal port.
+ *  \param we                   The WE signal port.
+ *  \param clk                  The SDRAM clock.
+ *  \param cb                   Clock block to control the ports.
+ *  \param cas_latency          The CAS latency.
+ *  \param row_words            The number of 32b words in a SDRAM row (half the number of columns).
+ *  \param col_bits             The count of bits for a memory location, normally 16.
+ *  \param col_address_bits     The number of bits in the column address bus.
+ *  \param row_address_bits     The number of bits in the row address bus.
+ *  \param bank_address_bits    The number of bits in the bank address bus.
+ *  \param refresh_ms           The count of milliseconds for a full refresh cycle.
+ *  \param refresh_cycles       The count of refresh instructions per full refresh cycle.
+ *  \param clock_divider        The divider of the system clock to the SDRAM clock.
+ *  \param read_delay_whole_clocks The number of SDRAM clock cycles (Tclk) to defer input reading
+ *  \param sample_delay         1 for an extra 1/2 Tclk input reading delay, 0 for none
+ *  \param pad_delay            The number of core clock cycles (Tcore) to delay the input signal,
+ *                              in range 0..5. This has the effect of reading input earlier.
+ **/
+void sdram_server_with_delays(streaming chanend c_client[client_count],
+        const static unsigned client_count,
+        out buffered port:32 dq_ah,
+        out buffered port:32 cas,
+        out buffered port:32 ras,
+        out buffered port:8 we,
+        out port clk,
+        clock cb,
+        const static unsigned cas_latency,
+        const static unsigned row_words,
+        const static unsigned col_bits,
+        const static unsigned col_address_bits,
+        const static unsigned row_address_bits,
+        const static unsigned bank_address_bits,
+        const static unsigned refresh_ms,
+        const static unsigned refresh_cycles,
+        unsigned clock_divider,
+        unsigned read_delay_whole_clocks,
+        unsigned sample_delay,
+        unsigned pad_delay);
+
+/**
  * This is used to initialise the sdram_state that follows the channel to the SDRAM server. It must only be called
  * once on the s_sdram_state that it is initialising. A client must have only one s_sdram_state that exists for the
  * life time of the use of the SDRAM.
