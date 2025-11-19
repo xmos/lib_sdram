@@ -25,7 +25,109 @@ static void refresh(unsigned ncycles,
     }
 }
 
-static unsigned sdram_init(
+static void select_delays(
+        const static unsigned clock_divider,
+        unsigned& read_delay_whole_clocks,
+        unsigned& sample_delay,
+        unsigned& pad_delay) {
+
+#ifdef __XS3A__ // assuming 600MHz clock
+  // See tools/sdram_timing_calculations how values for xcore-ai are selected.
+  // Settings below are for pins X1D00..X1D71, 3.3V 5pF 4mA, IS42S16400D-7
+  // with some corrections towards earlier reads after HW tests.
+  switch(clock_divider) {
+    case 5: // Tclk = 60.00MHz
+        read_delay_whole_clocks = 1;
+        sample_delay = 1;
+        pad_delay = 0;
+        break;
+    case 6: // Tclk = 50.00MHz
+        read_delay_whole_clocks = 1;
+        sample_delay = 1;
+        pad_delay = 2;
+        break;
+    case 7: // Tclk = 42.86MHz
+        read_delay_whole_clocks = 1;
+        sample_delay = 1;
+        pad_delay = 4;
+        break;
+    case 8: // Tclk = 37.50MHz
+        read_delay_whole_clocks = 1;
+        sample_delay = 1;
+        pad_delay = 5;
+        break;
+    case 9: // Tclk = 33.33MHz
+        read_delay_whole_clocks = 1;
+        sample_delay = 0;
+        pad_delay = 0;
+        break;
+    case 10: // Tclk = 30.00MHz
+        read_delay_whole_clocks = 1;
+        sample_delay = 0;
+        pad_delay = 1;
+        break;
+    default:
+        __builtin_trap();
+        break;
+  }
+#else // assuming 500MHz clock
+  //SDRAM used for timing calcs has 6ns max access (clock to data) time and 2.5ns min hold time
+  //Timing also includes 1.4ns of PCB round trip delay (correct for XCORE200 slicekit)
+  //Timings assume use of any combination of ports ( setup = 21.3ns and hold = -11ns)
+  //Greater timing margins can be obtained by choosing specific ports.
+  //Please consult the "IO timings for xCORE200" document for details
+
+  switch(clock_divider) {
+    case 4: // 500 / (4 * 2) = 62.50MHz. ~100ps margin
+        read_delay_whole_clocks = 2;
+        sample_delay = 0;
+        pad_delay = 2;
+        break;
+    case 5: // 500 / (5 * 2) = 50.00MHz. ~2.1ns margin
+        read_delay_whole_clocks = 1;
+        sample_delay = 1;
+        pad_delay = 1;
+        break;
+    case 6: // 500 / (6 * 2) = 41.67MHz. ~4.1ns margin
+        read_delay_whole_clocks = 1;
+        sample_delay = 1;
+        pad_delay = 3;
+        break;
+    case 7: // 500 / (7 * 2) = 35.71MHz. ~6.1ns margin
+        read_delay_whole_clocks = 1;
+        sample_delay = 1;
+        pad_delay = 5;
+        break;
+    case 8: // 500 / (8 * 2) = 31.25MHz. ~6.1ns margin
+        read_delay_whole_clocks = 1;
+        sample_delay = 0;
+        pad_delay = 0;
+        break;
+    case 9: // 500 / (9 * 2) = 27.78MHz. ~10.1ns margin
+        read_delay_whole_clocks = 1;
+        sample_delay = 0;
+        pad_delay = 0;
+        break;
+    case 10: // 500 / (10 * 2) = 25.00MHz. ~12.1ns margin
+        read_delay_whole_clocks = 1;
+        sample_delay = 0;
+        pad_delay = 0;
+        break;
+    // 83.33MHz may be possible with compromised setup/hold times and specific port usage.
+    //case 3: // 500 / (3 * 2) = 83.33MHz.
+    //    read_delay_whole_clocks = 2;
+    //    sample_delay = 1;
+    //    pad_delay = 2;
+    //    break;
+    default: // Support for any frequency lower that 25MHz can be implemented by using
+             // the 25MHz delay settings which will provide 12.7ns margin (plenty)
+        __builtin_trap();
+        break;
+  }
+#endif
+}
+
+static void sdram_init(
         out buffered port:32 dq_ah,
         out buffered port:32 cas,
         out buffered port:32 ras,
@@ -33,12 +135,9 @@ static unsigned sdram_init(
         out port clk,
         clock cb,
         unsigned cas_latency,
-        const static unsigned clock_divider
-) {
-  //This parameter is used to delay the read by a whole number of sdram clocks
-  //It is used to compensate for the large round trip delay time of the xcore IO
-
-  unsigned read_delay_whole_clocks = 0;
+        const static unsigned clock_divider,
+        unsigned sample_delay,
+        unsigned pad_delay) {
 
   timer T;
   int time, t;
@@ -71,99 +170,16 @@ static unsigned sdram_init(
   set_port_clock(ras, cb);
   set_port_clock(we, cb);
 
-#ifdef __XS3A__ // assuming 600MHz clock
-  // See tools/sdram_timing_calculations how values for xcore-ai are selected.
-  // Settings below are for pins X1D00..X1D71, 3.3V 5pF 4mA, IS42S16400D-7
-  // with some corrections towards earlier reads after HW tests.
-  switch(clock_divider) {
-    case 5: // Tclk = 60.00MHz
-        read_delay_whole_clocks = 1;
-        set_port_sample_delay(dq_ah);
-        set_pad_delay(dq_ah, 0);
-        break;
-    case 6: // Tclk = 50.00MHz
-        read_delay_whole_clocks = 1;
-        set_port_sample_delay(dq_ah);
-        set_pad_delay(dq_ah, 2);
-        break;
-    case 7: // Tclk = 42.86MHz
-        read_delay_whole_clocks = 1;
-        set_port_sample_delay(dq_ah);
-        set_pad_delay(dq_ah, 4);
-        break;
-    case 8: // Tclk = 37.50MHz
-        read_delay_whole_clocks = 1;
-        set_port_sample_delay(dq_ah);
-        set_pad_delay(dq_ah, 5);
-        break;
-    case 9: // Tclk = 33.33MHz
-        read_delay_whole_clocks = 1;
-        set_port_no_sample_delay(dq_ah);
-        set_pad_delay(dq_ah, 0);
-        break;
-    case 10: // Tclk = 30.00MHz
-        read_delay_whole_clocks = 1;
-        set_port_no_sample_delay(dq_ah);
-        set_pad_delay(dq_ah, 1);
-        break;
-    default:
-        __builtin_trap();
-        break;
+  // Setup pad and internal read delays to compensate for round trip delays
+  if (sample_delay)
+  {
+    set_port_sample_delay(dq_ah);
   }
-#else // assuming 500MHz clock
-  //Setup pad and internal read delays to compensate for round trip delays
-  //SDRAM used for timing calcs has 6ns max access (clock to data) time and 2.5ns min hold time
-  //Timing also includes 1.4ns of PCB round trip delay (correct for XCORE200 slicekit)
-  //Timings assume use of any combination of ports ( setup = 21.3ns and hold = -11ns) Greater timing margins can be obtained
-  //by choosing specific ports. Please consult the "IO timings for xCORE200" document for details
-  switch(clock_divider) {
-    case 4: // 500 / (4 * 2) = 62.50MHz. ~100ps margin
-        read_delay_whole_clocks = 2;
-        set_port_no_sample_delay(dq_ah);
-        set_pad_delay(dq_ah, 2);
-        break;
-    case 5: // 500 / (5 * 2) = 50.00MHz. ~2.1ns margin
-        read_delay_whole_clocks = 1;
-        set_port_sample_delay(dq_ah);
-        set_pad_delay(dq_ah, 1);
-        break;
-    case 6: // 500 / (6 * 2) = 41.67MHz. ~4.1ns margin
-        read_delay_whole_clocks = 1;
-        set_port_sample_delay(dq_ah);
-        set_pad_delay(dq_ah, 3);
-        break;
-    case 7: // 500 / (7 * 2) = 35.71MHz. ~6.1ns margin
-        read_delay_whole_clocks = 1;
-        set_port_sample_delay(dq_ah);
-        set_pad_delay(dq_ah, 5);
-        break;
-    case 8: // 500 / (8 * 2) = 31.25MHz. ~6.1ns margin
-        read_delay_whole_clocks = 1;
-        set_port_no_sample_delay(dq_ah);
-        set_pad_delay(dq_ah, 0);
-        break;
-    case 9: // 500 / (9 * 2) = 27.78MHz. ~10.1ns margin
-        read_delay_whole_clocks = 1;
-        set_port_no_sample_delay(dq_ah);
-        set_pad_delay(dq_ah, 0);
-        break;
-    case 10: // 500 / (10 * 2) = 25.00MHz. ~12.1ns margin
-        read_delay_whole_clocks = 1;
-        set_port_no_sample_delay(dq_ah);
-        set_pad_delay(dq_ah, 0);
-        break;
-    // 83.33MHz may be possible with compromised setup/hold times and specific port usage.
-    //case 3: // 500 / (3 * 2) = 83.33MHz.
-    //    read_delay_whole_clocks = 2;
-    //    set_port_sample_delay(dq_ah);
-    //    set_pad_delay(dq_ah, 2);
-    //    break;
-    default: // Support for any frequency lower that 25MHz can be implemented by using
-             // the 25MHz delay settings which will provide 12.7ns margin (plenty)
-        __builtin_trap();
-        break;
+  else
+  {
+    set_port_no_sample_delay(dq_ah);
   }
-#endif
+  set_pad_delay(dq_ah, pad_delay);
 
   start_clock(cb);
 
@@ -235,9 +251,6 @@ static unsigned sdram_init(
 
   //Perform refresh of whole memory
   refresh(256, cas, ras);
-
-  return (cas_latency + read_delay_whole_clocks);
-
 }
 
 typedef struct {
@@ -475,7 +488,18 @@ void sdram_server(streaming chanend c_client[client_count],
         cmd_buffer[i]->buffer = null;
     }
 
-    unsigned read_time_offset = sdram_init(dq_ah, cas, ras, we, clk, cb, cas_latency, clock_divider);
+    unsigned read_delay_whole_clocks;
+    unsigned sample_delay;
+    unsigned pad_delay;
+
+    select_delays(clock_divider, read_delay_whole_clocks, sample_delay, pad_delay);
+
+    sdram_init(dq_ah, cas, ras, we, clk, cb, cas_latency,
+               clock_divider, sample_delay, pad_delay);
+
+    // This parameter is used to delay the read by a whole number of sdram clocks
+    // It is used to compensate for the large round trip delay time of the xcore IO
+    unsigned read_time_offset = cas_latency + read_delay_whole_clocks;
 
     unsafe {
         for(unsigned i=0;i<client_count;i++){
