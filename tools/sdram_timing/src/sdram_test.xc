@@ -2,16 +2,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "sdram.h"
+#include "sdram_test.h"
+#include "sdram_ports.h"
 
-#define VERBOSE_MSG   1
 #define ERROR_MSG     0
 
-//For XS2 (xCORE200) put an SDRAM slice into the 'triangle' slot of tile 0 of the XP-SKC-X200 slice kit
-//If using 256Mb slice, then define USE_256Mb below, otherwise leave commented out
-
-#define SDRAM_256Mb   1 //Use IS42S16160D 256Mb or similar
-#define SDRAM_128Mb   0 //Use IS42S16800D 128Mb
-                        //otherwise IS42S16400D 64Mb which is default on XMOS boards
+#define SDRAM_256Mb   1 // Use IS42S16160D 256Mb or similar
+#define SDRAM_128Mb   0 // Use IS42S16800D 128Mb
+                        // otherwise IS42S16400D 64Mb which is default on XMOS boards
 
 #define CAS_LATENCY   2
 #define REFRESH_MS    64
@@ -43,36 +41,14 @@
 #define ROW_WORDS     128
 #endif
 
-#if defined(__XS3A__)
-// SDRAM test board for XU316
-#define SERVER_TILE 1
-on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
-on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1A;
-on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1P;
-on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1M;
-on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1F;
-on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_1;
-#elif defined(__XS2A__)
-//Triangle slot tile 0 for XU216
-#define SERVER_TILE 0
-on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16B;
-on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1J;
-on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1I;
-on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1K;
-on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1L;
-on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_2;
-#else
-//Square slot on A16 slicekit
-#define SERVER_TILE 1
-on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
-on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1B;
-on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1G;
-on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1C;
-on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1F;
-on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_2;
-#endif
+on tile[SERVER_TILE] : out buffered port:32 sdram_dq_ah = PORT_SDRAM_DQ_AH;
+on tile[SERVER_TILE] : out buffered port:32 sdram_cas   = PORT_SDRAM_CAS;
+on tile[SERVER_TILE] : out buffered port:32 sdram_ras   = PORT_SDRAM_RAS;
+on tile[SERVER_TILE] : out buffered port:8  sdram_we    = PORT_SDRAM_WE;
+on tile[SERVER_TILE] : out port             sdram_clk   = PORT_SDRAM_CLK;
+on tile[SERVER_TILE] : clock                sdram_cb    = CLOCK_SDRAM;
 
-unsigned get_core_frequency()
+unsigned sdram_test_get_core_frequency_MHz()
 {
   unsigned pll_ctl_value;
 
@@ -82,8 +58,8 @@ unsigned get_core_frequency()
   unsigned F  = (pll_ctl_value >>  8) & 0x1FFF;
   unsigned R  = (pll_ctl_value >>  0) & 0x3F;
   unsigned f_osc = 24000000;
-  unsigned f_core = (f_osc / 2) * (F+1) / ((R+1) * (OD+1));
-  return f_core;
+  unsigned f_core_Hz = (f_osc / 2) * (F+1) / ((R+1) * (OD+1));
+  return f_core_Hz / 1000000;
 }
 
 unsigned sdram_tester(streaming chanend c_server)
@@ -197,14 +173,24 @@ unsigned sdram_tester(streaming chanend c_server)
   return 1;
 }
 
-void sdram_test(unsigned clock_divider,
-                unsigned read_delay_whole_clocks,
-                unsigned sample_delay,
-                unsigned pad_delay)
+void sdram_test_print_info()
+{
+#if SDRAM_256Mb
+  printf("Using 256Mb SDRAM\n");
+#elif SDRAM_128Mb
+  printf("Using 128Mb SDRAM\n");
+#else
+  printf("Using 64Mb SDRAM\n");
+#endif
+}
+
+unsigned sdram_test_run(unsigned clock_divider,
+                        unsigned read_delay_whole_clocks,
+                        unsigned sample_delay,
+                        unsigned pad_delay)
 {
   streaming chan c_sdram[1];
   unsigned success;
-
   par
   {
     {
@@ -222,60 +208,5 @@ void sdram_test(unsigned clock_divider,
       sdram_shutdown(c_sdram[0]);
     }
   }
-  printf("div: %2d  read: %d sample: %d pad: %d  result: %d\n",
-    clock_divider, read_delay_whole_clocks, sample_delay, pad_delay, success);
-}
-
-void sdram_test_suite()
-{
-  if (VERBOSE_MSG)
-  {
-#if SDRAM_256Mb
-    printf("Using 256Mb SDRAM\n");
-#elif SDRAM_128Mb
-    printf("Using 128Mb SDRAM\n");
-#else
-    printf("Using 64Mb SDRAM\n");
-#endif
-    printf("starting SDRAM tests\n");
-  }
-
-  unsigned f_core = get_core_frequency();
-
-  for (unsigned clock_divider = 4; clock_divider < 13; clock_divider++)
-  {
-    if (VERBOSE_MSG)
-    {
-      unsigned f_core_MHz = f_core / 1000000;
-      printf("\nF_core: %d MHz, clock divider: %d, F_clk: %d.%02d MHz\n",
-            f_core_MHz, clock_divider,
-            f_core_MHz / (2 * clock_divider),
-            (f_core_MHz * 50 / clock_divider) % 100);
-    }
-    for (unsigned read_delay_clocks = 0; read_delay_clocks < 3; read_delay_clocks++)
-    {
-      for (unsigned sample_delay = 0; sample_delay < 2; sample_delay++)
-      {
-        for (unsigned i = 0; i < 6; i++)
-        {
-          unsigned pad_delay = 5 - i;
-          sdram_test(clock_divider, read_delay_clocks, sample_delay, pad_delay);
-        }
-      }
-    }
-  }
-  if (VERBOSE_MSG)
-  {
-    printf("SDRAM tests finished\n\n");
-  }
-}
-
-int main()
-{
-  par
-  {
-    on tile[SERVER_TILE]: sdram_test_suite();
-    on tile[SERVER_TILE]: par(int i=0;i<6;i++) while(1);
-  }
-  return 0;
+  return success;
 }

@@ -1,0 +1,714 @@
+SDRAM timing calculation and test results
+=========================================
+
+The default delays selected in lib_sdram/src/server.xc
+are marked with ***.
+
+XS2 Results
+-----------
+
+Tested on a XP-SKC-X200 sliceboard (XE216-512-FB236 CPU)
+with XA-SK-SDRAM slice (64Mbit IS42S16400F-7).
+
+Using 64Mb SDRAM
+Round trip time min: 12400 ps, max: 22700 ps
+starting SDRAM timing
+
+F_core: 500 MHz, clock divider: 4, F_clk: 62.50 MHz
+div:  4 read: 0 sample: 0 pad: 5 [46.700 (-38.700)   8.000 ( 40.900) 48.900] calc: 0 test: 0
+div:  4 read: 0 sample: 0 pad: 4 [44.700 (-36.700)   8.000 ( 38.900) 46.900] calc: 0 test: 0
+div:  4 read: 0 sample: 0 pad: 3 [42.700 (-34.700)   8.000 ( 36.900) 44.900] calc: 0 test: 0
+div:  4 read: 0 sample: 0 pad: 2 [40.700 (-32.700)   8.000 ( 34.900) 42.900] calc: 0 test: 0
+div:  4 read: 0 sample: 0 pad: 1 [38.700 (-30.700)   8.000 ( 32.900) 40.900] calc: 0 test: 0
+div:  4 read: 0 sample: 0 pad: 0 [36.700 (-28.700)   8.000 ( 30.900) 38.900] calc: 0 test: 0
+div:  4 read: 0 sample: 1 pad: 5 [46.700 (-30.700)  16.000 ( 32.900) 48.900] calc: 0 test: 0
+div:  4 read: 0 sample: 1 pad: 4 [44.700 (-28.700)  16.000 ( 30.900) 46.900] calc: 0 test: 0
+div:  4 read: 0 sample: 1 pad: 3 [42.700 (-26.700)  16.000 ( 28.900) 44.900] calc: 0 test: 0
+div:  4 read: 0 sample: 1 pad: 2 [40.700 (-24.700)  16.000 ( 26.900) 42.900] calc: 0 test: 0
+div:  4 read: 0 sample: 1 pad: 1 [38.700 (-22.700)  16.000 ( 24.900) 40.900] calc: 0 test: 0
+div:  4 read: 0 sample: 1 pad: 0 [36.700 (-20.700)  16.000 ( 22.900) 38.900] calc: 0 test: 0
+div:  4 read: 1 sample: 0 pad: 5 [46.700 (-22.700)  24.000 ( 24.900) 48.900] calc: 0 test: 0
+div:  4 read: 1 sample: 0 pad: 4 [44.700 (-20.700)  24.000 ( 22.900) 46.900] calc: 0 test: 0
+div:  4 read: 1 sample: 0 pad: 3 [42.700 (-18.700)  24.000 ( 20.900) 44.900] calc: 0 test: 0
+div:  4 read: 1 sample: 0 pad: 2 [40.700 (-16.700)  24.000 ( 18.900) 42.900] calc: 0 test: 0
+div:  4 read: 1 sample: 0 pad: 1 [38.700 (-14.700)  24.000 ( 16.900) 40.900] calc: 0 test: 0
+div:  4 read: 1 sample: 0 pad: 0 [36.700 (-12.700)  24.000 ( 14.900) 38.900] calc: 0 test: 0
+div:  4 read: 1 sample: 1 pad: 5 [46.700 (-14.700)  32.000 ( 16.900) 48.900] calc: 0 test: 0
+div:  4 read: 1 sample: 1 pad: 4 [44.700 (-12.700)  32.000 ( 14.900) 46.900] calc: 0 test: 0
+div:  4 read: 1 sample: 1 pad: 3 [42.700 (-10.700)  32.000 ( 12.900) 44.900] calc: 0 test: 1
+div:  4 read: 1 sample: 1 pad: 2 [40.700 ( -8.700)  32.000 ( 10.900) 42.900] calc: 0 test: 1
+div:  4 read: 1 sample: 1 pad: 1 [38.700 ( -6.700)  32.000 (  8.900) 40.900] calc: 0 test: 1
+div:  4 read: 1 sample: 1 pad: 0 [36.700 ( -4.700)  32.000 (  6.900) 38.900] calc: 0 test: 1
+div:  4 read: 2 sample: 0 pad: 5 [46.700 ( -6.700)  40.000 (  8.900) 48.900] calc: 0 test: 1
+div:  4 read: 2 sample: 0 pad: 4 [44.700 ( -4.700)  40.000 (  6.900) 46.900] calc: 0 test: 1
+div:  4 read: 2 sample: 0 pad: 3 [42.700 ( -2.700)  40.000 (  4.900) 44.900] calc: 0 test: 1
+div:  4 read: 2 sample: 0 pad: 2 [40.700 ( -0.700)  40.000 (  2.900) 42.900] calc: 0 test: 1 ***
+div:  4 read: 2 sample: 0 pad: 1 [38.700 (  1.300)  40.000 (  0.900) 40.900] calc: 1 test: 0
+div:  4 read: 2 sample: 0 pad: 0 [36.700 (  3.300)  40.000 ( -1.100) 38.900] calc: 0 test: 0
+div:  4 read: 2 sample: 1 pad: 5 [46.700 (  1.300)  48.000 (  0.900) 48.900] calc: 1 test: 0
+div:  4 read: 2 sample: 1 pad: 4 [44.700 (  3.300)  48.000 ( -1.100) 46.900] calc: 0 test: 0
+div:  4 read: 2 sample: 1 pad: 3 [42.700 (  5.300)  48.000 ( -3.100) 44.900] calc: 0 test: 0
+div:  4 read: 2 sample: 1 pad: 2 [40.700 (  7.300)  48.000 ( -5.100) 42.900] calc: 0 test: 0
+div:  4 read: 2 sample: 1 pad: 1 [38.700 (  9.300)  48.000 ( -7.100) 40.900] calc: 0 test: 0
+div:  4 read: 2 sample: 1 pad: 0 [36.700 ( 11.300)  48.000 ( -9.100) 38.900] calc: 0 test: 0
+
+F_core: 500 MHz, clock divider: 5, F_clk: 50.00 MHz
+div:  5 read: 0 sample: 0 pad: 5 [48.700 (-38.700)  10.000 ( 44.900) 54.900] calc: 0 test: 0
+div:  5 read: 0 sample: 0 pad: 4 [46.700 (-36.700)  10.000 ( 42.900) 52.900] calc: 0 test: 0
+div:  5 read: 0 sample: 0 pad: 3 [44.700 (-34.700)  10.000 ( 40.900) 50.900] calc: 0 test: 0
+div:  5 read: 0 sample: 0 pad: 2 [42.700 (-32.700)  10.000 ( 38.900) 48.900] calc: 0 test: 0
+div:  5 read: 0 sample: 0 pad: 1 [40.700 (-30.700)  10.000 ( 36.900) 46.900] calc: 0 test: 0
+div:  5 read: 0 sample: 0 pad: 0 [38.700 (-28.700)  10.000 ( 34.900) 44.900] calc: 0 test: 0
+div:  5 read: 0 sample: 1 pad: 5 [48.700 (-28.700)  20.000 ( 34.900) 54.900] calc: 0 test: 0
+div:  5 read: 0 sample: 1 pad: 4 [46.700 (-26.700)  20.000 ( 32.900) 52.900] calc: 0 test: 0
+div:  5 read: 0 sample: 1 pad: 3 [44.700 (-24.700)  20.000 ( 30.900) 50.900] calc: 0 test: 0
+div:  5 read: 0 sample: 1 pad: 2 [42.700 (-22.700)  20.000 ( 28.900) 48.900] calc: 0 test: 0
+div:  5 read: 0 sample: 1 pad: 1 [40.700 (-20.700)  20.000 ( 26.900) 46.900] calc: 0 test: 0
+div:  5 read: 0 sample: 1 pad: 0 [38.700 (-18.700)  20.000 ( 24.900) 44.900] calc: 0 test: 0
+div:  5 read: 1 sample: 0 pad: 5 [48.700 (-18.700)  30.000 ( 24.900) 54.900] calc: 0 test: 0
+div:  5 read: 1 sample: 0 pad: 4 [46.700 (-16.700)  30.000 ( 22.900) 52.900] calc: 0 test: 0
+div:  5 read: 1 sample: 0 pad: 3 [44.700 (-14.700)  30.000 ( 20.900) 50.900] calc: 0 test: 0
+div:  5 read: 1 sample: 0 pad: 2 [42.700 (-12.700)  30.000 ( 18.900) 48.900] calc: 0 test: 0
+div:  5 read: 1 sample: 0 pad: 1 [40.700 (-10.700)  30.000 ( 16.900) 46.900] calc: 0 test: 1
+div:  5 read: 1 sample: 0 pad: 0 [38.700 ( -8.700)  30.000 ( 14.900) 44.900] calc: 0 test: 1
+div:  5 read: 1 sample: 1 pad: 5 [48.700 ( -8.700)  40.000 ( 14.900) 54.900] calc: 0 test: 1
+div:  5 read: 1 sample: 1 pad: 4 [46.700 ( -6.700)  40.000 ( 12.900) 52.900] calc: 0 test: 1
+div:  5 read: 1 sample: 1 pad: 3 [44.700 ( -4.700)  40.000 ( 10.900) 50.900] calc: 0 test: 1
+div:  5 read: 1 sample: 1 pad: 2 [42.700 ( -2.700)  40.000 (  8.900) 48.900] calc: 0 test: 1
+div:  5 read: 1 sample: 1 pad: 1 [40.700 ( -0.700)  40.000 (  6.900) 46.900] calc: 0 test: 1 ***
+div:  5 read: 1 sample: 1 pad: 0 [38.700 (  1.300)  40.000 (  4.900) 44.900] calc: 1 test: 1
+div:  5 read: 2 sample: 0 pad: 5 [48.700 (  1.300)  50.000 (  4.900) 54.900] calc: 1 test: 1
+div:  5 read: 2 sample: 0 pad: 4 [46.700 (  3.300)  50.000 (  2.900) 52.900] calc: 1 test: 1
+div:  5 read: 2 sample: 0 pad: 3 [44.700 (  5.300)  50.000 (  0.900) 50.900] calc: 1 test: 0
+div:  5 read: 2 sample: 0 pad: 2 [42.700 (  7.300)  50.000 ( -1.100) 48.900] calc: 0 test: 0
+div:  5 read: 2 sample: 0 pad: 1 [40.700 (  9.300)  50.000 ( -3.100) 46.900] calc: 0 test: 0
+div:  5 read: 2 sample: 0 pad: 0 [38.700 ( 11.300)  50.000 ( -5.100) 44.900] calc: 0 test: 0
+div:  5 read: 2 sample: 1 pad: 5 [48.700 ( 11.300)  60.000 ( -5.100) 54.900] calc: 0 test: 0
+div:  5 read: 2 sample: 1 pad: 4 [46.700 ( 13.300)  60.000 ( -7.100) 52.900] calc: 0 test: 0
+div:  5 read: 2 sample: 1 pad: 3 [44.700 ( 15.300)  60.000 ( -9.100) 50.900] calc: 0 test: 0
+div:  5 read: 2 sample: 1 pad: 2 [42.700 ( 17.300)  60.000 (-11.100) 48.900] calc: 0 test: 0
+div:  5 read: 2 sample: 1 pad: 1 [40.700 ( 19.300)  60.000 (-13.100) 46.900] calc: 0 test: 0
+div:  5 read: 2 sample: 1 pad: 0 [38.700 ( 21.300)  60.000 (-15.100) 44.900] calc: 0 test: 0
+
+F_core: 500 MHz, clock divider: 6, F_clk: 41.66 MHz
+div:  6 read: 0 sample: 0 pad: 5 [50.700 (-38.700)  12.000 ( 48.900) 60.900] calc: 0 test: 0
+div:  6 read: 0 sample: 0 pad: 4 [48.700 (-36.700)  12.000 ( 46.900) 58.900] calc: 0 test: 0
+div:  6 read: 0 sample: 0 pad: 3 [46.700 (-34.700)  12.000 ( 44.900) 56.900] calc: 0 test: 0
+div:  6 read: 0 sample: 0 pad: 2 [44.700 (-32.700)  12.000 ( 42.900) 54.900] calc: 0 test: 0
+div:  6 read: 0 sample: 0 pad: 1 [42.700 (-30.700)  12.000 ( 40.900) 52.900] calc: 0 test: 0
+div:  6 read: 0 sample: 0 pad: 0 [40.700 (-28.700)  12.000 ( 38.900) 50.900] calc: 0 test: 0
+div:  6 read: 0 sample: 1 pad: 5 [50.700 (-26.700)  24.000 ( 36.900) 60.900] calc: 0 test: 0
+div:  6 read: 0 sample: 1 pad: 4 [48.700 (-24.700)  24.000 ( 34.900) 58.900] calc: 0 test: 0
+div:  6 read: 0 sample: 1 pad: 3 [46.700 (-22.700)  24.000 ( 32.900) 56.900] calc: 0 test: 0
+div:  6 read: 0 sample: 1 pad: 2 [44.700 (-20.700)  24.000 ( 30.900) 54.900] calc: 0 test: 0
+div:  6 read: 0 sample: 1 pad: 1 [42.700 (-18.700)  24.000 ( 28.900) 52.900] calc: 0 test: 0
+div:  6 read: 0 sample: 1 pad: 0 [40.700 (-16.700)  24.000 ( 26.900) 50.900] calc: 0 test: 0
+div:  6 read: 1 sample: 0 pad: 5 [50.700 (-14.700)  36.000 ( 24.900) 60.900] calc: 0 test: 0
+div:  6 read: 1 sample: 0 pad: 4 [48.700 (-12.700)  36.000 ( 22.900) 58.900] calc: 0 test: 0
+div:  6 read: 1 sample: 0 pad: 3 [46.700 (-10.700)  36.000 ( 20.900) 56.900] calc: 0 test: 1
+div:  6 read: 1 sample: 0 pad: 2 [44.700 ( -8.700)  36.000 ( 18.900) 54.900] calc: 0 test: 1
+div:  6 read: 1 sample: 0 pad: 1 [42.700 ( -6.700)  36.000 ( 16.900) 52.900] calc: 0 test: 1
+div:  6 read: 1 sample: 0 pad: 0 [40.700 ( -4.700)  36.000 ( 14.900) 50.900] calc: 0 test: 1
+div:  6 read: 1 sample: 1 pad: 5 [50.700 ( -2.700)  48.000 ( 12.900) 60.900] calc: 0 test: 1
+div:  6 read: 1 sample: 1 pad: 4 [48.700 ( -0.700)  48.000 ( 10.900) 58.900] calc: 0 test: 1
+div:  6 read: 1 sample: 1 pad: 3 [46.700 (  1.300)  48.000 (  8.900) 56.900] calc: 1 test: 1 ***
+div:  6 read: 1 sample: 1 pad: 2 [44.700 (  3.300)  48.000 (  6.900) 54.900] calc: 1 test: 1
+div:  6 read: 1 sample: 1 pad: 1 [42.700 (  5.300)  48.000 (  4.900) 52.900] calc: 1 test: 1
+div:  6 read: 1 sample: 1 pad: 0 [40.700 (  7.300)  48.000 (  2.900) 50.900] calc: 1 test: 1
+div:  6 read: 2 sample: 0 pad: 5 [50.700 (  9.300)  60.000 (  0.900) 60.900] calc: 1 test: 0
+div:  6 read: 2 sample: 0 pad: 4 [48.700 ( 11.300)  60.000 ( -1.100) 58.900] calc: 0 test: 0
+div:  6 read: 2 sample: 0 pad: 3 [46.700 ( 13.300)  60.000 ( -3.100) 56.900] calc: 0 test: 0
+div:  6 read: 2 sample: 0 pad: 2 [44.700 ( 15.300)  60.000 ( -5.100) 54.900] calc: 0 test: 0
+div:  6 read: 2 sample: 0 pad: 1 [42.700 ( 17.300)  60.000 ( -7.100) 52.900] calc: 0 test: 0
+div:  6 read: 2 sample: 0 pad: 0 [40.700 ( 19.300)  60.000 ( -9.100) 50.900] calc: 0 test: 0
+div:  6 read: 2 sample: 1 pad: 5 [50.700 ( 21.300)  72.000 (-11.100) 60.900] calc: 0 test: 0
+div:  6 read: 2 sample: 1 pad: 4 [48.700 ( 23.300)  72.000 (-13.100) 58.900] calc: 0 test: 0
+div:  6 read: 2 sample: 1 pad: 3 [46.700 ( 25.300)  72.000 (-15.100) 56.900] calc: 0 test: 0
+div:  6 read: 2 sample: 1 pad: 2 [44.700 ( 27.300)  72.000 (-17.100) 54.900] calc: 0 test: 0
+div:  6 read: 2 sample: 1 pad: 1 [42.700 ( 29.300)  72.000 (-19.100) 52.900] calc: 0 test: 0
+div:  6 read: 2 sample: 1 pad: 0 [40.700 ( 31.300)  72.000 (-21.100) 50.900] calc: 0 test: 0
+
+F_core: 500 MHz, clock divider: 7, F_clk: 35.71 MHz
+div:  7 read: 0 sample: 0 pad: 5 [52.700 (-38.700)  14.000 ( 52.900) 66.900] calc: 0 test: 0
+div:  7 read: 0 sample: 0 pad: 4 [50.700 (-36.700)  14.000 ( 50.900) 64.900] calc: 0 test: 0
+div:  7 read: 0 sample: 0 pad: 3 [48.700 (-34.700)  14.000 ( 48.900) 62.900] calc: 0 test: 0
+div:  7 read: 0 sample: 0 pad: 2 [46.700 (-32.700)  14.000 ( 46.900) 60.900] calc: 0 test: 0
+div:  7 read: 0 sample: 0 pad: 1 [44.700 (-30.700)  14.000 ( 44.900) 58.900] calc: 0 test: 0
+div:  7 read: 0 sample: 0 pad: 0 [42.700 (-28.700)  14.000 ( 42.900) 56.900] calc: 0 test: 0
+div:  7 read: 0 sample: 1 pad: 5 [52.700 (-24.700)  28.000 ( 38.900) 66.900] calc: 0 test: 0
+div:  7 read: 0 sample: 1 pad: 4 [50.700 (-22.700)  28.000 ( 36.900) 64.900] calc: 0 test: 0
+div:  7 read: 0 sample: 1 pad: 3 [48.700 (-20.700)  28.000 ( 34.900) 62.900] calc: 0 test: 0
+div:  7 read: 0 sample: 1 pad: 2 [46.700 (-18.700)  28.000 ( 32.900) 60.900] calc: 0 test: 0
+div:  7 read: 0 sample: 1 pad: 1 [44.700 (-16.700)  28.000 ( 30.900) 58.900] calc: 0 test: 0
+div:  7 read: 0 sample: 1 pad: 0 [42.700 (-14.700)  28.000 ( 28.900) 56.900] calc: 0 test: 0
+div:  7 read: 1 sample: 0 pad: 5 [52.700 (-10.700)  42.000 ( 24.900) 66.900] calc: 0 test: 1
+div:  7 read: 1 sample: 0 pad: 4 [50.700 ( -8.700)  42.000 ( 22.900) 64.900] calc: 0 test: 1
+div:  7 read: 1 sample: 0 pad: 3 [48.700 ( -6.700)  42.000 ( 20.900) 62.900] calc: 0 test: 1
+div:  7 read: 1 sample: 0 pad: 2 [46.700 ( -4.700)  42.000 ( 18.900) 60.900] calc: 0 test: 1
+div:  7 read: 1 sample: 0 pad: 1 [44.700 ( -2.700)  42.000 ( 16.900) 58.900] calc: 0 test: 1
+div:  7 read: 1 sample: 0 pad: 0 [42.700 ( -0.700)  42.000 ( 14.900) 56.900] calc: 0 test: 1
+div:  7 read: 1 sample: 1 pad: 5 [52.700 (  3.300)  56.000 ( 10.900) 66.900] calc: 1 test: 1 ***
+div:  7 read: 1 sample: 1 pad: 4 [50.700 (  5.300)  56.000 (  8.900) 64.900] calc: 1 test: 1
+div:  7 read: 1 sample: 1 pad: 3 [48.700 (  7.300)  56.000 (  6.900) 62.900] calc: 1 test: 1
+div:  7 read: 1 sample: 1 pad: 2 [46.700 (  9.300)  56.000 (  4.900) 60.900] calc: 1 test: 1
+div:  7 read: 1 sample: 1 pad: 1 [44.700 ( 11.300)  56.000 (  2.900) 58.900] calc: 1 test: 1
+div:  7 read: 1 sample: 1 pad: 0 [42.700 ( 13.300)  56.000 (  0.900) 56.900] calc: 1 test: 0
+div:  7 read: 2 sample: 0 pad: 5 [52.700 ( 17.300)  70.000 ( -3.100) 66.900] calc: 0 test: 0
+div:  7 read: 2 sample: 0 pad: 4 [50.700 ( 19.300)  70.000 ( -5.100) 64.900] calc: 0 test: 0
+div:  7 read: 2 sample: 0 pad: 3 [48.700 ( 21.300)  70.000 ( -7.100) 62.900] calc: 0 test: 0
+div:  7 read: 2 sample: 0 pad: 2 [46.700 ( 23.300)  70.000 ( -9.100) 60.900] calc: 0 test: 0
+div:  7 read: 2 sample: 0 pad: 1 [44.700 ( 25.300)  70.000 (-11.100) 58.900] calc: 0 test: 0
+div:  7 read: 2 sample: 0 pad: 0 [42.700 ( 27.300)  70.000 (-13.100) 56.900] calc: 0 test: 0
+div:  7 read: 2 sample: 1 pad: 5 [52.700 ( 31.300)  84.000 (-17.100) 66.900] calc: 0 test: 0
+div:  7 read: 2 sample: 1 pad: 4 [50.700 ( 33.300)  84.000 (-19.100) 64.900] calc: 0 test: 0
+div:  7 read: 2 sample: 1 pad: 3 [48.700 ( 35.300)  84.000 (-21.100) 62.900] calc: 0 test: 0
+div:  7 read: 2 sample: 1 pad: 2 [46.700 ( 37.300)  84.000 (-23.100) 60.900] calc: 0 test: 0
+div:  7 read: 2 sample: 1 pad: 1 [44.700 ( 39.300)  84.000 (-25.100) 58.900] calc: 0 test: 0
+div:  7 read: 2 sample: 1 pad: 0 [42.700 ( 41.300)  84.000 (-27.100) 56.900] calc: 0 test: 0
+
+F_core: 500 MHz, clock divider: 8, F_clk: 31.25 MHz
+div:  8 read: 0 sample: 0 pad: 5 [54.700 (-38.700)  16.000 ( 56.900) 72.900] calc: 0 test: 0
+div:  8 read: 0 sample: 0 pad: 4 [52.700 (-36.700)  16.000 ( 54.900) 70.900] calc: 0 test: 0
+div:  8 read: 0 sample: 0 pad: 3 [50.700 (-34.700)  16.000 ( 52.900) 68.900] calc: 0 test: 0
+div:  8 read: 0 sample: 0 pad: 2 [48.700 (-32.700)  16.000 ( 50.900) 66.900] calc: 0 test: 0
+div:  8 read: 0 sample: 0 pad: 1 [46.700 (-30.700)  16.000 ( 48.900) 64.900] calc: 0 test: 0
+div:  8 read: 0 sample: 0 pad: 0 [44.700 (-28.700)  16.000 ( 46.900) 62.900] calc: 0 test: 0
+div:  8 read: 0 sample: 1 pad: 5 [54.700 (-22.700)  32.000 ( 40.900) 72.900] calc: 0 test: 0
+div:  8 read: 0 sample: 1 pad: 4 [52.700 (-20.700)  32.000 ( 38.900) 70.900] calc: 0 test: 0
+div:  8 read: 0 sample: 1 pad: 3 [50.700 (-18.700)  32.000 ( 36.900) 68.900] calc: 0 test: 0
+div:  8 read: 0 sample: 1 pad: 2 [48.700 (-16.700)  32.000 ( 34.900) 66.900] calc: 0 test: 0
+div:  8 read: 0 sample: 1 pad: 1 [46.700 (-14.700)  32.000 ( 32.900) 64.900] calc: 0 test: 0
+div:  8 read: 0 sample: 1 pad: 0 [44.700 (-12.700)  32.000 ( 30.900) 62.900] calc: 0 test: 0
+div:  8 read: 1 sample: 0 pad: 5 [54.700 ( -6.700)  48.000 ( 24.900) 72.900] calc: 0 test: 1
+div:  8 read: 1 sample: 0 pad: 4 [52.700 ( -4.700)  48.000 ( 22.900) 70.900] calc: 0 test: 1
+div:  8 read: 1 sample: 0 pad: 3 [50.700 ( -2.700)  48.000 ( 20.900) 68.900] calc: 0 test: 1
+div:  8 read: 1 sample: 0 pad: 2 [48.700 ( -0.700)  48.000 ( 18.900) 66.900] calc: 0 test: 1
+div:  8 read: 1 sample: 0 pad: 1 [46.700 (  1.300)  48.000 ( 16.900) 64.900] calc: 1 test: 1
+div:  8 read: 1 sample: 0 pad: 0 [44.700 (  3.300)  48.000 ( 14.900) 62.900] calc: 1 test: 1 ***
+div:  8 read: 1 sample: 1 pad: 5 [54.700 (  9.300)  64.000 (  8.900) 72.900] calc: 1 test: 1
+div:  8 read: 1 sample: 1 pad: 4 [52.700 ( 11.300)  64.000 (  6.900) 70.900] calc: 1 test: 1
+div:  8 read: 1 sample: 1 pad: 3 [50.700 ( 13.300)  64.000 (  4.900) 68.900] calc: 1 test: 1
+div:  8 read: 1 sample: 1 pad: 2 [48.700 ( 15.300)  64.000 (  2.900) 66.900] calc: 1 test: 1
+div:  8 read: 1 sample: 1 pad: 1 [46.700 ( 17.300)  64.000 (  0.900) 64.900] calc: 1 test: 0
+div:  8 read: 1 sample: 1 pad: 0 [44.700 ( 19.300)  64.000 ( -1.100) 62.900] calc: 0 test: 0
+div:  8 read: 2 sample: 0 pad: 5 [54.700 ( 25.300)  80.000 ( -7.100) 72.900] calc: 0 test: 0
+div:  8 read: 2 sample: 0 pad: 4 [52.700 ( 27.300)  80.000 ( -9.100) 70.900] calc: 0 test: 0
+div:  8 read: 2 sample: 0 pad: 3 [50.700 ( 29.300)  80.000 (-11.100) 68.900] calc: 0 test: 0
+div:  8 read: 2 sample: 0 pad: 2 [48.700 ( 31.300)  80.000 (-13.100) 66.900] calc: 0 test: 0
+div:  8 read: 2 sample: 0 pad: 1 [46.700 ( 33.300)  80.000 (-15.100) 64.900] calc: 0 test: 0
+div:  8 read: 2 sample: 0 pad: 0 [44.700 ( 35.300)  80.000 (-17.100) 62.900] calc: 0 test: 0
+div:  8 read: 2 sample: 1 pad: 5 [54.700 ( 41.300)  96.000 (-23.100) 72.900] calc: 0 test: 0
+div:  8 read: 2 sample: 1 pad: 4 [52.700 ( 43.300)  96.000 (-25.100) 70.900] calc: 0 test: 0
+div:  8 read: 2 sample: 1 pad: 3 [50.700 ( 45.300)  96.000 (-27.100) 68.900] calc: 0 test: 0
+div:  8 read: 2 sample: 1 pad: 2 [48.700 ( 47.300)  96.000 (-29.100) 66.900] calc: 0 test: 0
+div:  8 read: 2 sample: 1 pad: 1 [46.700 ( 49.300)  96.000 (-31.100) 64.900] calc: 0 test: 0
+div:  8 read: 2 sample: 1 pad: 0 [44.700 ( 51.300)  96.000 (-33.100) 62.900] calc: 0 test: 0
+
+F_core: 500 MHz, clock divider: 9, F_clk: 27.77 MHz
+div:  9 read: 0 sample: 0 pad: 5 [56.700 (-38.700)  18.000 ( 60.900) 78.900] calc: 0 test: 0
+div:  9 read: 0 sample: 0 pad: 4 [54.700 (-36.700)  18.000 ( 58.900) 76.900] calc: 0 test: 0
+div:  9 read: 0 sample: 0 pad: 3 [52.700 (-34.700)  18.000 ( 56.900) 74.900] calc: 0 test: 0
+div:  9 read: 0 sample: 0 pad: 2 [50.700 (-32.700)  18.000 ( 54.900) 72.900] calc: 0 test: 0
+div:  9 read: 0 sample: 0 pad: 1 [48.700 (-30.700)  18.000 ( 52.900) 70.900] calc: 0 test: 0
+div:  9 read: 0 sample: 0 pad: 0 [46.700 (-28.700)  18.000 ( 50.900) 68.900] calc: 0 test: 0
+div:  9 read: 0 sample: 1 pad: 5 [56.700 (-20.700)  36.000 ( 42.900) 78.900] calc: 0 test: 0
+div:  9 read: 0 sample: 1 pad: 4 [54.700 (-18.700)  36.000 ( 40.900) 76.900] calc: 0 test: 0
+div:  9 read: 0 sample: 1 pad: 3 [52.700 (-16.700)  36.000 ( 38.900) 74.900] calc: 0 test: 0
+div:  9 read: 0 sample: 1 pad: 2 [50.700 (-14.700)  36.000 ( 36.900) 72.900] calc: 0 test: 0
+div:  9 read: 0 sample: 1 pad: 1 [48.700 (-12.700)  36.000 ( 34.900) 70.900] calc: 0 test: 0
+div:  9 read: 0 sample: 1 pad: 0 [46.700 (-10.700)  36.000 ( 32.900) 68.900] calc: 0 test: 1
+div:  9 read: 1 sample: 0 pad: 5 [56.700 ( -2.700)  54.000 ( 24.900) 78.900] calc: 0 test: 1
+div:  9 read: 1 sample: 0 pad: 4 [54.700 ( -0.700)  54.000 ( 22.900) 76.900] calc: 0 test: 1
+div:  9 read: 1 sample: 0 pad: 3 [52.700 (  1.300)  54.000 ( 20.900) 74.900] calc: 1 test: 1
+div:  9 read: 1 sample: 0 pad: 2 [50.700 (  3.300)  54.000 ( 18.900) 72.900] calc: 1 test: 1
+div:  9 read: 1 sample: 0 pad: 1 [48.700 (  5.300)  54.000 ( 16.900) 70.900] calc: 1 test: 1
+div:  9 read: 1 sample: 0 pad: 0 [46.700 (  7.300)  54.000 ( 14.900) 68.900] calc: 1 test: 1 ***
+div:  9 read: 1 sample: 1 pad: 5 [56.700 ( 15.300)  72.000 (  6.900) 78.900] calc: 1 test: 1
+div:  9 read: 1 sample: 1 pad: 4 [54.700 ( 17.300)  72.000 (  4.900) 76.900] calc: 1 test: 1
+div:  9 read: 1 sample: 1 pad: 3 [52.700 ( 19.300)  72.000 (  2.900) 74.900] calc: 1 test: 1
+div:  9 read: 1 sample: 1 pad: 2 [50.700 ( 21.300)  72.000 (  0.900) 72.900] calc: 1 test: 0
+div:  9 read: 1 sample: 1 pad: 1 [48.700 ( 23.300)  72.000 ( -1.100) 70.900] calc: 0 test: 0
+div:  9 read: 1 sample: 1 pad: 0 [46.700 ( 25.300)  72.000 ( -3.100) 68.900] calc: 0 test: 0
+div:  9 read: 2 sample: 0 pad: 5 [56.700 ( 33.300)  90.000 (-11.100) 78.900] calc: 0 test: 0
+div:  9 read: 2 sample: 0 pad: 4 [54.700 ( 35.300)  90.000 (-13.100) 76.900] calc: 0 test: 0
+div:  9 read: 2 sample: 0 pad: 3 [52.700 ( 37.300)  90.000 (-15.100) 74.900] calc: 0 test: 0
+div:  9 read: 2 sample: 0 pad: 2 [50.700 ( 39.300)  90.000 (-17.100) 72.900] calc: 0 test: 0
+div:  9 read: 2 sample: 0 pad: 1 [48.700 ( 41.300)  90.000 (-19.100) 70.900] calc: 0 test: 0
+div:  9 read: 2 sample: 0 pad: 0 [46.700 ( 43.300)  90.000 (-21.100) 68.900] calc: 0 test: 0
+div:  9 read: 2 sample: 1 pad: 5 [56.700 ( 51.300) 108.000 (-29.100) 78.900] calc: 0 test: 0
+div:  9 read: 2 sample: 1 pad: 4 [54.700 ( 53.300) 108.000 (-31.100) 76.900] calc: 0 test: 0
+div:  9 read: 2 sample: 1 pad: 3 [52.700 ( 55.300) 108.000 (-33.100) 74.900] calc: 0 test: 0
+div:  9 read: 2 sample: 1 pad: 2 [50.700 ( 57.300) 108.000 (-35.100) 72.900] calc: 0 test: 0
+div:  9 read: 2 sample: 1 pad: 1 [48.700 ( 59.300) 108.000 (-37.100) 70.900] calc: 0 test: 0
+div:  9 read: 2 sample: 1 pad: 0 [46.700 ( 61.300) 108.000 (-39.100) 68.900] calc: 0 test: 0
+
+F_core: 500 MHz, clock divider: 10, F_clk: 25.00 MHz
+div: 10 read: 0 sample: 0 pad: 5 [58.700 (-38.700)  20.000 ( 64.900) 84.900] calc: 0 test: 0
+div: 10 read: 0 sample: 0 pad: 4 [56.700 (-36.700)  20.000 ( 62.900) 82.900] calc: 0 test: 0
+div: 10 read: 0 sample: 0 pad: 3 [54.700 (-34.700)  20.000 ( 60.900) 80.900] calc: 0 test: 0
+div: 10 read: 0 sample: 0 pad: 2 [52.700 (-32.700)  20.000 ( 58.900) 78.900] calc: 0 test: 0
+div: 10 read: 0 sample: 0 pad: 1 [50.700 (-30.700)  20.000 ( 56.900) 76.900] calc: 0 test: 0
+div: 10 read: 0 sample: 0 pad: 0 [48.700 (-28.700)  20.000 ( 54.900) 74.900] calc: 0 test: 0
+div: 10 read: 0 sample: 1 pad: 5 [58.700 (-18.700)  40.000 ( 44.900) 84.900] calc: 0 test: 0
+div: 10 read: 0 sample: 1 pad: 4 [56.700 (-16.700)  40.000 ( 42.900) 82.900] calc: 0 test: 0
+div: 10 read: 0 sample: 1 pad: 3 [54.700 (-14.700)  40.000 ( 40.900) 80.900] calc: 0 test: 0
+div: 10 read: 0 sample: 1 pad: 2 [52.700 (-12.700)  40.000 ( 38.900) 78.900] calc: 0 test: 0
+div: 10 read: 0 sample: 1 pad: 1 [50.700 (-10.700)  40.000 ( 36.900) 76.900] calc: 0 test: 1
+div: 10 read: 0 sample: 1 pad: 0 [48.700 ( -8.700)  40.000 ( 34.900) 74.900] calc: 0 test: 1
+div: 10 read: 1 sample: 0 pad: 5 [58.700 (  1.300)  60.000 ( 24.900) 84.900] calc: 1 test: 1
+div: 10 read: 1 sample: 0 pad: 4 [56.700 (  3.300)  60.000 ( 22.900) 82.900] calc: 1 test: 1
+div: 10 read: 1 sample: 0 pad: 3 [54.700 (  5.300)  60.000 ( 20.900) 80.900] calc: 1 test: 1
+div: 10 read: 1 sample: 0 pad: 2 [52.700 (  7.300)  60.000 ( 18.900) 78.900] calc: 1 test: 1
+div: 10 read: 1 sample: 0 pad: 1 [50.700 (  9.300)  60.000 ( 16.900) 76.900] calc: 1 test: 1
+div: 10 read: 1 sample: 0 pad: 0 [48.700 ( 11.300)  60.000 ( 14.900) 74.900] calc: 1 test: 1 ***
+div: 10 read: 1 sample: 1 pad: 5 [58.700 ( 21.300)  80.000 (  4.900) 84.900] calc: 1 test: 1
+div: 10 read: 1 sample: 1 pad: 4 [56.700 ( 23.300)  80.000 (  2.900) 82.900] calc: 1 test: 1
+div: 10 read: 1 sample: 1 pad: 3 [54.700 ( 25.300)  80.000 (  0.900) 80.900] calc: 1 test: 0
+div: 10 read: 1 sample: 1 pad: 2 [52.700 ( 27.300)  80.000 ( -1.100) 78.900] calc: 0 test: 0
+div: 10 read: 1 sample: 1 pad: 1 [50.700 ( 29.300)  80.000 ( -3.100) 76.900] calc: 0 test: 0
+div: 10 read: 1 sample: 1 pad: 0 [48.700 ( 31.300)  80.000 ( -5.100) 74.900] calc: 0 test: 0
+div: 10 read: 2 sample: 0 pad: 5 [58.700 ( 41.300) 100.000 (-15.100) 84.900] calc: 0 test: 0
+div: 10 read: 2 sample: 0 pad: 4 [56.700 ( 43.300) 100.000 (-17.100) 82.900] calc: 0 test: 0
+div: 10 read: 2 sample: 0 pad: 3 [54.700 ( 45.300) 100.000 (-19.100) 80.900] calc: 0 test: 0
+div: 10 read: 2 sample: 0 pad: 2 [52.700 ( 47.300) 100.000 (-21.100) 78.900] calc: 0 test: 0
+div: 10 read: 2 sample: 0 pad: 1 [50.700 ( 49.300) 100.000 (-23.100) 76.900] calc: 0 test: 0
+div: 10 read: 2 sample: 0 pad: 0 [48.700 ( 51.300) 100.000 (-25.100) 74.900] calc: 0 test: 0
+div: 10 read: 2 sample: 1 pad: 5 [58.700 ( 61.300) 120.000 (-35.100) 84.900] calc: 0 test: 0
+div: 10 read: 2 sample: 1 pad: 4 [56.700 ( 63.300) 120.000 (-37.100) 82.900] calc: 0 test: 0
+div: 10 read: 2 sample: 1 pad: 3 [54.700 ( 65.300) 120.000 (-39.100) 80.900] calc: 0 test: 0
+div: 10 read: 2 sample: 1 pad: 2 [52.700 ( 67.300) 120.000 (-41.100) 78.900] calc: 0 test: 0
+div: 10 read: 2 sample: 1 pad: 1 [50.700 ( 69.300) 120.000 (-43.100) 76.900] calc: 0 test: 0
+div: 10 read: 2 sample: 1 pad: 0 [48.700 ( 71.300) 120.000 (-45.100) 74.900] calc: 0 test: 0
+
+F_core: 500 MHz, clock divider: 11, F_clk: 22.72 MHz
+div: 11 read: 0 sample: 0 pad: 5 [60.700 (-38.700)  22.000 ( 68.900) 90.900] calc: 0 test: 0
+div: 11 read: 0 sample: 0 pad: 4 [58.700 (-36.700)  22.000 ( 66.900) 88.900] calc: 0 test: 0
+div: 11 read: 0 sample: 0 pad: 3 [56.700 (-34.700)  22.000 ( 64.900) 86.900] calc: 0 test: 0
+div: 11 read: 0 sample: 0 pad: 2 [54.700 (-32.700)  22.000 ( 62.900) 84.900] calc: 0 test: 0
+div: 11 read: 0 sample: 0 pad: 1 [52.700 (-30.700)  22.000 ( 60.900) 82.900] calc: 0 test: 0
+div: 11 read: 0 sample: 0 pad: 0 [50.700 (-28.700)  22.000 ( 58.900) 80.900] calc: 0 test: 0
+div: 11 read: 0 sample: 1 pad: 5 [60.700 (-16.700)  44.000 ( 46.900) 90.900] calc: 0 test: 0
+div: 11 read: 0 sample: 1 pad: 4 [58.700 (-14.700)  44.000 ( 44.900) 88.900] calc: 0 test: 0
+div: 11 read: 0 sample: 1 pad: 3 [56.700 (-12.700)  44.000 ( 42.900) 86.900] calc: 0 test: 0
+div: 11 read: 0 sample: 1 pad: 2 [54.700 (-10.700)  44.000 ( 40.900) 84.900] calc: 0 test: 1
+div: 11 read: 0 sample: 1 pad: 1 [52.700 ( -8.700)  44.000 ( 38.900) 82.900] calc: 0 test: 1
+div: 11 read: 0 sample: 1 pad: 0 [50.700 ( -6.700)  44.000 ( 36.900) 80.900] calc: 0 test: 1
+div: 11 read: 1 sample: 0 pad: 5 [60.700 (  5.300)  66.000 ( 24.900) 90.900] calc: 1 test: 1
+div: 11 read: 1 sample: 0 pad: 4 [58.700 (  7.300)  66.000 ( 22.900) 88.900] calc: 1 test: 1
+div: 11 read: 1 sample: 0 pad: 3 [56.700 (  9.300)  66.000 ( 20.900) 86.900] calc: 1 test: 1
+div: 11 read: 1 sample: 0 pad: 2 [54.700 ( 11.300)  66.000 ( 18.900) 84.900] calc: 1 test: 1
+div: 11 read: 1 sample: 0 pad: 1 [52.700 ( 13.300)  66.000 ( 16.900) 82.900] calc: 1 test: 1
+div: 11 read: 1 sample: 0 pad: 0 [50.700 ( 15.300)  66.000 ( 14.900) 80.900] calc: 1 test: 1
+div: 11 read: 1 sample: 1 pad: 5 [60.700 ( 27.300)  88.000 (  2.900) 90.900] calc: 1 test: 1
+div: 11 read: 1 sample: 1 pad: 4 [58.700 ( 29.300)  88.000 (  0.900) 88.900] calc: 1 test: 0
+div: 11 read: 1 sample: 1 pad: 3 [56.700 ( 31.300)  88.000 ( -1.100) 86.900] calc: 0 test: 0
+div: 11 read: 1 sample: 1 pad: 2 [54.700 ( 33.300)  88.000 ( -3.100) 84.900] calc: 0 test: 0
+div: 11 read: 1 sample: 1 pad: 1 [52.700 ( 35.300)  88.000 ( -5.100) 82.900] calc: 0 test: 0
+div: 11 read: 1 sample: 1 pad: 0 [50.700 ( 37.300)  88.000 ( -7.100) 80.900] calc: 0 test: 0
+div: 11 read: 2 sample: 0 pad: 5 [60.700 ( 49.300) 110.000 (-19.100) 90.900] calc: 0 test: 0
+div: 11 read: 2 sample: 0 pad: 4 [58.700 ( 51.300) 110.000 (-21.100) 88.900] calc: 0 test: 0
+div: 11 read: 2 sample: 0 pad: 3 [56.700 ( 53.300) 110.000 (-23.100) 86.900] calc: 0 test: 0
+div: 11 read: 2 sample: 0 pad: 2 [54.700 ( 55.300) 110.000 (-25.100) 84.900] calc: 0 test: 0
+div: 11 read: 2 sample: 0 pad: 1 [52.700 ( 57.300) 110.000 (-27.100) 82.900] calc: 0 test: 0
+div: 11 read: 2 sample: 0 pad: 0 [50.700 ( 59.300) 110.000 (-29.100) 80.900] calc: 0 test: 0
+div: 11 read: 2 sample: 1 pad: 5 [60.700 ( 71.300) 132.000 (-41.100) 90.900] calc: 0 test: 0
+div: 11 read: 2 sample: 1 pad: 4 [58.700 ( 73.300) 132.000 (-43.100) 88.900] calc: 0 test: 0
+div: 11 read: 2 sample: 1 pad: 3 [56.700 ( 75.300) 132.000 (-45.100) 86.900] calc: 0 test: 0
+div: 11 read: 2 sample: 1 pad: 2 [54.700 ( 77.300) 132.000 (-47.100) 84.900] calc: 0 test: 0
+div: 11 read: 2 sample: 1 pad: 1 [52.700 ( 79.300) 132.000 (-49.100) 82.900] calc: 0 test: 0
+div: 11 read: 2 sample: 1 pad: 0 [50.700 ( 81.300) 132.000 (-51.100) 80.900] calc: 0 test: 0
+
+F_core: 500 MHz, clock divider: 12, F_clk: 20.83 MHz
+div: 12 read: 0 sample: 0 pad: 5 [62.700 (-38.700)  24.000 ( 72.900) 96.900] calc: 0 test: 0
+div: 12 read: 0 sample: 0 pad: 4 [60.700 (-36.700)  24.000 ( 70.900) 94.900] calc: 0 test: 0
+div: 12 read: 0 sample: 0 pad: 3 [58.700 (-34.700)  24.000 ( 68.900) 92.900] calc: 0 test: 0
+div: 12 read: 0 sample: 0 pad: 2 [56.700 (-32.700)  24.000 ( 66.900) 90.900] calc: 0 test: 0
+div: 12 read: 0 sample: 0 pad: 1 [54.700 (-30.700)  24.000 ( 64.900) 88.900] calc: 0 test: 0
+div: 12 read: 0 sample: 0 pad: 0 [52.700 (-28.700)  24.000 ( 62.900) 86.900] calc: 0 test: 0
+div: 12 read: 0 sample: 1 pad: 5 [62.700 (-14.700)  48.000 ( 48.900) 96.900] calc: 0 test: 0
+div: 12 read: 0 sample: 1 pad: 4 [60.700 (-12.700)  48.000 ( 46.900) 94.900] calc: 0 test: 0
+div: 12 read: 0 sample: 1 pad: 3 [58.700 (-10.700)  48.000 ( 44.900) 92.900] calc: 0 test: 1
+div: 12 read: 0 sample: 1 pad: 2 [56.700 ( -8.700)  48.000 ( 42.900) 90.900] calc: 0 test: 1
+div: 12 read: 0 sample: 1 pad: 1 [54.700 ( -6.700)  48.000 ( 40.900) 88.900] calc: 0 test: 1
+div: 12 read: 0 sample: 1 pad: 0 [52.700 ( -4.700)  48.000 ( 38.900) 86.900] calc: 0 test: 1
+div: 12 read: 1 sample: 0 pad: 5 [62.700 (  9.300)  72.000 ( 24.900) 96.900] calc: 1 test: 1
+div: 12 read: 1 sample: 0 pad: 4 [60.700 ( 11.300)  72.000 ( 22.900) 94.900] calc: 1 test: 1
+div: 12 read: 1 sample: 0 pad: 3 [58.700 ( 13.300)  72.000 ( 20.900) 92.900] calc: 1 test: 1
+div: 12 read: 1 sample: 0 pad: 2 [56.700 ( 15.300)  72.000 ( 18.900) 90.900] calc: 1 test: 1
+div: 12 read: 1 sample: 0 pad: 1 [54.700 ( 17.300)  72.000 ( 16.900) 88.900] calc: 1 test: 1
+div: 12 read: 1 sample: 0 pad: 0 [52.700 ( 19.300)  72.000 ( 14.900) 86.900] calc: 1 test: 1
+div: 12 read: 1 sample: 1 pad: 5 [62.700 ( 33.300)  96.000 (  0.900) 96.900] calc: 1 test: 0
+div: 12 read: 1 sample: 1 pad: 4 [60.700 ( 35.300)  96.000 ( -1.100) 94.900] calc: 0 test: 0
+div: 12 read: 1 sample: 1 pad: 3 [58.700 ( 37.300)  96.000 ( -3.100) 92.900] calc: 0 test: 0
+div: 12 read: 1 sample: 1 pad: 2 [56.700 ( 39.300)  96.000 ( -5.100) 90.900] calc: 0 test: 0
+div: 12 read: 1 sample: 1 pad: 1 [54.700 ( 41.300)  96.000 ( -7.100) 88.900] calc: 0 test: 0
+div: 12 read: 1 sample: 1 pad: 0 [52.700 ( 43.300)  96.000 ( -9.100) 86.900] calc: 0 test: 0
+div: 12 read: 2 sample: 0 pad: 5 [62.700 ( 57.300) 120.000 (-23.100) 96.900] calc: 0 test: 0
+div: 12 read: 2 sample: 0 pad: 4 [60.700 ( 59.300) 120.000 (-25.100) 94.900] calc: 0 test: 0
+div: 12 read: 2 sample: 0 pad: 3 [58.700 ( 61.300) 120.000 (-27.100) 92.900] calc: 0 test: 0
+div: 12 read: 2 sample: 0 pad: 2 [56.700 ( 63.300) 120.000 (-29.100) 90.900] calc: 0 test: 0
+div: 12 read: 2 sample: 0 pad: 1 [54.700 ( 65.300) 120.000 (-31.100) 88.900] calc: 0 test: 0
+div: 12 read: 2 sample: 0 pad: 0 [52.700 ( 67.300) 120.000 (-33.100) 86.900] calc: 0 test: 0
+div: 12 read: 2 sample: 1 pad: 5 [62.700 ( 81.300) 144.000 (-47.100) 96.900] calc: 0 test: 0
+div: 12 read: 2 sample: 1 pad: 4 [60.700 ( 83.300) 144.000 (-49.100) 94.900] calc: 0 test: 0
+div: 12 read: 2 sample: 1 pad: 3 [58.700 ( 85.300) 144.000 (-51.100) 92.900] calc: 0 test: 0
+div: 12 read: 2 sample: 1 pad: 2 [56.700 ( 87.300) 144.000 (-53.100) 90.900] calc: 0 test: 0
+div: 12 read: 2 sample: 1 pad: 1 [54.700 ( 89.300) 144.000 (-55.100) 88.900] calc: 0 test: 0
+div: 12 read: 2 sample: 1 pad: 0 [52.700 ( 91.300) 144.000 (-57.100) 86.900] calc: 0 test: 0
+SDRAM timing finished
+
+
+
+
+XS3 results
+-----------
+
+Tested using a XU316 xcore-ai onboard SDRAM test board (XU316-1024-FB265-C24 CPU)
+with 64Mbit Winbond W9864G6KH-6 (equivalent to an ISSI IS42S16400D-7).
+
+Using 64Mb SDRAM
+Round trip time min: 8764 ps, max: 21830 ps
+starting SDRAM timing
+
+F_core: 600 MHz, clock divider: 4, F_clk: 75.00 MHz
+div:  4 read: 0 sample: 0 pad: 5 [42.224 (-35.560)   6.664 ( 32.922) 39.586] calc: 0 test: 0
+div:  4 read: 0 sample: 0 pad: 4 [40.558 (-33.894)   6.664 ( 31.256) 37.920] calc: 0 test: 0
+div:  4 read: 0 sample: 0 pad: 3 [38.892 (-32.228)   6.664 ( 29.590) 36.254] calc: 0 test: 0
+div:  4 read: 0 sample: 0 pad: 2 [37.226 (-30.562)   6.664 ( 27.924) 34.588] calc: 0 test: 0
+div:  4 read: 0 sample: 0 pad: 1 [35.560 (-28.896)   6.664 ( 26.258) 32.922] calc: 0 test: 0
+div:  4 read: 0 sample: 0 pad: 0 [33.894 (-27.230)   6.664 ( 24.592) 31.256] calc: 0 test: 0
+div:  4 read: 0 sample: 1 pad: 5 [42.224 (-28.896)  13.328 ( 26.258) 39.586] calc: 0 test: 0
+div:  4 read: 0 sample: 1 pad: 4 [40.558 (-27.230)  13.328 ( 24.592) 37.920] calc: 0 test: 0
+div:  4 read: 0 sample: 1 pad: 3 [38.892 (-25.564)  13.328 ( 22.926) 36.254] calc: 0 test: 0
+div:  4 read: 0 sample: 1 pad: 2 [37.226 (-23.898)  13.328 ( 21.260) 34.588] calc: 0 test: 0
+div:  4 read: 0 sample: 1 pad: 1 [35.560 (-22.232)  13.328 ( 19.594) 32.922] calc: 0 test: 0
+div:  4 read: 0 sample: 1 pad: 0 [33.894 (-20.566)  13.328 ( 17.928) 31.256] calc: 0 test: 0
+div:  4 read: 1 sample: 0 pad: 5 [42.224 (-22.232)  19.992 ( 19.594) 39.586] calc: 0 test: 0
+div:  4 read: 1 sample: 0 pad: 4 [40.558 (-20.566)  19.992 ( 17.928) 37.920] calc: 0 test: 0
+div:  4 read: 1 sample: 0 pad: 3 [38.892 (-18.900)  19.992 ( 16.262) 36.254] calc: 0 test: 0
+div:  4 read: 1 sample: 0 pad: 2 [37.226 (-17.234)  19.992 ( 14.596) 34.588] calc: 0 test: 0
+div:  4 read: 1 sample: 0 pad: 1 [35.560 (-15.568)  19.992 ( 12.930) 32.922] calc: 0 test: 0
+div:  4 read: 1 sample: 0 pad: 0 [33.894 (-13.902)  19.992 ( 11.264) 31.256] calc: 0 test: 0
+div:  4 read: 1 sample: 1 pad: 5 [42.224 (-15.568)  26.656 ( 12.930) 39.586] calc: 0 test: 0
+div:  4 read: 1 sample: 1 pad: 4 [40.558 (-13.902)  26.656 ( 11.264) 37.920] calc: 0 test: 0
+div:  4 read: 1 sample: 1 pad: 3 [38.892 (-12.236)  26.656 (  9.598) 36.254] calc: 0 test: 0
+div:  4 read: 1 sample: 1 pad: 2 [37.226 (-10.570)  26.656 (  7.932) 34.588] calc: 0 test: 0
+div:  4 read: 1 sample: 1 pad: 1 [35.560 ( -8.904)  26.656 (  6.266) 32.922] calc: 0 test: 1
+div:  4 read: 1 sample: 1 pad: 0 [33.894 ( -7.238)  26.656 (  4.600) 31.256] calc: 0 test: 1
+div:  4 read: 2 sample: 0 pad: 5 [42.224 ( -8.904)  33.320 (  6.266) 39.586] calc: 0 test: 1
+div:  4 read: 2 sample: 0 pad: 4 [40.558 ( -7.238)  33.320 (  4.600) 37.920] calc: 0 test: 1
+div:  4 read: 2 sample: 0 pad: 3 [38.892 ( -5.572)  33.320 (  2.934) 36.254] calc: 0 test: 1
+div:  4 read: 2 sample: 0 pad: 2 [37.226 ( -3.906)  33.320 (  1.268) 34.588] calc: 0 test: 1
+div:  4 read: 2 sample: 0 pad: 1 [35.560 ( -2.240)  33.320 ( -0.398) 32.922] calc: 0 test: 1
+div:  4 read: 2 sample: 0 pad: 0 [33.894 ( -0.574)  33.320 ( -2.064) 31.256] calc: 0 test: 0
+div:  4 read: 2 sample: 1 pad: 5 [42.224 ( -2.240)  39.984 ( -0.398) 39.586] calc: 0 test: 1
+div:  4 read: 2 sample: 1 pad: 4 [40.558 ( -0.574)  39.984 ( -2.064) 37.920] calc: 0 test: 0
+div:  4 read: 2 sample: 1 pad: 3 [38.892 (  1.092)  39.984 ( -3.730) 36.254] calc: 0 test: 0
+div:  4 read: 2 sample: 1 pad: 2 [37.226 (  2.758)  39.984 ( -5.396) 34.588] calc: 0 test: 0
+div:  4 read: 2 sample: 1 pad: 1 [35.560 (  4.424)  39.984 ( -7.062) 32.922] calc: 0 test: 0
+div:  4 read: 2 sample: 1 pad: 0 [33.894 (  6.090)  39.984 ( -8.728) 31.256] calc: 0 test: 0
+
+F_core: 600 MHz, clock divider: 5, F_clk: 60.00 MHz
+div:  5 read: 0 sample: 0 pad: 5 [43.890 (-35.560)   8.330 ( 36.254) 44.584] calc: 0 test: 0
+div:  5 read: 0 sample: 0 pad: 4 [42.224 (-33.894)   8.330 ( 34.588) 42.918] calc: 0 test: 0
+div:  5 read: 0 sample: 0 pad: 3 [40.558 (-32.228)   8.330 ( 32.922) 41.252] calc: 0 test: 0
+div:  5 read: 0 sample: 0 pad: 2 [38.892 (-30.562)   8.330 ( 31.256) 39.586] calc: 0 test: 0
+div:  5 read: 0 sample: 0 pad: 1 [37.226 (-28.896)   8.330 ( 29.590) 37.920] calc: 0 test: 0
+div:  5 read: 0 sample: 0 pad: 0 [35.560 (-27.230)   8.330 ( 27.924) 36.254] calc: 0 test: 0
+div:  5 read: 0 sample: 1 pad: 5 [43.890 (-27.230)  16.660 ( 27.924) 44.584] calc: 0 test: 0
+div:  5 read: 0 sample: 1 pad: 4 [42.224 (-25.564)  16.660 ( 26.258) 42.918] calc: 0 test: 0
+div:  5 read: 0 sample: 1 pad: 3 [40.558 (-23.898)  16.660 ( 24.592) 41.252] calc: 0 test: 0
+div:  5 read: 0 sample: 1 pad: 2 [38.892 (-22.232)  16.660 ( 22.926) 39.586] calc: 0 test: 0
+div:  5 read: 0 sample: 1 pad: 1 [37.226 (-20.566)  16.660 ( 21.260) 37.920] calc: 0 test: 0
+div:  5 read: 0 sample: 1 pad: 0 [35.560 (-18.900)  16.660 ( 19.594) 36.254] calc: 0 test: 0
+div:  5 read: 1 sample: 0 pad: 5 [43.890 (-18.900)  24.990 ( 19.594) 44.584] calc: 0 test: 0
+div:  5 read: 1 sample: 0 pad: 4 [42.224 (-17.234)  24.990 ( 17.928) 42.918] calc: 0 test: 0
+div:  5 read: 1 sample: 0 pad: 3 [40.558 (-15.568)  24.990 ( 16.262) 41.252] calc: 0 test: 0
+div:  5 read: 1 sample: 0 pad: 2 [38.892 (-13.902)  24.990 ( 14.596) 39.586] calc: 0 test: 0
+div:  5 read: 1 sample: 0 pad: 1 [37.226 (-12.236)  24.990 ( 12.930) 37.920] calc: 0 test: 0
+div:  5 read: 1 sample: 0 pad: 0 [35.560 (-10.570)  24.990 ( 11.264) 36.254] calc: 0 test: 0
+div:  5 read: 1 sample: 1 pad: 5 [43.890 (-10.570)  33.320 ( 11.264) 44.584] calc: 0 test: 0
+div:  5 read: 1 sample: 1 pad: 4 [42.224 ( -8.904)  33.320 (  9.598) 42.918] calc: 0 test: 1
+div:  5 read: 1 sample: 1 pad: 3 [40.558 ( -7.238)  33.320 (  7.932) 41.252] calc: 0 test: 1
+div:  5 read: 1 sample: 1 pad: 2 [38.892 ( -5.572)  33.320 (  6.266) 39.586] calc: 0 test: 1
+div:  5 read: 1 sample: 1 pad: 1 [37.226 ( -3.906)  33.320 (  4.600) 37.920] calc: 0 test: 1
+div:  5 read: 1 sample: 1 pad: 0 [35.560 ( -2.240)  33.320 (  2.934) 36.254] calc: 0 test: 1 ***
+div:  5 read: 2 sample: 0 pad: 5 [43.890 ( -2.240)  41.650 (  2.934) 44.584] calc: 0 test: 1
+div:  5 read: 2 sample: 0 pad: 4 [42.224 ( -0.574)  41.650 (  1.268) 42.918] calc: 0 test: 1
+div:  5 read: 2 sample: 0 pad: 3 [40.558 (  1.092)  41.650 ( -0.398) 41.252] calc: 0 test: 1
+div:  5 read: 2 sample: 0 pad: 2 [38.892 (  2.758)  41.650 ( -2.064) 39.586] calc: 0 test: 0
+div:  5 read: 2 sample: 0 pad: 1 [37.226 (  4.424)  41.650 ( -3.730) 37.920] calc: 0 test: 0
+div:  5 read: 2 sample: 0 pad: 0 [35.560 (  6.090)  41.650 ( -5.396) 36.254] calc: 0 test: 0
+div:  5 read: 2 sample: 1 pad: 5 [43.890 (  6.090)  49.980 ( -5.396) 44.584] calc: 0 test: 0
+div:  5 read: 2 sample: 1 pad: 4 [42.224 (  7.756)  49.980 ( -7.062) 42.918] calc: 0 test: 0
+div:  5 read: 2 sample: 1 pad: 3 [40.558 (  9.422)  49.980 ( -8.728) 41.252] calc: 0 test: 0
+div:  5 read: 2 sample: 1 pad: 2 [38.892 ( 11.088)  49.980 (-10.394) 39.586] calc: 0 test: 0
+div:  5 read: 2 sample: 1 pad: 1 [37.226 ( 12.754)  49.980 (-12.060) 37.920] calc: 0 test: 0
+div:  5 read: 2 sample: 1 pad: 0 [35.560 ( 14.420)  49.980 (-13.726) 36.254] calc: 0 test: 0
+
+F_core: 600 MHz, clock divider: 6, F_clk: 50.00 MHz
+div:  6 read: 0 sample: 0 pad: 5 [45.556 (-35.560)   9.996 ( 39.586) 49.582] calc: 0 test: 0
+div:  6 read: 0 sample: 0 pad: 4 [43.890 (-33.894)   9.996 ( 37.920) 47.916] calc: 0 test: 0
+div:  6 read: 0 sample: 0 pad: 3 [42.224 (-32.228)   9.996 ( 36.254) 46.250] calc: 0 test: 0
+div:  6 read: 0 sample: 0 pad: 2 [40.558 (-30.562)   9.996 ( 34.588) 44.584] calc: 0 test: 0
+div:  6 read: 0 sample: 0 pad: 1 [38.892 (-28.896)   9.996 ( 32.922) 42.918] calc: 0 test: 0
+div:  6 read: 0 sample: 0 pad: 0 [37.226 (-27.230)   9.996 ( 31.256) 41.252] calc: 0 test: 0
+div:  6 read: 0 sample: 1 pad: 5 [45.556 (-25.564)  19.992 ( 29.590) 49.582] calc: 0 test: 0
+div:  6 read: 0 sample: 1 pad: 4 [43.890 (-23.898)  19.992 ( 27.924) 47.916] calc: 0 test: 0
+div:  6 read: 0 sample: 1 pad: 3 [42.224 (-22.232)  19.992 ( 26.258) 46.250] calc: 0 test: 0
+div:  6 read: 0 sample: 1 pad: 2 [40.558 (-20.566)  19.992 ( 24.592) 44.584] calc: 0 test: 0
+div:  6 read: 0 sample: 1 pad: 1 [38.892 (-18.900)  19.992 ( 22.926) 42.918] calc: 0 test: 0
+div:  6 read: 0 sample: 1 pad: 0 [37.226 (-17.234)  19.992 ( 21.260) 41.252] calc: 0 test: 0
+div:  6 read: 1 sample: 0 pad: 5 [45.556 (-15.568)  29.988 ( 19.594) 49.582] calc: 0 test: 0
+div:  6 read: 1 sample: 0 pad: 4 [43.890 (-13.902)  29.988 ( 17.928) 47.916] calc: 0 test: 0
+div:  6 read: 1 sample: 0 pad: 3 [42.224 (-12.236)  29.988 ( 16.262) 46.250] calc: 0 test: 0
+div:  6 read: 1 sample: 0 pad: 2 [40.558 (-10.570)  29.988 ( 14.596) 44.584] calc: 0 test: 0
+div:  6 read: 1 sample: 0 pad: 1 [38.892 ( -8.904)  29.988 ( 12.930) 42.918] calc: 0 test: 1
+div:  6 read: 1 sample: 0 pad: 0 [37.226 ( -7.238)  29.988 ( 11.264) 41.252] calc: 0 test: 1
+div:  6 read: 1 sample: 1 pad: 5 [45.556 ( -5.572)  39.984 (  9.598) 49.582] calc: 0 test: 1
+div:  6 read: 1 sample: 1 pad: 4 [43.890 ( -3.906)  39.984 (  7.932) 47.916] calc: 0 test: 1
+div:  6 read: 1 sample: 1 pad: 3 [42.224 ( -2.240)  39.984 (  6.266) 46.250] calc: 0 test: 1
+div:  6 read: 1 sample: 1 pad: 2 [40.558 ( -0.574)  39.984 (  4.600) 44.584] calc: 0 test: 1 ***
+div:  6 read: 1 sample: 1 pad: 1 [38.892 (  1.092)  39.984 (  2.934) 42.918] calc: 1 test: 1
+div:  6 read: 1 sample: 1 pad: 0 [37.226 (  2.758)  39.984 (  1.268) 41.252] calc: 1 test: 1
+div:  6 read: 2 sample: 0 pad: 5 [45.556 (  4.424)  49.980 ( -0.398) 49.582] calc: 0 test: 1
+div:  6 read: 2 sample: 0 pad: 4 [43.890 (  6.090)  49.980 ( -2.064) 47.916] calc: 0 test: 0
+div:  6 read: 2 sample: 0 pad: 3 [42.224 (  7.756)  49.980 ( -3.730) 46.250] calc: 0 test: 0
+div:  6 read: 2 sample: 0 pad: 2 [40.558 (  9.422)  49.980 ( -5.396) 44.584] calc: 0 test: 0
+div:  6 read: 2 sample: 0 pad: 1 [38.892 ( 11.088)  49.980 ( -7.062) 42.918] calc: 0 test: 0
+div:  6 read: 2 sample: 0 pad: 0 [37.226 ( 12.754)  49.980 ( -8.728) 41.252] calc: 0 test: 0
+div:  6 read: 2 sample: 1 pad: 5 [45.556 ( 14.420)  59.976 (-10.394) 49.582] calc: 0 test: 0
+div:  6 read: 2 sample: 1 pad: 4 [43.890 ( 16.086)  59.976 (-12.060) 47.916] calc: 0 test: 0
+div:  6 read: 2 sample: 1 pad: 3 [42.224 ( 17.752)  59.976 (-13.726) 46.250] calc: 0 test: 0
+div:  6 read: 2 sample: 1 pad: 2 [40.558 ( 19.418)  59.976 (-15.392) 44.584] calc: 0 test: 0
+div:  6 read: 2 sample: 1 pad: 1 [38.892 ( 21.084)  59.976 (-17.058) 42.918] calc: 0 test: 0
+div:  6 read: 2 sample: 1 pad: 0 [37.226 ( 22.750)  59.976 (-18.724) 41.252] calc: 0 test: 0
+
+F_core: 600 MHz, clock divider: 7, F_clk: 42.85 MHz
+div:  7 read: 0 sample: 0 pad: 5 [47.222 (-35.560)  11.662 ( 42.918) 54.580] calc: 0 test: 0
+div:  7 read: 0 sample: 0 pad: 4 [45.556 (-33.894)  11.662 ( 41.252) 52.914] calc: 0 test: 0
+div:  7 read: 0 sample: 0 pad: 3 [43.890 (-32.228)  11.662 ( 39.586) 51.248] calc: 0 test: 0
+div:  7 read: 0 sample: 0 pad: 2 [42.224 (-30.562)  11.662 ( 37.920) 49.582] calc: 0 test: 0
+div:  7 read: 0 sample: 0 pad: 1 [40.558 (-28.896)  11.662 ( 36.254) 47.916] calc: 0 test: 0
+div:  7 read: 0 sample: 0 pad: 0 [38.892 (-27.230)  11.662 ( 34.588) 46.250] calc: 0 test: 0
+div:  7 read: 0 sample: 1 pad: 5 [47.222 (-23.898)  23.324 ( 31.256) 54.580] calc: 0 test: 0
+div:  7 read: 0 sample: 1 pad: 4 [45.556 (-22.232)  23.324 ( 29.590) 52.914] calc: 0 test: 0
+div:  7 read: 0 sample: 1 pad: 3 [43.890 (-20.566)  23.324 ( 27.924) 51.248] calc: 0 test: 0
+div:  7 read: 0 sample: 1 pad: 2 [42.224 (-18.900)  23.324 ( 26.258) 49.582] calc: 0 test: 0
+div:  7 read: 0 sample: 1 pad: 1 [40.558 (-17.234)  23.324 ( 24.592) 47.916] calc: 0 test: 0
+div:  7 read: 0 sample: 1 pad: 0 [38.892 (-15.568)  23.324 ( 22.926) 46.250] calc: 0 test: 0
+div:  7 read: 1 sample: 0 pad: 5 [47.222 (-12.236)  34.986 ( 19.594) 54.580] calc: 0 test: 0
+div:  7 read: 1 sample: 0 pad: 4 [45.556 (-10.570)  34.986 ( 17.928) 52.914] calc: 0 test: 0
+div:  7 read: 1 sample: 0 pad: 3 [43.890 ( -8.904)  34.986 ( 16.262) 51.248] calc: 0 test: 1
+div:  7 read: 1 sample: 0 pad: 2 [42.224 ( -7.238)  34.986 ( 14.596) 49.582] calc: 0 test: 1
+div:  7 read: 1 sample: 0 pad: 1 [40.558 ( -5.572)  34.986 ( 12.930) 47.916] calc: 0 test: 1
+div:  7 read: 1 sample: 0 pad: 0 [38.892 ( -3.906)  34.986 ( 11.264) 46.250] calc: 0 test: 1
+div:  7 read: 1 sample: 1 pad: 5 [47.222 ( -0.574)  46.648 (  7.932) 54.580] calc: 0 test: 1
+div:  7 read: 1 sample: 1 pad: 4 [45.556 (  1.092)  46.648 (  6.266) 52.914] calc: 1 test: 1 ***
+div:  7 read: 1 sample: 1 pad: 3 [43.890 (  2.758)  46.648 (  4.600) 51.248] calc: 1 test: 1
+div:  7 read: 1 sample: 1 pad: 2 [42.224 (  4.424)  46.648 (  2.934) 49.582] calc: 1 test: 1
+div:  7 read: 1 sample: 1 pad: 1 [40.558 (  6.090)  46.648 (  1.268) 47.916] calc: 1 test: 1
+div:  7 read: 1 sample: 1 pad: 0 [38.892 (  7.756)  46.648 ( -0.398) 46.250] calc: 0 test: 1
+div:  7 read: 2 sample: 0 pad: 5 [47.222 ( 11.088)  58.310 ( -3.730) 54.580] calc: 0 test: 0
+div:  7 read: 2 sample: 0 pad: 4 [45.556 ( 12.754)  58.310 ( -5.396) 52.914] calc: 0 test: 0
+div:  7 read: 2 sample: 0 pad: 3 [43.890 ( 14.420)  58.310 ( -7.062) 51.248] calc: 0 test: 0
+div:  7 read: 2 sample: 0 pad: 2 [42.224 ( 16.086)  58.310 ( -8.728) 49.582] calc: 0 test: 0
+div:  7 read: 2 sample: 0 pad: 1 [40.558 ( 17.752)  58.310 (-10.394) 47.916] calc: 0 test: 0
+div:  7 read: 2 sample: 0 pad: 0 [38.892 ( 19.418)  58.310 (-12.060) 46.250] calc: 0 test: 0
+div:  7 read: 2 sample: 1 pad: 5 [47.222 ( 22.750)  69.972 (-15.392) 54.580] calc: 0 test: 0
+div:  7 read: 2 sample: 1 pad: 4 [45.556 ( 24.416)  69.972 (-17.058) 52.914] calc: 0 test: 0
+div:  7 read: 2 sample: 1 pad: 3 [43.890 ( 26.082)  69.972 (-18.724) 51.248] calc: 0 test: 0
+div:  7 read: 2 sample: 1 pad: 2 [42.224 ( 27.748)  69.972 (-20.390) 49.582] calc: 0 test: 0
+div:  7 read: 2 sample: 1 pad: 1 [40.558 ( 29.414)  69.972 (-22.056) 47.916] calc: 0 test: 0
+div:  7 read: 2 sample: 1 pad: 0 [38.892 ( 31.080)  69.972 (-23.722) 46.250] calc: 0 test: 0
+
+F_core: 600 MHz, clock divider: 8, F_clk: 37.50 MHz
+div:  8 read: 0 sample: 0 pad: 5 [48.888 (-35.560)  13.328 ( 46.250) 59.578] calc: 0 test: 0
+div:  8 read: 0 sample: 0 pad: 4 [47.222 (-33.894)  13.328 ( 44.584) 57.912] calc: 0 test: 0
+div:  8 read: 0 sample: 0 pad: 3 [45.556 (-32.228)  13.328 ( 42.918) 56.246] calc: 0 test: 0
+div:  8 read: 0 sample: 0 pad: 2 [43.890 (-30.562)  13.328 ( 41.252) 54.580] calc: 0 test: 0
+div:  8 read: 0 sample: 0 pad: 1 [42.224 (-28.896)  13.328 ( 39.586) 52.914] calc: 0 test: 0
+div:  8 read: 0 sample: 0 pad: 0 [40.558 (-27.230)  13.328 ( 37.920) 51.248] calc: 0 test: 0
+div:  8 read: 0 sample: 1 pad: 5 [48.888 (-22.232)  26.656 ( 32.922) 59.578] calc: 0 test: 0
+div:  8 read: 0 sample: 1 pad: 4 [47.222 (-20.566)  26.656 ( 31.256) 57.912] calc: 0 test: 0
+div:  8 read: 0 sample: 1 pad: 3 [45.556 (-18.900)  26.656 ( 29.590) 56.246] calc: 0 test: 0
+div:  8 read: 0 sample: 1 pad: 2 [43.890 (-17.234)  26.656 ( 27.924) 54.580] calc: 0 test: 0
+div:  8 read: 0 sample: 1 pad: 1 [42.224 (-15.568)  26.656 ( 26.258) 52.914] calc: 0 test: 0
+div:  8 read: 0 sample: 1 pad: 0 [40.558 (-13.902)  26.656 ( 24.592) 51.248] calc: 0 test: 0
+div:  8 read: 1 sample: 0 pad: 5 [48.888 ( -8.904)  39.984 ( 19.594) 59.578] calc: 0 test: 1
+div:  8 read: 1 sample: 0 pad: 4 [47.222 ( -7.238)  39.984 ( 17.928) 57.912] calc: 0 test: 1
+div:  8 read: 1 sample: 0 pad: 3 [45.556 ( -5.572)  39.984 ( 16.262) 56.246] calc: 0 test: 1
+div:  8 read: 1 sample: 0 pad: 2 [43.890 ( -3.906)  39.984 ( 14.596) 54.580] calc: 0 test: 1
+div:  8 read: 1 sample: 0 pad: 1 [42.224 ( -2.240)  39.984 ( 12.930) 52.914] calc: 0 test: 1
+div:  8 read: 1 sample: 0 pad: 0 [40.558 ( -0.574)  39.984 ( 11.264) 51.248] calc: 0 test: 1
+div:  8 read: 1 sample: 1 pad: 5 [48.888 (  4.424)  53.312 (  6.266) 59.578] calc: 1 test: 1 ***
+div:  8 read: 1 sample: 1 pad: 4 [47.222 (  6.090)  53.312 (  4.600) 57.912] calc: 1 test: 1
+div:  8 read: 1 sample: 1 pad: 3 [45.556 (  7.756)  53.312 (  2.934) 56.246] calc: 1 test: 1
+div:  8 read: 1 sample: 1 pad: 2 [43.890 (  9.422)  53.312 (  1.268) 54.580] calc: 1 test: 1
+div:  8 read: 1 sample: 1 pad: 1 [42.224 ( 11.088)  53.312 ( -0.398) 52.914] calc: 0 test: 1
+div:  8 read: 1 sample: 1 pad: 0 [40.558 ( 12.754)  53.312 ( -2.064) 51.248] calc: 0 test: 0
+div:  8 read: 2 sample: 0 pad: 5 [48.888 ( 17.752)  66.640 ( -7.062) 59.578] calc: 0 test: 0
+div:  8 read: 2 sample: 0 pad: 4 [47.222 ( 19.418)  66.640 ( -8.728) 57.912] calc: 0 test: 0
+div:  8 read: 2 sample: 0 pad: 3 [45.556 ( 21.084)  66.640 (-10.394) 56.246] calc: 0 test: 0
+div:  8 read: 2 sample: 0 pad: 2 [43.890 ( 22.750)  66.640 (-12.060) 54.580] calc: 0 test: 0
+div:  8 read: 2 sample: 0 pad: 1 [42.224 ( 24.416)  66.640 (-13.726) 52.914] calc: 0 test: 0
+div:  8 read: 2 sample: 0 pad: 0 [40.558 ( 26.082)  66.640 (-15.392) 51.248] calc: 0 test: 0
+div:  8 read: 2 sample: 1 pad: 5 [48.888 ( 31.080)  79.968 (-20.390) 59.578] calc: 0 test: 0
+div:  8 read: 2 sample: 1 pad: 4 [47.222 ( 32.746)  79.968 (-22.056) 57.912] calc: 0 test: 0
+div:  8 read: 2 sample: 1 pad: 3 [45.556 ( 34.412)  79.968 (-23.722) 56.246] calc: 0 test: 0
+div:  8 read: 2 sample: 1 pad: 2 [43.890 ( 36.078)  79.968 (-25.388) 54.580] calc: 0 test: 0
+div:  8 read: 2 sample: 1 pad: 1 [42.224 ( 37.744)  79.968 (-27.054) 52.914] calc: 0 test: 0
+div:  8 read: 2 sample: 1 pad: 0 [40.558 ( 39.410)  79.968 (-28.720) 51.248] calc: 0 test: 0
+
+F_core: 600 MHz, clock divider: 9, F_clk: 33.33 MHz
+div:  9 read: 0 sample: 0 pad: 5 [50.554 (-35.560)  14.994 ( 49.582) 64.576] calc: 0 test: 0
+div:  9 read: 0 sample: 0 pad: 4 [48.888 (-33.894)  14.994 ( 47.916) 62.910] calc: 0 test: 0
+div:  9 read: 0 sample: 0 pad: 3 [47.222 (-32.228)  14.994 ( 46.250) 61.244] calc: 0 test: 0
+div:  9 read: 0 sample: 0 pad: 2 [45.556 (-30.562)  14.994 ( 44.584) 59.578] calc: 0 test: 0
+div:  9 read: 0 sample: 0 pad: 1 [43.890 (-28.896)  14.994 ( 42.918) 57.912] calc: 0 test: 0
+div:  9 read: 0 sample: 0 pad: 0 [42.224 (-27.230)  14.994 ( 41.252) 56.246] calc: 0 test: 0
+div:  9 read: 0 sample: 1 pad: 5 [50.554 (-20.566)  29.988 ( 34.588) 64.576] calc: 0 test: 0
+div:  9 read: 0 sample: 1 pad: 4 [48.888 (-18.900)  29.988 ( 32.922) 62.910] calc: 0 test: 0
+div:  9 read: 0 sample: 1 pad: 3 [47.222 (-17.234)  29.988 ( 31.256) 61.244] calc: 0 test: 0
+div:  9 read: 0 sample: 1 pad: 2 [45.556 (-15.568)  29.988 ( 29.590) 59.578] calc: 0 test: 0
+div:  9 read: 0 sample: 1 pad: 1 [43.890 (-13.902)  29.988 ( 27.924) 57.912] calc: 0 test: 0
+div:  9 read: 0 sample: 1 pad: 0 [42.224 (-12.236)  29.988 ( 26.258) 56.246] calc: 0 test: 0
+div:  9 read: 1 sample: 0 pad: 5 [50.554 ( -5.572)  44.982 ( 19.594) 64.576] calc: 0 test: 1
+div:  9 read: 1 sample: 0 pad: 4 [48.888 ( -3.906)  44.982 ( 17.928) 62.910] calc: 0 test: 1
+div:  9 read: 1 sample: 0 pad: 3 [47.222 ( -2.240)  44.982 ( 16.262) 61.244] calc: 0 test: 1
+div:  9 read: 1 sample: 0 pad: 2 [45.556 ( -0.574)  44.982 ( 14.596) 59.578] calc: 0 test: 1
+div:  9 read: 1 sample: 0 pad: 1 [43.890 (  1.092)  44.982 ( 12.930) 57.912] calc: 1 test: 1
+div:  9 read: 1 sample: 0 pad: 0 [42.224 (  2.758)  44.982 ( 11.264) 56.246] calc: 1 test: 1 ***
+div:  9 read: 1 sample: 1 pad: 5 [50.554 (  9.422)  59.976 (  4.600) 64.576] calc: 1 test: 1
+div:  9 read: 1 sample: 1 pad: 4 [48.888 ( 11.088)  59.976 (  2.934) 62.910] calc: 1 test: 1
+div:  9 read: 1 sample: 1 pad: 3 [47.222 ( 12.754)  59.976 (  1.268) 61.244] calc: 1 test: 1
+div:  9 read: 1 sample: 1 pad: 2 [45.556 ( 14.420)  59.976 ( -0.398) 59.578] calc: 0 test: 1
+div:  9 read: 1 sample: 1 pad: 1 [43.890 ( 16.086)  59.976 ( -2.064) 57.912] calc: 0 test: 0
+div:  9 read: 1 sample: 1 pad: 0 [42.224 ( 17.752)  59.976 ( -3.730) 56.246] calc: 0 test: 0
+div:  9 read: 2 sample: 0 pad: 5 [50.554 ( 24.416)  74.970 (-10.394) 64.576] calc: 0 test: 0
+div:  9 read: 2 sample: 0 pad: 4 [48.888 ( 26.082)  74.970 (-12.060) 62.910] calc: 0 test: 0
+div:  9 read: 2 sample: 0 pad: 3 [47.222 ( 27.748)  74.970 (-13.726) 61.244] calc: 0 test: 0
+div:  9 read: 2 sample: 0 pad: 2 [45.556 ( 29.414)  74.970 (-15.392) 59.578] calc: 0 test: 0
+div:  9 read: 2 sample: 0 pad: 1 [43.890 ( 31.080)  74.970 (-17.058) 57.912] calc: 0 test: 0
+div:  9 read: 2 sample: 0 pad: 0 [42.224 ( 32.746)  74.970 (-18.724) 56.246] calc: 0 test: 0
+div:  9 read: 2 sample: 1 pad: 5 [50.554 ( 39.410)  89.964 (-25.388) 64.576] calc: 0 test: 0
+div:  9 read: 2 sample: 1 pad: 4 [48.888 ( 41.076)  89.964 (-27.054) 62.910] calc: 0 test: 0
+div:  9 read: 2 sample: 1 pad: 3 [47.222 ( 42.742)  89.964 (-28.720) 61.244] calc: 0 test: 0
+div:  9 read: 2 sample: 1 pad: 2 [45.556 ( 44.408)  89.964 (-30.386) 59.578] calc: 0 test: 0
+div:  9 read: 2 sample: 1 pad: 1 [43.890 ( 46.074)  89.964 (-32.052) 57.912] calc: 0 test: 0
+div:  9 read: 2 sample: 1 pad: 0 [42.224 ( 47.740)  89.964 (-33.718) 56.246] calc: 0 test: 0
+
+F_core: 600 MHz, clock divider: 10, F_clk: 30.00 MHz
+div: 10 read: 0 sample: 0 pad: 5 [52.220 (-35.560)  16.660 ( 52.914) 69.574] calc: 0 test: 0
+div: 10 read: 0 sample: 0 pad: 4 [50.554 (-33.894)  16.660 ( 51.248) 67.908] calc: 0 test: 0
+div: 10 read: 0 sample: 0 pad: 3 [48.888 (-32.228)  16.660 ( 49.582) 66.242] calc: 0 test: 0
+div: 10 read: 0 sample: 0 pad: 2 [47.222 (-30.562)  16.660 ( 47.916) 64.576] calc: 0 test: 0
+div: 10 read: 0 sample: 0 pad: 1 [45.556 (-28.896)  16.660 ( 46.250) 62.910] calc: 0 test: 0
+div: 10 read: 0 sample: 0 pad: 0 [43.890 (-27.230)  16.660 ( 44.584) 61.244] calc: 0 test: 0
+div: 10 read: 0 sample: 1 pad: 5 [52.220 (-18.900)  33.320 ( 36.254) 69.574] calc: 0 test: 0
+div: 10 read: 0 sample: 1 pad: 4 [50.554 (-17.234)  33.320 ( 34.588) 67.908] calc: 0 test: 0
+div: 10 read: 0 sample: 1 pad: 3 [48.888 (-15.568)  33.320 ( 32.922) 66.242] calc: 0 test: 0
+div: 10 read: 0 sample: 1 pad: 2 [47.222 (-13.902)  33.320 ( 31.256) 64.576] calc: 0 test: 0
+div: 10 read: 0 sample: 1 pad: 1 [45.556 (-12.236)  33.320 ( 29.590) 62.910] calc: 0 test: 0
+div: 10 read: 0 sample: 1 pad: 0 [43.890 (-10.570)  33.320 ( 27.924) 61.244] calc: 0 test: 1
+div: 10 read: 1 sample: 0 pad: 5 [52.220 ( -2.240)  49.980 ( 19.594) 69.574] calc: 0 test: 1
+div: 10 read: 1 sample: 0 pad: 4 [50.554 ( -0.574)  49.980 ( 17.928) 67.908] calc: 0 test: 1
+div: 10 read: 1 sample: 0 pad: 3 [48.888 (  1.092)  49.980 ( 16.262) 66.242] calc: 1 test: 1
+div: 10 read: 1 sample: 0 pad: 2 [47.222 (  2.758)  49.980 ( 14.596) 64.576] calc: 1 test: 1
+div: 10 read: 1 sample: 0 pad: 1 [45.556 (  4.424)  49.980 ( 12.930) 62.910] calc: 1 test: 1 ***
+div: 10 read: 1 sample: 0 pad: 0 [43.890 (  6.090)  49.980 ( 11.264) 61.244] calc: 1 test: 1
+div: 10 read: 1 sample: 1 pad: 5 [52.220 ( 14.420)  66.640 (  2.934) 69.574] calc: 1 test: 1
+div: 10 read: 1 sample: 1 pad: 4 [50.554 ( 16.086)  66.640 (  1.268) 67.908] calc: 1 test: 1
+div: 10 read: 1 sample: 1 pad: 3 [48.888 ( 17.752)  66.640 ( -0.398) 66.242] calc: 0 test: 1
+div: 10 read: 1 sample: 1 pad: 2 [47.222 ( 19.418)  66.640 ( -2.064) 64.576] calc: 0 test: 0
+div: 10 read: 1 sample: 1 pad: 1 [45.556 ( 21.084)  66.640 ( -3.730) 62.910] calc: 0 test: 0
+div: 10 read: 1 sample: 1 pad: 0 [43.890 ( 22.750)  66.640 ( -5.396) 61.244] calc: 0 test: 0
+div: 10 read: 2 sample: 0 pad: 5 [52.220 ( 31.080)  83.300 (-13.726) 69.574] calc: 0 test: 0
+div: 10 read: 2 sample: 0 pad: 4 [50.554 ( 32.746)  83.300 (-15.392) 67.908] calc: 0 test: 0
+div: 10 read: 2 sample: 0 pad: 3 [48.888 ( 34.412)  83.300 (-17.058) 66.242] calc: 0 test: 0
+div: 10 read: 2 sample: 0 pad: 2 [47.222 ( 36.078)  83.300 (-18.724) 64.576] calc: 0 test: 0
+div: 10 read: 2 sample: 0 pad: 1 [45.556 ( 37.744)  83.300 (-20.390) 62.910] calc: 0 test: 0
+div: 10 read: 2 sample: 0 pad: 0 [43.890 ( 39.410)  83.300 (-22.056) 61.244] calc: 0 test: 0
+div: 10 read: 2 sample: 1 pad: 5 [52.220 ( 47.740)  99.960 (-30.386) 69.574] calc: 0 test: 0
+div: 10 read: 2 sample: 1 pad: 4 [50.554 ( 49.406)  99.960 (-32.052) 67.908] calc: 0 test: 0
+div: 10 read: 2 sample: 1 pad: 3 [48.888 ( 51.072)  99.960 (-33.718) 66.242] calc: 0 test: 0
+div: 10 read: 2 sample: 1 pad: 2 [47.222 ( 52.738)  99.960 (-35.384) 64.576] calc: 0 test: 0
+div: 10 read: 2 sample: 1 pad: 1 [45.556 ( 54.404)  99.960 (-37.050) 62.910] calc: 0 test: 0
+div: 10 read: 2 sample: 1 pad: 0 [43.890 ( 56.070)  99.960 (-38.716) 61.244] calc: 0 test: 0
+
+F_core: 600 MHz, clock divider: 11, F_clk: 27.27 MHz
+div: 11 read: 0 sample: 0 pad: 5 [53.886 (-35.560)  18.326 ( 56.246) 74.572] calc: 0 test: 0
+div: 11 read: 0 sample: 0 pad: 4 [52.220 (-33.894)  18.326 ( 54.580) 72.906] calc: 0 test: 0
+div: 11 read: 0 sample: 0 pad: 3 [50.554 (-32.228)  18.326 ( 52.914) 71.240] calc: 0 test: 0
+div: 11 read: 0 sample: 0 pad: 2 [48.888 (-30.562)  18.326 ( 51.248) 69.574] calc: 0 test: 0
+div: 11 read: 0 sample: 0 pad: 1 [47.222 (-28.896)  18.326 ( 49.582) 67.908] calc: 0 test: 0
+div: 11 read: 0 sample: 0 pad: 0 [45.556 (-27.230)  18.326 ( 47.916) 66.242] calc: 0 test: 0
+div: 11 read: 0 sample: 1 pad: 5 [53.886 (-17.234)  36.652 ( 37.920) 74.572] calc: 0 test: 0
+div: 11 read: 0 sample: 1 pad: 4 [52.220 (-15.568)  36.652 ( 36.254) 72.906] calc: 0 test: 0
+div: 11 read: 0 sample: 1 pad: 3 [50.554 (-13.902)  36.652 ( 34.588) 71.240] calc: 0 test: 0
+div: 11 read: 0 sample: 1 pad: 2 [48.888 (-12.236)  36.652 ( 32.922) 69.574] calc: 0 test: 0
+div: 11 read: 0 sample: 1 pad: 1 [47.222 (-10.570)  36.652 ( 31.256) 67.908] calc: 0 test: 0
+div: 11 read: 0 sample: 1 pad: 0 [45.556 ( -8.904)  36.652 ( 29.590) 66.242] calc: 0 test: 1
+div: 11 read: 1 sample: 0 pad: 5 [53.886 (  1.092)  54.978 ( 19.594) 74.572] calc: 1 test: 1
+div: 11 read: 1 sample: 0 pad: 4 [52.220 (  2.758)  54.978 ( 17.928) 72.906] calc: 1 test: 1
+div: 11 read: 1 sample: 0 pad: 3 [50.554 (  4.424)  54.978 ( 16.262) 71.240] calc: 1 test: 1
+div: 11 read: 1 sample: 0 pad: 2 [48.888 (  6.090)  54.978 ( 14.596) 69.574] calc: 1 test: 1
+div: 11 read: 1 sample: 0 pad: 1 [47.222 (  7.756)  54.978 ( 12.930) 67.908] calc: 1 test: 1
+div: 11 read: 1 sample: 0 pad: 0 [45.556 (  9.422)  54.978 ( 11.264) 66.242] calc: 1 test: 1
+div: 11 read: 1 sample: 1 pad: 5 [53.886 ( 19.418)  73.304 (  1.268) 74.572] calc: 1 test: 1
+div: 11 read: 1 sample: 1 pad: 4 [52.220 ( 21.084)  73.304 ( -0.398) 72.906] calc: 0 test: 1
+div: 11 read: 1 sample: 1 pad: 3 [50.554 ( 22.750)  73.304 ( -2.064) 71.240] calc: 0 test: 0
+div: 11 read: 1 sample: 1 pad: 2 [48.888 ( 24.416)  73.304 ( -3.730) 69.574] calc: 0 test: 0
+div: 11 read: 1 sample: 1 pad: 1 [47.222 ( 26.082)  73.304 ( -5.396) 67.908] calc: 0 test: 0
+div: 11 read: 1 sample: 1 pad: 0 [45.556 ( 27.748)  73.304 ( -7.062) 66.242] calc: 0 test: 0
+div: 11 read: 2 sample: 0 pad: 5 [53.886 ( 37.744)  91.630 (-17.058) 74.572] calc: 0 test: 0
+div: 11 read: 2 sample: 0 pad: 4 [52.220 ( 39.410)  91.630 (-18.724) 72.906] calc: 0 test: 0
+div: 11 read: 2 sample: 0 pad: 3 [50.554 ( 41.076)  91.630 (-20.390) 71.240] calc: 0 test: 0
+div: 11 read: 2 sample: 0 pad: 2 [48.888 ( 42.742)  91.630 (-22.056) 69.574] calc: 0 test: 0
+div: 11 read: 2 sample: 0 pad: 1 [47.222 ( 44.408)  91.630 (-23.722) 67.908] calc: 0 test: 0
+div: 11 read: 2 sample: 0 pad: 0 [45.556 ( 46.074)  91.630 (-25.388) 66.242] calc: 0 test: 0
+div: 11 read: 2 sample: 1 pad: 5 [53.886 ( 56.070) 109.956 (-35.384) 74.572] calc: 0 test: 0
+div: 11 read: 2 sample: 1 pad: 4 [52.220 ( 57.736) 109.956 (-37.050) 72.906] calc: 0 test: 0
+div: 11 read: 2 sample: 1 pad: 3 [50.554 ( 59.402) 109.956 (-38.716) 71.240] calc: 0 test: 0
+div: 11 read: 2 sample: 1 pad: 2 [48.888 ( 61.068) 109.956 (-40.382) 69.574] calc: 0 test: 0
+div: 11 read: 2 sample: 1 pad: 1 [47.222 ( 62.734) 109.956 (-42.048) 67.908] calc: 0 test: 0
+div: 11 read: 2 sample: 1 pad: 0 [45.556 ( 64.400) 109.956 (-43.714) 66.242] calc: 0 test: 0
+
+F_core: 600 MHz, clock divider: 12, F_clk: 25.00 MHz
+div: 12 read: 0 sample: 0 pad: 5 [55.552 (-35.560)  19.992 ( 59.578) 79.570] calc: 0 test: 0
+div: 12 read: 0 sample: 0 pad: 4 [53.886 (-33.894)  19.992 ( 57.912) 77.904] calc: 0 test: 0
+div: 12 read: 0 sample: 0 pad: 3 [52.220 (-32.228)  19.992 ( 56.246) 76.238] calc: 0 test: 0
+div: 12 read: 0 sample: 0 pad: 2 [50.554 (-30.562)  19.992 ( 54.580) 74.572] calc: 0 test: 0
+div: 12 read: 0 sample: 0 pad: 1 [48.888 (-28.896)  19.992 ( 52.914) 72.906] calc: 0 test: 0
+div: 12 read: 0 sample: 0 pad: 0 [47.222 (-27.230)  19.992 ( 51.248) 71.240] calc: 0 test: 0
+div: 12 read: 0 sample: 1 pad: 5 [55.552 (-15.568)  39.984 ( 39.586) 79.570] calc: 0 test: 0
+div: 12 read: 0 sample: 1 pad: 4 [53.886 (-13.902)  39.984 ( 37.920) 77.904] calc: 0 test: 0
+div: 12 read: 0 sample: 1 pad: 3 [52.220 (-12.236)  39.984 ( 36.254) 76.238] calc: 0 test: 0
+div: 12 read: 0 sample: 1 pad: 2 [50.554 (-10.570)  39.984 ( 34.588) 74.572] calc: 0 test: 1
+div: 12 read: 0 sample: 1 pad: 1 [48.888 ( -8.904)  39.984 ( 32.922) 72.906] calc: 0 test: 1
+div: 12 read: 0 sample: 1 pad: 0 [47.222 ( -7.238)  39.984 ( 31.256) 71.240] calc: 0 test: 1
+div: 12 read: 1 sample: 0 pad: 5 [55.552 (  4.424)  59.976 ( 19.594) 79.570] calc: 1 test: 1
+div: 12 read: 1 sample: 0 pad: 4 [53.886 (  6.090)  59.976 ( 17.928) 77.904] calc: 1 test: 1
+div: 12 read: 1 sample: 0 pad: 3 [52.220 (  7.756)  59.976 ( 16.262) 76.238] calc: 1 test: 1
+div: 12 read: 1 sample: 0 pad: 2 [50.554 (  9.422)  59.976 ( 14.596) 74.572] calc: 1 test: 1
+div: 12 read: 1 sample: 0 pad: 1 [48.888 ( 11.088)  59.976 ( 12.930) 72.906] calc: 1 test: 1
+div: 12 read: 1 sample: 0 pad: 0 [47.222 ( 12.754)  59.976 ( 11.264) 71.240] calc: 1 test: 1
+div: 12 read: 1 sample: 1 pad: 5 [55.552 ( 24.416)  79.968 ( -0.398) 79.570] calc: 0 test: 1
+div: 12 read: 1 sample: 1 pad: 4 [53.886 ( 26.082)  79.968 ( -2.064) 77.904] calc: 0 test: 0
+div: 12 read: 1 sample: 1 pad: 3 [52.220 ( 27.748)  79.968 ( -3.730) 76.238] calc: 0 test: 0
+div: 12 read: 1 sample: 1 pad: 2 [50.554 ( 29.414)  79.968 ( -5.396) 74.572] calc: 0 test: 0
+div: 12 read: 1 sample: 1 pad: 1 [48.888 ( 31.080)  79.968 ( -7.062) 72.906] calc: 0 test: 0
+div: 12 read: 1 sample: 1 pad: 0 [47.222 ( 32.746)  79.968 ( -8.728) 71.240] calc: 0 test: 0
+div: 12 read: 2 sample: 0 pad: 5 [55.552 ( 44.408)  99.960 (-20.390) 79.570] calc: 0 test: 0
+div: 12 read: 2 sample: 0 pad: 4 [53.886 ( 46.074)  99.960 (-22.056) 77.904] calc: 0 test: 0
+div: 12 read: 2 sample: 0 pad: 3 [52.220 ( 47.740)  99.960 (-23.722) 76.238] calc: 0 test: 0
+div: 12 read: 2 sample: 0 pad: 2 [50.554 ( 49.406)  99.960 (-25.388) 74.572] calc: 0 test: 0
+div: 12 read: 2 sample: 0 pad: 1 [48.888 ( 51.072)  99.960 (-27.054) 72.906] calc: 0 test: 0
+div: 12 read: 2 sample: 0 pad: 0 [47.222 ( 52.738)  99.960 (-28.720) 71.240] calc: 0 test: 0
+div: 12 read: 2 sample: 1 pad: 5 [55.552 ( 64.400) 119.952 (-40.382) 79.570] calc: 0 test: 0
+div: 12 read: 2 sample: 1 pad: 4 [53.886 ( 66.066) 119.952 (-42.048) 77.904] calc: 0 test: 0
+div: 12 read: 2 sample: 1 pad: 3 [52.220 ( 67.732) 119.952 (-43.714) 76.238] calc: 0 test: 0
+div: 12 read: 2 sample: 1 pad: 2 [50.554 ( 69.398) 119.952 (-45.380) 74.572] calc: 0 test: 0
+div: 12 read: 2 sample: 1 pad: 1 [48.888 ( 71.064) 119.952 (-47.046) 72.906] calc: 0 test: 0
+div: 12 read: 2 sample: 1 pad: 0 [47.222 ( 72.730) 119.952 (-48.712) 71.240] calc: 0 test: 0
+SDRAM timing finished
