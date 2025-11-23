@@ -98,7 +98,20 @@ int main()
   par
   {
     on tile[SERVER_TILE]: sdram_test_suite();
-    on tile[SERVER_TILE]: par(int i=0;i<6;i++) while(1);
+    on tile[SERVER_TILE]: {
+      // - keep other threads busy
+      // - the resulting sdram_server thread speed is
+      //   Fcore/8, same as the Fclk=FCore/(2*clock_divider)
+      //   of the fastest tested clock_divider of 4
+      //   500 MHZ -> 63 MIPS/MHz
+      //   600 MHz -> 75 MIPS/MHz
+      //   800 MHz -> 100 MIPS/MHz
+      // - so the processor speed scales with the raising
+      //   SDRAM clock speed per clock_divider
+      par(int i=0;i<6;i++) {
+        { set_core_high_priority_on(); while(1); }
+      }
+    }
   }
   return 0;
 }
