@@ -1,4 +1,4 @@
-SDRAM library change log
+lib_sdram change log
 ====================
 
 3.4.0
