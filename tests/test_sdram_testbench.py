@@ -6,5 +6,5 @@ import Pyxsim
 from Pyxsim import testers
 from pathlib import Path
 
-def sdram_benchmark(level, capfd):
-    pass
+def sdram_testbench(level, capfd):
+    pytest.skip("Not implemented yet")
