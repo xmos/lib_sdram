@@ -3,7 +3,16 @@
 #ifndef SDRAM_H_
 #define SDRAM_H_
 #include <platform.h>
+#include <xccompat.h>
 #include "structs_and_enums.h"
+
+// These are needed for DOXYGEN to render properly
+#ifndef __DOXYGEN__
+#define const_static_unsigned_t const static unsigned
+#define out_port_t out port
+#define MOVABLE_REFERENCE_PARAM(type, name) type * movable &name
+#define MOVABLE_PARAM(type, name) type * movable name
+#endif
 
 /**
  * The actual SDRAM server providing a software interface plus services to access the SDRAM.
@@ -33,23 +42,24 @@
  *  \param refresh_cycles       The count of refresh instructions per full refresh cycle.
  *  \param clock_divider        The divider of the system clock to the SDRAM clock.
  **/
-void sdram_server(streaming chanend c_client[client_count],
-        const static unsigned client_count,
-        out buffered port:32 dq_ah,
-        out buffered port:32 cas,
-        out buffered port:32 ras,
-        out buffered port:8 we,
-        out port clk,
+void sdram_server(
+        ARRAY_OF_SIZE(streaming_chanend_t, c_client, client_count),
+        const_static_unsigned_t client_count,
+        out_buffered_port_32_t dq_ah,
+        out_buffered_port_32_t cas,
+        out_buffered_port_32_t ras,
+        out_buffered_port_8_t we,
+        out_port_t clk,
         clock cb,
-        const static unsigned cas_latency,
-        const static unsigned row_words,
-        const static unsigned col_bits,
-        const static unsigned col_address_bits,
-        const static unsigned row_address_bits,
-        const static unsigned bank_address_bits,
-        const static unsigned refresh_ms,
-        const static unsigned refresh_cycles,
-        const static unsigned clock_divider);
+        const_static_unsigned_t cas_latency,
+        const_static_unsigned_t row_words,
+        const_static_unsigned_t col_bits,
+        const_static_unsigned_t col_address_bits,
+        const_static_unsigned_t row_address_bits,
+        const_static_unsigned_t bank_address_bits,
+        const_static_unsigned_t refresh_ms,
+        const_static_unsigned_t refresh_cycles,
+        const_static_unsigned_t clock_divider);
 
 /**
  * This is used to initialise the sdram_state that follows the channel to the SDRAM server. It must only be called
@@ -61,7 +71,7 @@ void sdram_server(streaming chanend c_client[client_count],
  *
  * \return                  None.
  **/
-void sdram_init_state(streaming chanend c_sdram_server, s_sdram_state &sdram_state);
+void sdram_init_state(streaming_chanend_t c_sdram_server, REFERENCE_PARAM(s_sdram_state, sdram_state));
 
 /**
  * This is a blocking call that may be used as a select handler. It returns an array
@@ -69,7 +79,10 @@ void sdram_init_state(streaming chanend c_sdram_server, s_sdram_state &sdram_sta
  * server.
  **/
 #pragma select handler
-void sdram_complete(streaming chanend c_sdram_server, s_sdram_state &state, unsigned * movable & buffer);
+void sdram_complete(
+        streaming_chanend_t c_sdram_server,
+        REFERENCE_PARAM(s_sdram_state, state),
+        MOVABLE_REFERENCE_PARAM(unsigned, buffer));
 
 /**
  * Request the SDRAM server to perform a write operation of a number of long (32b) words.
@@ -84,8 +97,12 @@ void sdram_complete(streaming chanend c_sdram_server, s_sdram_state &state, unsi
  *  \return                   0 for write command has successfully be added to SDRAM command queue.
  *  \return                   1 for SDRAM command queue is full, write command has not been added.
  **/
-int sdram_write   (streaming chanend c_sdram_server, s_sdram_state &state, unsigned address, unsigned word_count,
-        unsigned * movable buffer);
+int sdram_write(
+        streaming_chanend_t c_sdram_server,
+        REFERENCE_PARAM(s_sdram_state, state),
+        unsigned address,
+        unsigned word_count,
+        MOVABLE_PARAM(unsigned, buffer));
 
 /**
  * Request the SDRAM server to perform a read operation of a number of long (32b) words.
@@ -101,8 +118,12 @@ int sdram_write   (streaming chanend c_sdram_server, s_sdram_state &state, unsig
  *  \return                   1 for SDRAM command queue is full, read command has not been added.
  *
  **/
-int sdram_read    (streaming chanend c_sdram_server, s_sdram_state &state, unsigned address, unsigned word_count,
-        unsigned * movable buffer);
+int sdram_read(
+        streaming_chanend_t c_sdram_server,
+        REFERENCE_PARAM(s_sdram_state, state),
+        unsigned address,
+        unsigned word_count,
+        MOVABLE_PARAM(unsigned, buffer));
 
 /**
  * Terminates the SDRAM server.
@@ -111,6 +132,6 @@ int sdram_read    (streaming chanend c_sdram_server, s_sdram_state &state, unsig
  *
  *  \return                  None.
  **/
-void sdram_shutdown(streaming chanend c_sdram_server);
+void sdram_shutdown(streaming_chanend_t c_sdram_server);
 
 #endif /* SDRAM_H_ */
