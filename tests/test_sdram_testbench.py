@@ -6,5 +6,26 @@ import Pyxsim
 from Pyxsim import testers
 from pathlib import Path
 
-def sdram_testbench(level, capfd):
-    pytest.skip("Not implemented yet")
+def test_sdram_testbench(level, capfd):
+    
+    if level == 'smoke':
+        pytest.skip("level == 'smoke'")
+
+    binary = Path(__file__).parent / "sdram_testbench" / "bin" / "sdram_testbench.xe"
+
+    tester = None
+
+    max_cycles = 15000
+
+    simargs = [
+        "--max-cycles",
+        str(max_cycles),
+    ]
+
+    result = Pyxsim.run_on_simulator(
+        binary,
+        cmake=True,
+        simargs=simargs,
+        tester=tester,
+        capfd=capfd,
+        clean_before_build=False)
