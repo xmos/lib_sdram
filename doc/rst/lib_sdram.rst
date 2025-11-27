@@ -271,6 +271,8 @@ address space. All of the clients may request a number of bytes from the memory 
 and will either be allocated a base address to use the requested amount of memory from 
 or will receive an error. All clients of the memory address allocator must be on the same tile.
 
+|newpage|
+
 ************************
 Hardware characteristics
 ************************
@@ -342,6 +344,8 @@ control of the CS is needed then it must be done from the client application
 level. This means that for the duration of the use of the SDRAM, CS must 
 be asserted and when ``sdram_server`` is shutdown the CS can be deasserted.
 
+|newpage|
+
 *******************
 Example application
 *******************
@@ -407,6 +411,8 @@ Alternatively, the application can be programmed into flash memory for standalon
 .. code-block:: bash
 
    xflash ./bin/app_sdram_demo.xe
+
+|newpage|
 
 *************
 API Reference
