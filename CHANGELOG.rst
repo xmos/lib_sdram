@@ -1,5 +1,10 @@
-SDRAM library change log
-========================
+lib_sdram change log
+====================
+
+3.4.0
+-----
+
+  * Update to xcommon_cmake and purge old build system files
 
 3.3.0
 -----

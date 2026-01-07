@@ -1,19 +1,46 @@
-**.build*/*
-**/bin/*
-*.o
-*.xe
+# Tmp files & logs
+*.settings
+*.bin
+*.zip
+*.log
 *.vcd
-*.s
+*.swp
+*.*~
+*.xmt
+*.swo
+*.swn
+*~
+*.DS_Store
+
+# Python
+*.pyc
+**/*.egg-info/
+**/.venv*/
+*.python-version
+
+# XMOS temp files
+**/*build*/*
+**/bin/*
+**/flash_bin_node*
+**/fw-*
+**/s2l-*
+**/spanning-xn-*
+**/target-xn*
 *.xi
+*.o
 *.i
 *.a
-**/_build/*
-lib_lcd/doc/rst/_build/*
-**/run_*.log
-**/pdf/*
-**/html/*
-Installs/*
-.settings*
-examples/lcd_demo/.build*/*
-*.swp
-examples/sdram_demo/.build*
+*.d
+*.decouple
+*.pca.xml
+**/CMakeFiles/*
+
+# XMOS binaries
+*.xe
+
+# Built documentation
+doc/_build/pdf/*.pdf
+**/doc/pdf/*.pdf
+
+# Editor
+*.vscode
