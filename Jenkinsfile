@@ -9,7 +9,7 @@ pipeline {
                     try {
                         // 1. Force a dynamic pull of your library name and target branch
                         // Replace 'your-library-name' with the exact string in Manage Jenkins
-                        library 'xmos_jenkins_shared_library@v0.43.1' 
+                        library 'xmos_jenkins_shared_library@v0.43.3' 
                         
                         echo "SUCCESS: Jenkins found and successfully checked out the library!"
                         
