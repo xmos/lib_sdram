@@ -1,5 +1,3 @@
-@Library('xmos_jenkins_shared_library@v0.43.3')
-
 pipeline {
     agent any 
 
