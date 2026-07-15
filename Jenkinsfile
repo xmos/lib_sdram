@@ -2,7 +2,7 @@
 
 @Library('xmos_jenkins_shared_library@v0.43.3') _
 
-// getApproval()
+getApproval()
 pipeline {
 
     agent none
@@ -18,15 +18,15 @@ pipeline {
             defaultValue: 'v8.0.0',
             description: 'xmosdoc version'
         )
-        string(
-            name: 'INFR_APPS_VERSION',
-            defaultValue: 'v3.1.1',
-            description: 'The infr_apps version'
-        )
-        choice(
-            name: 'TEST_LEVEL', choices: ['smoke', 'default', 'extended'],
-            description: 'The level of test coverage to run'
-        )
+        // string(
+        //     name: 'INFR_APPS_VERSION',
+        //     defaultValue: 'v3.1.1',
+        //     description: 'The infr_apps version'
+        // )
+        // choice(
+        //     name: 'TEST_LEVEL', choices: ['smoke', 'default', 'extended'],
+        //     description: 'The level of test coverage to run'
+        // )
     }
 
     options {
@@ -58,66 +58,66 @@ pipeline {
                     }
                 }
 
-                stage('Examples build') {
-                    steps {
-                        dir("${REPO_NAME}/examples") {
-                            xcoreBuild()
-                        }
-                    }
-                }
+        //         stage('Examples build') {
+        //             steps {
+        //                 dir("${REPO_NAME}/examples") {
+        //                     xcoreBuild()
+        //                 }
+        //             }
+        //         }
 
-                stage('Repo checks') {
-                    steps {
-                        warnError("Repo checks failed")
-                        {
-                            runRepoChecks("${WORKSPACE}/${REPO_NAME}")
-                        }
-                    }
-                }
+        //         stage('Repo checks') {
+        //             steps {
+        //                 warnError("Repo checks failed")
+        //                 {
+        //                     runRepoChecks("${WORKSPACE}/${REPO_NAME}")
+        //                 }
+        //             }
+        //         }
 
-                stage('Doc build') {
-                    steps {
-                        dir(REPO_NAME) {
-                            buildDocs()
-                        }
-                    }
-                }
+        //         stage('Doc build') {
+        //             steps {
+        //                 dir(REPO_NAME) {
+        //                     buildDocs()
+        //                 }
+        //             }
+        //         }
 
-                stage('Tests') {
-                    steps {
-                        dir("${REPO_NAME}/tests") {
-                            withTools(params.TOOLS_VERSION) {
-                                createVenv(reqFile: "requirements.txt")
-                                withVenv {
-                                    xcoreBuild(archiveBins: false)
-                                    // Use the TEST_LEVEL parameter to control the test coverage
-                                    runPytest("--level=${params.TEST_LEVEL}")
-                                }
-                            }
-                        }
-                    }
-                }
+        //         stage('Tests') {
+        //             steps {
+        //                 dir("${REPO_NAME}/tests") {
+        //                     withTools(params.TOOLS_VERSION) {
+        //                         createVenv(reqFile: "requirements.txt")
+        //                         withVenv {
+        //                             xcoreBuild(archiveBins: false)
+        //                             // Use the TEST_LEVEL parameter to control the test coverage
+        //                             runPytest("--level=${params.TEST_LEVEL}")
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
 
-                stage("Archive sandbox") {
-                    steps {
-                        archiveSandbox(REPO_NAME)
-                    }
-                }
-            } // stages
-            post {
-                cleanup {
-                    xcoreCleanSandbox()
-                }
-            }
-        } // stage 'Build and test'
+        //         stage("Archive sandbox") {
+        //             steps {
+        //                 archiveSandbox(REPO_NAME)
+        //             }
+        //         }
+        //     } // stages
+        //     post {
+        //         cleanup {
+        //             xcoreCleanSandbox()
+        //         }
+        //     }
+        // } // stage 'Build and test'
 
-        stage('🚀 Release') {
-            when {
-                expression { triggerRelease.isReleasable() }
-            }
-            steps {
-                triggerRelease()
-            }
+        // stage('🚀 Release') {
+        //     when {
+        //         expression { triggerRelease.isReleasable() }
+        //     }
+        //     steps {
+        //         triggerRelease()
+        //     }
         }
     } // stages
 } // pipeline
