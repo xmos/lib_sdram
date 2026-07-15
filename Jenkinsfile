@@ -28,9 +28,17 @@ pipeline {
     }
 
     stages {
-        stage('Hello World Test') {
+        stage('checkout') {
             steps {
-                echo 'SUCCESS: The Jenkins server is reading this file!'
+                echo 'checkout the repo'
+                script {
+                    def (server, user, repo) = extractFromScmUrl()
+                    env.REPO_NAME = repo
+                }
+                dir(REPO_NAME){
+                    checkoutScmShallow()
+                }
+                echo 'checkout done'
             }
         }
     }
