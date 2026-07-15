@@ -1,7 +1,31 @@
 @Library('xmos_jenkins_shared_library@v0.43.3') _
 
+getApproval()
+
 pipeline {
     agent any 
+
+    parameters {
+        string(
+            name: 'TOOLS_VERSION',
+            defaultValue: '15.3.1',
+            description: 'XTC tools version'
+        )
+        string(
+            name: 'XMOSDOC_VERSION',
+            defaultValue: 'v8.0.0',
+            description: 'xmosdoc version'
+        )
+        // string(
+        //     name: 'INFR_APPS_VERSION',
+        //     defaultValue: 'v3.1.1',
+        //     description: 'The infr_apps version'
+        // )
+        // choice(
+        //     name: 'TEST_LEVEL', choices: ['smoke', 'default', 'extended'],
+        //     description: 'The level of test coverage to run'
+        // )
+    }
 
     stages {
         stage('Hello World Test') {
