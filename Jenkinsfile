@@ -37,10 +37,10 @@ pipeline {
 
     stages {
         stage('🏗️ Build and test') {
-            agent {
-                label 'x86_64 && linux && documentation'
-            }
-
+            // agent {
+            //     label 'x86_64 && linux && documentation'
+            // }
+            agent none
             stages {
                 stage('Checkout') {
                     steps {
