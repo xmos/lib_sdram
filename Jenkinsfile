@@ -7,33 +7,33 @@ pipeline {
 
     agent none
 
-    parameters {
-        string(
-            name: 'TOOLS_VERSION',
-            defaultValue: '15.3.1',
-            description: 'XTC tools version'
-        )
-        string(
-            name: 'XMOSDOC_VERSION',
-            defaultValue: 'v8.0.0',
-            description: 'xmosdoc version'
-        )
-        // string(
-        //     name: 'INFR_APPS_VERSION',
-        //     defaultValue: 'v3.1.1',
-        //     description: 'The infr_apps version'
-        // )
-        // choice(
-        //     name: 'TEST_LEVEL', choices: ['smoke', 'default', 'extended'],
-        //     description: 'The level of test coverage to run'
-        // )
-    }
+    // parameters {
+    //     string(
+    //         name: 'TOOLS_VERSION',
+    //         defaultValue: '15.3.1',
+    //         description: 'XTC tools version'
+    //     )
+    //     string(
+    //         name: 'XMOSDOC_VERSION',
+    //         defaultValue: 'v8.0.0',
+    //         description: 'xmosdoc version'
+    //     )
+    //     // string(
+    //     //     name: 'INFR_APPS_VERSION',
+    //     //     defaultValue: 'v3.1.1',
+    //     //     description: 'The infr_apps version'
+    //     // )
+    //     // choice(
+    //     //     name: 'TEST_LEVEL', choices: ['smoke', 'default', 'extended'],
+    //     //     description: 'The level of test coverage to run'
+    //     // )
+    // }
 
-    options {
-        skipDefaultCheckout()
-        timestamps()
-        buildDiscarder(xmosDiscardBuildSettings(onlyArtifacts = false))
-    }
+    // options {
+    //     skipDefaultCheckout()
+    //     timestamps()
+    //     buildDiscarder(xmosDiscardBuildSettings(onlyArtifacts = false))
+    // }
 
     stages {
         stage('🏗️ Build and test') {
@@ -45,7 +45,8 @@ pipeline {
                 stage('Checkout') {
                     steps {
 
-                        echo "Stage running on ${env.NODE_NAME}"
+                        // echo "Stage running on ${env.NODE_NAME}"
+                        echo 'Read by Jenkins server?'
 
                         // script {
                         //     def (server, user, repo) = extractFromScmUrl()
