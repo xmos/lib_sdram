@@ -45,16 +45,16 @@ pipeline {
                 stage('Checkout') {
                     steps {
 
-                        println "Stage running on ${env.NODE_NAME}"
+                        echo "Stage running on ${env.NODE_NAME}"
 
-                        script {
-                            def (server, user, repo) = extractFromScmUrl()
-                            env.REPO_NAME = repo
-                        }
+                        // script {
+                        //     def (server, user, repo) = extractFromScmUrl()
+                        //     env.REPO_NAME = repo
+                        // }
 
-                        dir(REPO_NAME){
-                            checkoutScmShallow()
-                        }
+                        // dir(REPO_NAME){
+                        //     checkoutScmShallow()
+                        // }
                     }
                 }
 
