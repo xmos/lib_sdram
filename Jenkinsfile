@@ -103,13 +103,13 @@ pipeline {
         //                 archiveSandbox(REPO_NAME)
         //             }
         //         }
-        //     } // stages
-        //     post {
-        //         cleanup {
-        //             xcoreCleanSandbox()
-        //         }
-        //     }
-        // } // stage 'Build and test'
+            } // stages
+            // post {
+            //     cleanup {
+            //         xcoreCleanSandbox()
+            //     }
+            // }
+        } // stage 'Build and test'
 
         // stage('🚀 Release') {
         //     when {
