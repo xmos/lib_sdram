@@ -1,6 +1,6 @@
 @Library('xmos_jenkins_shared_library@v0.43.3') _
 
-getApproval()
+// getApproval()
 
 pipeline {
     agent any 
