@@ -41,5 +41,14 @@ pipeline {
                 echo 'checkout done'
             }
         }
+        stage('examples build') {
+            steps {
+                echo 'example build'
+                dir("${REPO_NAME}/examples") {
+                    xcoreBuild()
+                }
+                echo 'build success'
+            }
+        }
     }
 }
