@@ -48,6 +48,10 @@ pipeline {
             }
         }
         stage('examples build') {
+            agent {
+                // label 'x86_64 && linux && documentation'
+                label 'built-in'
+            }            
             steps {
                 echo 'example build'
                 dir("${REPO_NAME}/examples") {
