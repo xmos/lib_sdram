@@ -66,8 +66,8 @@ pipeline {
                             // sh 'ls -la'
                             // sh 'cmake -B build'
                             // sh 'xmake -C build -j'
-                            sh '''#!/bin/bash
-                                source /home/alexyiu/xmos/tools/XMOS/xTIMEcomposer/Community_14.4.1/SetEnv
+                            sh '''
+                                . /home/alexyiu/xmos/tools/XMOS/xTIMEcomposer/Community_14.4.1/SetEnv
                                 which cmake
                                 pwd
                                 ls -la
