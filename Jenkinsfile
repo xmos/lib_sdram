@@ -38,11 +38,10 @@ pipeline {
             agent {
                 // label 'x86_64 && linux && documentation'
                 label 'built-in'
-            }                   
+            }                 
             stages {
                 stage('checkout') {
                     steps {
-                        sh 'source /home/alexyiu/x14_4_1_setup.sh'
                         echo 'checkout the repo'
                         script {
                             def (server, user, repo) = extractFromScmUrl()
@@ -62,11 +61,19 @@ pipeline {
                         checkout scm
                         dir("${REPO_NAME}/examples/app_sdram_demo") {
                             // xcoreBuild()
-                            sh 'which cmake'
-                            sh 'pwd'
-                            sh 'ls -la'
-                            sh 'cmake -B build'
-                            sh 'xmake -C build -j'
+                            // sh 'which cmake'
+                            // sh 'pwd'
+                            // sh 'ls -la'
+                            // sh 'cmake -B build'
+                            // sh 'xmake -C build -j'
+                            sh '''
+                                source /home/alexyiu/xmos/tools/XMOS/xTIMEcomposer/Community_14.4.1/SetEnv
+                                which cmake
+                                pwd
+                                ls -la
+                                cmake -B build
+                                xmake -C build -j
+                            '''
                         }
                         echo 'build success'
                     }
