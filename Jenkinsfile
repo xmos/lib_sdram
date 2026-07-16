@@ -34,6 +34,10 @@ pipeline {
     }
 
     stages {
+        agent {
+            // label 'x86_64 && linux && documentation'
+            label 'built-in'
+        }           
         stage('checkout') {
             steps {
                 echo 'checkout the repo'
@@ -49,11 +53,7 @@ pipeline {
                 echo 'checkout done'
             }
         }
-        stage('examples build') {
-            agent {
-                // label 'x86_64 && linux && documentation'
-                label 'built-in'
-            }            
+        stage('examples build') {         
             steps {
                 echo 'example build'
                 checkout scm
