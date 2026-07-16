@@ -55,7 +55,9 @@ pipeline {
             steps {
                 echo 'example build'
                 dir("${REPO_NAME}/examples") {
-                    xcoreBuild()
+                    // xcoreBuild()
+                    sh 'cmake -B build'
+                    sh 'xmake -C build -j'
                 }
                 echo 'build success'
             }
