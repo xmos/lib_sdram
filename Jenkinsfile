@@ -1,16 +1,12 @@
+// This file relates to internal XMOS infrastructure and should be ignored by external users
+
 @Library('xmos_jenkins_shared_library@v0.43.3') _
 
-// getApproval()
-
+getApproval()
 pipeline {
-    agent any
-    
-    options {
-        skipDefaultCheckout()
-        timestamps()
-        buildDiscarder(xmosDiscardBuildSettings(onlyArtifacts=false))
-    }
-    
+
+    agent none
+
     parameters {
         string(
             name: 'TOOLS_VERSION',
@@ -33,53 +29,95 @@ pipeline {
         )
     }
 
+    options {
+        skipDefaultCheckout()
+        timestamps()
+        buildDiscarder(xmosDiscardBuildSettings(onlyArtifacts = false))
+    }
+
     stages {
-        stage('checkout and build') {
+        stage('🏗️ Build and test') {
             agent {
-                // label 'x86_64 && linux && documentation'
-                label 'built-in'
-            }                 
+                label 'x86_64 && linux && documentation'
+            }
+
             stages {
-                stage('checkout') {
+                stage('Checkout') {
                     steps {
-                        echo 'checkout the repo'
+
+                        println "Stage running on ${env.NODE_NAME}"
+
                         script {
                             def (server, user, repo) = extractFromScmUrl()
                             env.REPO_NAME = repo
                         }
+
                         dir(REPO_NAME){
                             checkoutScmShallow()
-                            sh 'pwd'
-                            sh 'ls -la'
                         }
-                        echo 'checkout done'
                     }
                 }
-                stage('examples build') {         
+
+                stage('Examples build') {
                     steps {
-                        echo 'example build'
-                        checkout scm
-                        dir("${REPO_NAME}/examples/app_sdram_demo") {
-                            // xcoreBuild()
-                            // sh 'which cmake'
-                            // sh 'pwd'
-                            // sh 'ls -la'
-                            // sh 'cmake -B build'
-                            // sh 'xmake -C build -j'
-                            sh '''
-                                . /home/alexyiu/xmos/tools/XMOS/xTIMEcomposer/Community_14.4.1/SetEnv
-                                which cmake
-                                pwd
-                                ls -la
-                                cmake -B build
-                                xmake -C build -j
-                            '''
+                        dir("${REPO_NAME}/examples") {
+                            xcoreBuild()
                         }
-                        echo 'build success'
                     }
+                }
+
+                stage('Repo checks') {
+                    steps {
+                        warnError("Repo checks failed")
+                        {
+                            runRepoChecks("${WORKSPACE}/${REPO_NAME}")
+                        }
+                    }
+                }
+
+                stage('Doc build') {
+                    steps {
+                        dir(REPO_NAME) {
+                            buildDocs()
+                        }
+                    }
+                }
+
+                stage('Tests') {
+                    steps {
+                        dir("${REPO_NAME}/tests") {
+                            withTools(params.TOOLS_VERSION) {
+                                createVenv(reqFile: "requirements.txt")
+                                withVenv {
+                                    xcoreBuild(archiveBins: false)
+                                    // Use the TEST_LEVEL parameter to control the test coverage
+                                    runPytest("--level=${params.TEST_LEVEL}")
+                                }
+                            }
+                        }
+                    }
+                }
+
+                stage("Archive sandbox") {
+                    steps {
+                        archiveSandbox(REPO_NAME)
+                    }
+                }
+            } // stages
+            post {
+                cleanup {
+                    xcoreCleanSandbox()
                 }
             }
+        } // stage 'Build and test'
 
+        stage('🚀 Release') {
+            when {
+                expression { triggerRelease.isReleasable() }
+            }
+            steps {
+                triggerRelease()
+            }
         }
-    }
-}
+    } // stages
+} // pipeline
