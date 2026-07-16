@@ -56,6 +56,9 @@ pipeline {
                 echo 'example build'
                 dir("${REPO_NAME}/examples/app_sdram_demo") {
                     // xcoreBuild()
+                    sh 'which cmake'
+                    sh 'pwd'
+                    sh 'ls -la'
                     sh 'cmake -B build'
                     sh 'xmake -C build -j'
                 }
