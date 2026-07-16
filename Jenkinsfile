@@ -59,13 +59,14 @@ pipeline {
                     steps {
                         echo 'example build'
                         checkout scm
+                        sh '~/. x14_4_1_setup.sh'
                         dir("${REPO_NAME}/examples/app_sdram_demo") {
-                            xcoreBuild()
-                            // sh 'which cmake'
-                            // sh 'pwd'
-                            // sh 'ls -la'
-                            // sh 'cmake -B build'
-                            // sh 'xmake -C build -j'
+                            // xcoreBuild()
+                            sh 'which cmake'
+                            sh 'pwd'
+                            sh 'ls -la'
+                            sh 'cmake -B build'
+                            sh 'xmake -C build -j'
                         }
                         echo 'build success'
                     }
