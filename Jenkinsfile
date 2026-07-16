@@ -59,7 +59,7 @@ pipeline {
                     steps {
                         echo 'example build'
                         checkout scm
-                        sh '~/. x14_4_1_setup.sh'
+                        sh 'source /home/alexyiu/x14_4_1_setup.sh'
                         dir("${REPO_NAME}/examples/app_sdram_demo") {
                             // xcoreBuild()
                             sh 'which cmake'
