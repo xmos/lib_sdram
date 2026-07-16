@@ -60,12 +60,12 @@ pipeline {
                         echo 'example build'
                         checkout scm
                         dir("${REPO_NAME}/examples/app_sdram_demo") {
-                            // xcoreBuild()
-                            sh 'which cmake'
-                            sh 'pwd'
-                            sh 'ls -la'
-                            sh 'cmake -B build'
-                            sh 'xmake -C build -j'
+                            xcoreBuild()
+                            // sh 'which cmake'
+                            // sh 'pwd'
+                            // sh 'ls -la'
+                            // sh 'cmake -B build'
+                            // sh 'xmake -C build -j'
                         }
                         echo 'build success'
                     }
