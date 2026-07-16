@@ -54,7 +54,7 @@ pipeline {
             }            
             steps {
                 echo 'example build'
-                dir("${REPO_NAME}/examples") {
+                dir("${REPO_NAME}/examples/app_sdram_demo") {
                     xcoreBuild()
                 }
                 echo 'build success'
