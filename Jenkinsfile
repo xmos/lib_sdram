@@ -34,41 +34,44 @@ pipeline {
     }
 
     stages {
-        agent {
-            // label 'x86_64 && linux && documentation'
-            label 'built-in'
-        }                   
-        stages {
-            stage('checkout') {
-                steps {
-                    echo 'checkout the repo'
-                    script {
-                        def (server, user, repo) = extractFromScmUrl()
-                        env.REPO_NAME = repo
+        stage('checkout and build') {
+            agent {
+                // label 'x86_64 && linux && documentation'
+                label 'built-in'
+            }                   
+            stages {
+                stage('checkout') {
+                    steps {
+                        echo 'checkout the repo'
+                        script {
+                            def (server, user, repo) = extractFromScmUrl()
+                            env.REPO_NAME = repo
+                        }
+                        dir(REPO_NAME){
+                            checkoutScmShallow()
+                            sh 'pwd'
+                            sh 'ls -la'
+                        }
+                        echo 'checkout done'
                     }
-                    dir(REPO_NAME){
-                        checkoutScmShallow()
-                        sh 'pwd'
-                        sh 'ls -la'
+                }
+                stage('examples build') {         
+                    steps {
+                        echo 'example build'
+                        checkout scm
+                        dir("${REPO_NAME}/examples/app_sdram_demo") {
+                            // xcoreBuild()
+                            sh 'which cmake'
+                            sh 'pwd'
+                            sh 'ls -la'
+                            sh 'cmake -B build'
+                            sh 'xmake -C build -j'
+                        }
+                        echo 'build success'
                     }
-                    echo 'checkout done'
                 }
             }
-            stage('examples build') {         
-                steps {
-                    echo 'example build'
-                    checkout scm
-                    dir("${REPO_NAME}/examples/app_sdram_demo") {
-                        // xcoreBuild()
-                        sh 'which cmake'
-                        sh 'pwd'
-                        sh 'ls -la'
-                        sh 'cmake -B build'
-                        sh 'xmake -C build -j'
-                    }
-                    echo 'build success'
-                }
-            }
+
         }
     }
 }
