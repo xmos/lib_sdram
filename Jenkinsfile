@@ -4,7 +4,13 @@
 
 pipeline {
     agent any 
-
+    
+    options {
+        skipDefaultCheckout()
+        timestamps()
+        buildDiscarder(xmosDiscardBuildSettings(onlyArtifacts=false))
+    }
+    
     parameters {
         string(
             name: 'TOOLS_VERSION',
