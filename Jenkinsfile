@@ -24,7 +24,7 @@ pipeline {
             description: 'The infr_apps version'
         )
         choice(
-            name: 'TEST_LEVEL', choices: ['smoke', 'default', 'extended'],
+            name: 'TEST_LEVEL', choices: ['default', 'smoke', 'extended'],
             description: 'The level of test coverage to run'
         )
     }
@@ -85,6 +85,7 @@ pipeline {
 
                 stage('Tests') {
                     steps {
+                        echo "TEST_LEVEL: ${params.TEST_LEVEL}"
                         dir("${REPO_NAME}/tests") {
                             withTools(params.TOOLS_VERSION) {
                                 createVenv(reqFile: "requirements.txt")
