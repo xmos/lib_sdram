@@ -22,15 +22,15 @@ pipeline {
             defaultValue: 'v8.0.0',
             description: 'xmosdoc version'
         )
-        // string(
-        //     name: 'INFR_APPS_VERSION',
-        //     defaultValue: 'v3.1.1',
-        //     description: 'The infr_apps version'
-        // )
-        // choice(
-        //     name: 'TEST_LEVEL', choices: ['smoke', 'default', 'extended'],
-        //     description: 'The level of test coverage to run'
-        // )
+        string(
+            name: 'INFR_APPS_VERSION',
+            defaultValue: 'v3.1.1',
+            description: 'The infr_apps version'
+        )
+        choice(
+            name: 'TEST_LEVEL', choices: ['smoke', 'default', 'extended'],
+            description: 'The level of test coverage to run'
+        )
     }
 
     stages {
@@ -50,7 +50,7 @@ pipeline {
         stage('examples build') {
             steps {
                 echo 'example build'
-                dir("${REPO_NAME}/examples/app_sdram_demo") {
+                dir("${REPO_NAME}/examples") {
                     xcoreBuild()
                 }
                 echo 'build success'
