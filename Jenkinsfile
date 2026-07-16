@@ -34,11 +34,11 @@ pipeline {
     }
 
     stages {
+        agent {
+            // label 'x86_64 && linux && documentation'
+            label 'built-in'
+        }                   
         stages {
-            agent {
-                // label 'x86_64 && linux && documentation'
-                label 'built-in'
-            }           
             stage('checkout') {
                 steps {
                     echo 'checkout the repo'
