@@ -43,6 +43,8 @@ pipeline {
                 }
                 dir(REPO_NAME){
                     checkoutScmShallow()
+                    sh 'pwd'
+                    sh 'ls -la'
                 }
                 echo 'checkout done'
             }
