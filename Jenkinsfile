@@ -56,6 +56,7 @@ pipeline {
             }            
             steps {
                 echo 'example build'
+                checkout scm
                 dir("${REPO_NAME}/examples/app_sdram_demo") {
                     // xcoreBuild()
                     sh 'which cmake'
