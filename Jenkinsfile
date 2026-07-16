@@ -42,6 +42,7 @@ pipeline {
             stages {
                 stage('checkout') {
                     steps {
+                        sh 'source /home/alexyiu/x14_4_1_setup.sh'
                         echo 'checkout the repo'
                         script {
                             def (server, user, repo) = extractFromScmUrl()
@@ -59,7 +60,6 @@ pipeline {
                     steps {
                         echo 'example build'
                         checkout scm
-                        sh 'source /home/alexyiu/x14_4_1_setup.sh'
                         dir("${REPO_NAME}/examples/app_sdram_demo") {
                             // xcoreBuild()
                             sh 'which cmake'
