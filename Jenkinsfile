@@ -3,7 +3,7 @@
 // getApproval()
 
 pipeline {
-    agent none
+    agent any
     
     options {
         skipDefaultCheckout()
