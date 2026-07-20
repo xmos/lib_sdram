@@ -12,9 +12,11 @@
 
 #define VERBOSE_MSG 1
 
-#define SDRAM_256Mb   1 //Use IS42S16160D 256Mb
+#define SDRAM_256Mb   0//1 //Use IS42S16160D 256Mb
 #define SDRAM_128Mb   0 //Use IS42S16800D 128Mb
                         //othewise IS42S16400D 64Mb which is default on XMOS boards
+#define JTAG_TO_PRINT 1
+
 #define FAST_TEST     1 //Simplify read and wait only 12 seconds instead of 120 for refresh tests
 
 #define CAS_LATENCY   2

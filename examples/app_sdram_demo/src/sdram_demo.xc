@@ -9,7 +9,8 @@
 //For XS2 (xCORE200) put an SDRAM slice into the 'triangle' slot of tile 0 of the XP-SKC-X200 slice kit
 //If using 256Mb slice, then define USE_256Mb below, otherwise leave commented out
 
-#define USE_256Mb   1 //Else will assume 64Mb
+#define USE_256Mb   0//1 //Else will assume 64Mb
+#define JTAG_TO_PRINT 1
 
 void application(streaming chanend c_server) {
 #define BUF_WORDS (16)

@@ -8,13 +8,15 @@
 //For XS2 (xCORE200) put an SDRAM slice into the 'triangle' slot of tile 0 of the XP-SKC-X200 slice kit
 //If using 256Mb slice, then define USE_256Mb below, otherwise leave commented out
 
-#define SDRAM_256Mb   1 //Use IS42S16160D 256Mb or similar
+#define SDRAM_256Mb   0//1 //Use IS42S16160D 256Mb or similar
 #define SDRAM_128Mb   0 //Use IS42S16800D 128Mb
                         //othewise IS42S16400D 64Mb which is default on XMOS boards
 #define CAS_LATENCY   2
 #define REFRESH_MS    64
 #define CLOCK_DIV     4 //Note clock div 4 gives (500/ (4*2)) = 62.5MHz
 #define DATA_BITS     16
+
+#define JTAG_TO_PRINT 1
 
 #if SDRAM_256Mb
 #define REFRESH_CYCLES 8192
