@@ -24,7 +24,7 @@ pipeline {
             description: 'The infr_apps version'
         )
         choice(
-            name: 'TEST_LEVEL', choices: ['default', 'smoke', 'extended'],
+            name: 'TEST_LEVEL', choices: ['smoke', 'default', 'extended'],
             description: 'The level of test coverage to run'
         )
     }
@@ -36,6 +36,37 @@ pipeline {
     }
 
     stages {
+        stage('🏗️ Build doc') {
+            agent {
+                label 'x86_64 && linux && documentation'
+            }
+
+            stages {
+                stage('Checkout') {
+                    steps {
+
+                        println "Stage running on ${env.NODE_NAME}"
+
+                        script {
+                            def (server, user, repo) = extractFromScmUrl()
+                            env.REPO_NAME = repo
+                        }
+
+                        dir(REPO_NAME){
+                            checkoutScmShallow()
+                        }
+                    }
+                }
+
+                stage('Doc build') {
+                    steps {
+                        dir(REPO_NAME) {
+                            buildDocs()
+                        }
+                    }
+                }
+            }
+        } // build doc
         stage('🏗️ Build and test') {
             agent {
                 label 'ah05-sdram'
@@ -71,14 +102,6 @@ pipeline {
                         warnError("Repo checks failed")
                         {
                             runRepoChecks("${WORKSPACE}/${REPO_NAME}")
-                        }
-                    }
-                }
-
-                stage('Doc build') {
-                    steps {
-                        dir(REPO_NAME) {
-                            buildDocs()
                         }
                     }
                 }
