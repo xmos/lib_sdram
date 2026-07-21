@@ -95,7 +95,7 @@ pipeline {
                                         sh "xrun --xscope bin/sdram_testbench.xe"
                                     }
                                     dir("sdram_multi_client_test") {
-                                        sh "xrun --xscope bin/sdram_multe_client_test.xe"
+                                        sh "xrun --xscope bin/sdram_multi_client_test.xe"
                                     }
                                 }
                             }

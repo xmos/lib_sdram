@@ -120,6 +120,7 @@ int main() {
               sdram_client(c_sdram[6], 6);
           }
           printf("Success\n");
+          _Exit(0);
       }
       on tile[SERVER_TILE]:{
         set_thread_fast_mode_on();
