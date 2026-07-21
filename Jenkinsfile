@@ -38,7 +38,7 @@ pipeline {
     stages {
         stage('🏗️ Build and test') {
             agent {
-                label 'ah05-sdram0'
+                label 'ah05-sdram'
             }
 
             stages {
