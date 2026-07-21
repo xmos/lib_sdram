@@ -2,6 +2,8 @@
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 #include <platform.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <xs1.h>
 #include "sdram.h"
 
 //For XS2 (xCORE200) put an SDRAM slice into the 'triangle' slot of tile 0 of the XP-SKC-X200 slice kit
@@ -85,6 +87,7 @@ void sdram_client(streaming chanend c_server, int n) {
   s_sdram_state sdram_state;
   sdram_init_state(c_server, sdram_state);
   test(c_server, sdram_state, n);
+  _Exit(0);
 }
 
 #if defined (__XS2A__)
@@ -120,7 +123,6 @@ int main() {
               sdram_client(c_sdram[6], 6);
           }
           printf("Success\n");
-          _Exit(0);
       }
       on tile[SERVER_TILE]:{
         set_thread_fast_mode_on();
