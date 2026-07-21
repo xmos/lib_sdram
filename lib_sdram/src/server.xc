@@ -85,7 +85,7 @@ static unsigned sdram_init(
     case 5: // 500 / (5 * 2) = 50.00MHz. ~2.1ns margin
         read_delay_whole_clocks = 1;
         set_port_sample_delay(dq_ah);
-        set_pad_delay(dq_ah, 1);
+        set_pad_delay(dq_ah, 1);   
         break;
     case 6: // 500 / (6 * 2) = 41.67MHz. ~4.1ns margin
         read_delay_whole_clocks = 1;
@@ -459,7 +459,7 @@ void sdram_server(streaming chanend c_client[client_count],
        while (running) {
           #pragma ordered
           select {
-          case t when timerafter(time) :> unsigned handle_time :{
+          case t when timerafter(time) :>  unsigned handle_time :{
             unsigned diff = handle_time - time;
             unsigned bursts = diff>>bits;
             refresh(MINIMUM_REFRESH_COUNT*bursts, cas, ras);

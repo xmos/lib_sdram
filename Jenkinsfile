@@ -38,7 +38,7 @@ pipeline {
     stages {
         stage('🏗️ Build and test') {
             agent {
-                label 'x86_64 && linux && documentation'
+                label 'ah05-sdram0'
             }
 
             stages {
@@ -91,8 +91,12 @@ pipeline {
                                 createVenv(reqFile: "requirements.txt")
                                 withVenv {
                                     xcoreBuild(archiveBins: false)
-                                    // Use the TEST_LEVEL parameter to control the test coverage
-                                    runPytest("--level=${params.TEST_LEVEL}")
+                                    dir("sdram_testbench") {
+                                        sh "xrun --xscope bin/sdram_testbench.xe"
+                                    }
+                                    dir("sdram_multi_client_test") {
+                                        sh "xrun --xscope bin/sdram_multe_client_test.xe"
+                                    }
                                 }
                             }
                         }

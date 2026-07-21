@@ -13,10 +13,14 @@
                         //othewise IS42S16400D 64Mb which is default on XMOS boards
 #define CAS_LATENCY   2
 #define REFRESH_MS    64
+#if defined (__XS2A__)
 #define CLOCK_DIV     4 //Note clock div 4 gives (500/ (4*2)) = 62.5MHz
+#else
+#define CLOCK_DIV     5 //Note clock div 5 gives (600/ (5*2)) = 60.0MHz
+#endif
 #define DATA_BITS     16
 
-#define JTAG_TO_PRINT 1
+#define JTAG_IO_PRINT 1
 
 #if SDRAM_256Mb
 #define REFRESH_CYCLES 8192
@@ -49,10 +53,10 @@
 void application(streaming chanend c_server, s_sdram_state sdram_state) {
 #define BUF_WORDS (240)
 
-    unsigned buffer_0[ROW_WORDS];
-    unsigned buffer_1[ROW_WORDS];
-    unsigned buffer_2[ROW_WORDS];
-    unsigned buffer_3[ROW_WORDS];
+    unsigned buffer_0[BUF_WORDS];
+    unsigned buffer_1[BUF_WORDS];
+    unsigned buffer_2[BUF_WORDS];
+    unsigned buffer_3[BUF_WORDS];
 
   unsigned * movable buffer_pointer_0 = buffer_0;
   unsigned * movable buffer_pointer_1 = buffer_1;
@@ -64,19 +68,19 @@ void application(streaming chanend c_server, s_sdram_state sdram_state) {
 #define SECONDS 2
   unsigned words_since_timeout = 0;
   t :> time;
-  sdram_read(c_server, sdram_state, 0, ROW_WORDS, move(buffer_pointer_0));
-  sdram_read(c_server, sdram_state, 0, ROW_WORDS, move(buffer_pointer_1));
-  sdram_read(c_server, sdram_state, 0, ROW_WORDS, move(buffer_pointer_2));
-  sdram_read(c_server, sdram_state, 0, ROW_WORDS, move(buffer_pointer_3));
-  while(1){
+  sdram_read(c_server, sdram_state, 0, BUF_WORDS, move(buffer_pointer_0));
+  sdram_read(c_server, sdram_state, 0, BUF_WORDS, move(buffer_pointer_1));
+  sdram_read(c_server, sdram_state, 0, BUF_WORDS, move(buffer_pointer_2));
+  sdram_read(c_server, sdram_state, 0, BUF_WORDS, move(buffer_pointer_3));
+  while(1){ 
     select {
       case t when timerafter(time + SECONDS*100000000) :> time:
         printintln(words_since_timeout*4/SECONDS);
         words_since_timeout = 0;
         break;
       case sdram_complete(c_server, sdram_state, buffer_pointer_0):{
-        words_since_timeout += ROW_WORDS;
-        sdram_read(c_server, sdram_state, 0, ROW_WORDS, move(buffer_pointer_0));
+        words_since_timeout += BUF_WORDS;
+        sdram_read(c_server, sdram_state, 0, BUF_WORDS, move(buffer_pointer_0));
         break;
       }
     }
@@ -97,7 +101,17 @@ void sdram_client(streaming chanend c_server) {
   sdram_init_state(c_server, sdram_state);
   application(c_server, sdram_state);
 }
-
+#if defined(__XS3A__)
+// SDRAM test board for XU316
+#define CLOCK_DIV   5 // (600/ (5*2)) = 60.0MHz
+#define SERVER_TILE 1
+on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
+on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1A;
+on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1P;
+on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1M;
+on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1F;
+on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_1;
+#else
 //Triangle slot tile 0 for XU216
 #define      SERVER_TILE            0
 on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16B;
@@ -106,7 +120,7 @@ on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_
 on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1K;
 on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1L;
 on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_2;
-
+#endif
 int main() {
     streaming chan c_sdram[1];
   par {

@@ -77,14 +77,14 @@ on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_
 on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1L;
 on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_2;
 #else
-//Square slot on A16 slicekit
+//Uses IS42S16400D 64Mb part supplied on AH05_SDRAM board
 #define      SERVER_TILE            1
 on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
-on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1B;
-on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1G;
-on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1C;
+on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1A;
+on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1P;
+on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1M;
 on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1F;
-on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_2;
+on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_1;
 #endif
 
 int main() {
@@ -100,7 +100,8 @@ int main() {
 #if USE_256Mb
               2, 256, 16, 9, 13, 2, 64, 8192, 4); //IS45S16160D 256Mb option or similar
 #else
-              2, 128, 16, 8, 12, 2, 64, 4096, 4); //Uses IS42S16400D 64Mb part supplied on SDRAM slice
+              // 2, 128, 16, 8, 12, 2, 64, 4096, 4); //Uses IS42S16400D 64Mb part supplied on SDRAM slice
+              2, 128, 16, 8, 12, 2, 64, 4096, 5); //Uses IS42S16400D 64Mb part supplied on AH05_SDRAM board
 #endif
                                                   //Note clock div 4 gives (500/ (4*2)) = 62.5MHz
 

@@ -14,7 +14,11 @@
 
 #define CAS_LATENCY   2
 #define REFRESH_MS    64
+#if defined (__XS2A__)
 #define CLOCK_DIV     4 //Note clock div 4 gives (500/ (4*2)) = 62.5MHz
+#else
+#define CLOCK_DIV     5 //Note clock div 4 gives (600/ (5*2)) = 60.0MHz
+#endif
 #define DATA_BITS     16
 
 #if SDRAM_256Mb
@@ -76,12 +80,14 @@ static int test(streaming chanend c_server, s_sdram_state &sdram_state, int n){
 }
 
 void sdram_client(streaming chanend c_server, int n) {
+    printf("client %d\n", n);
   set_thread_fast_mode_on();
   s_sdram_state sdram_state;
   sdram_init_state(c_server, sdram_state);
   test(c_server, sdram_state, n);
 }
 
+#if defined (__XS2A__)
 //Triangle slot tile 0 for XU216
 #define      SERVER_TILE            0
 on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16B;
@@ -90,7 +96,16 @@ on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_
 on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1K;
 on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1L;
 on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_2;
+#else
+#define      SERVER_TILE            1
+on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
+on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1A;
+on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1P;
+on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1M;
+on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1F;
+on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_1;
 
+#endif
 int main() {
   streaming chan c_sdram[7];
   par {
@@ -106,14 +121,25 @@ int main() {
           }
           printf("Success\n");
       }
-    on tile[SERVER_TILE]:sdram_server(c_sdram, 1,
-            sdram_dq_ah,
-            sdram_cas,
-            sdram_ras,
-            sdram_we,
-            sdram_clk,
-            sdram_cb,
-            2, 128, 16, 8,12, 2, 64, 4096, 4);
+      on tile[SERVER_TILE]:{
+        set_thread_fast_mode_on();
+        sdram_server(c_sdram, 7,
+              sdram_dq_ah,
+              sdram_cas,
+              sdram_ras,
+              sdram_we,
+              sdram_clk,
+              sdram_cb,
+              CAS_LATENCY,
+              ROW_WORDS,
+              DATA_BITS,
+              COL_ADDRESS_BITS,
+              ROW_ADDRESS_BITS,
+              BANK_ADDRESS_BITS,
+              REFRESH_MS,
+              REFRESH_CYCLES,
+              CLOCK_DIV);
+      }
   }
   return 0;
 }
