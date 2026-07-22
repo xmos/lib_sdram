@@ -1,5 +1,5 @@
 set(LIB_NAME lib_sdram)
-set(LIB_VERSION 3.4.0)
+set(LIB_VERSION 3.5.0)
 set(LIB_INCLUDES api src)
 
 set(LIB_DEPENDENT_MODULES "")
