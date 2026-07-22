@@ -1,6 +1,11 @@
 lib_sdram change log
 ====================
 
+3.5.0
+-----
+
+  * CHANGED: updated example and test to support AH05-SDRAM (xcore.ai)
+
 3.4.0
 -----
 

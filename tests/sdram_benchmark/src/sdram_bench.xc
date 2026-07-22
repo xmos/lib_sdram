@@ -48,6 +48,12 @@
 #define ROW_WORDS     128
 #endif
 
+unsigned timer_is_after(timer t, unsigned time)
+{
+  unsigned now;
+  t :> now;
+  return timeafter(now, time);
+}
 
 #pragma unsafe arrays
 void application(streaming chanend c_server, s_sdram_state sdram_state) {
@@ -73,6 +79,19 @@ void application(streaming chanend c_server, s_sdram_state sdram_state) {
   sdram_read(c_server, sdram_state, 0, BUF_WORDS, move(buffer_pointer_2));
   sdram_read(c_server, sdram_state, 0, BUF_WORDS, move(buffer_pointer_3));
   while(1){ 
+#if JTAG_IO_PRINT
+    // avoid slow JTAG IO results printing to
+    // interrupt SDRAM server reading command
+    sdram_complete(c_server, sdram_state, buffer_pointer_0);
+    words_since_timeout += BUF_WORDS;
+    if (timer_is_after(t, time + SECONDS*100000000))
+    {
+      printintln(words_since_timeout*4/SECONDS);
+      words_since_timeout = 0;
+      t :> time;
+    }
+    sdram_read(c_server, sdram_state, 0, BUF_WORDS, move(buffer_pointer_0));
+#else    
     select {
       case t when timerafter(time + SECONDS*100000000) :> time:
         printintln(words_since_timeout*4/SECONDS);
@@ -84,6 +103,7 @@ void application(streaming chanend c_server, s_sdram_state sdram_state) {
         break;
       }
     }
+#endif
   }
 }
 
