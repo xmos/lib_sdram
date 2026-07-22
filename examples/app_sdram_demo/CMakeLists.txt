@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.21)
 include($ENV{XMOS_CMAKE_PATH}/xcommon.cmake)
 project(sdram_demo)
 
-set(APP_HW_TARGET           SLICEKIT-XC200-X1.xn)
+# set(APP_HW_TARGET           SLICEKIT-XC200-X1.xn)
+set(APP_HW_TARGET xcore_ai_sdram_test_board.xn)
+set(APP_XSCOPE_SRCS "")
 
 set(APP_DEPENDENT_MODULES   "lib_sdram")
 set(APP_COMPILER_FLAGS      -g -O2)

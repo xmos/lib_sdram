@@ -36,80 +36,135 @@ pipeline {
     }
 
     stages {
-        stage('🏗️ Build and test') {
-            agent {
-                label 'x86_64 && linux && documentation'
-            }
-
-            stages {
-                stage('Checkout') {
-                    steps {
-
-                        println "Stage running on ${env.NODE_NAME}"
-
-                        script {
-                            def (server, user, repo) = extractFromScmUrl()
-                            env.REPO_NAME = repo
-                        }
-
-                        dir(REPO_NAME){
-                            checkoutScmShallow()
-                        }
+        stage ('Build Docs and Test') {
+            parallel {
+                stage('🏗️ Build doc') {
+                    agent {
+                        label 'x86_64 && linux && documentation'
                     }
-                }
 
-                stage('Examples build') {
-                    steps {
-                        dir("${REPO_NAME}/examples") {
-                            xcoreBuild()
-                        }
-                    }
-                }
+                    stages {
+                        stage('Checkout') {
+                            steps {
 
-                stage('Repo checks') {
-                    steps {
-                        warnError("Repo checks failed")
-                        {
-                            runRepoChecks("${WORKSPACE}/${REPO_NAME}")
-                        }
-                    }
-                }
+                                println "Stage running on ${env.NODE_NAME}"
 
-                stage('Doc build') {
-                    steps {
-                        dir(REPO_NAME) {
-                            buildDocs()
-                        }
-                    }
-                }
+                                script {
+                                    def (server, user, repo) = extractFromScmUrl()
+                                    env.REPO_NAME = repo
+                                }
 
-                stage('Tests') {
-                    steps {
-                        dir("${REPO_NAME}/tests") {
-                            withTools(params.TOOLS_VERSION) {
-                                createVenv(reqFile: "requirements.txt")
-                                withVenv {
-                                    xcoreBuild(archiveBins: false)
-                                    // Use the TEST_LEVEL parameter to control the test coverage
-                                    runPytest("--level=${params.TEST_LEVEL}")
+                                dir(REPO_NAME){
+                                    checkoutScmShallow()
                                 }
                             }
                         }
-                    }
-                }
 
-                stage("Archive sandbox") {
-                    steps {
-                        archiveSandbox(REPO_NAME)
+                        stage('Examples build') {
+                            steps {
+                                dir("${REPO_NAME}/examples") {
+                                    xcoreBuild()
+                                }
+                            }
+                        }
+
+                        stage('Repo checks') {
+                            steps {
+                                warnError("Repo checks failed")
+                                {
+                                    runRepoChecks("${WORKSPACE}/${REPO_NAME}")
+                                }
+                            }
+                        }
+
+                        stage('Doc build') {
+                            steps {
+                                dir(REPO_NAME) {
+                                    buildDocs()
+                                }
+                            }
+                        }
+
+                        stage("Archive sandbox") {
+                            steps {
+                                archiveSandbox(REPO_NAME)
+                            }
+                        }                        
                     }
-                }
-            } // stages
-            post {
-                cleanup {
-                    xcoreCleanSandbox()
-                }
-            }
-        } // stage 'Build and test'
+                } // build doc
+                stage('🏗️ Build and test') {
+                    agent {
+                        label 'ah05-sdram'
+                    }
+
+                    stages {
+                        stage('Checkout') {
+                            steps {
+
+                                println "Stage running on ${env.NODE_NAME}"
+
+                                script {
+                                    def (server, user, repo) = extractFromScmUrl()
+                                    env.REPO_NAME = repo
+                                }
+
+                                dir(REPO_NAME){
+                                    checkoutScmShallow()
+                                }
+                            }
+                        }
+
+                        stage('Examples build') {
+                            steps {
+                                dir("${REPO_NAME}/examples") {
+                                    xcoreBuild()
+                                }
+                            }
+                        }
+
+                        stage('Repo checks') {
+                            steps {
+                                warnError("Repo checks failed")
+                                {
+                                    runRepoChecks("${WORKSPACE}/${REPO_NAME}")
+                                }
+                            }
+                        }
+
+                        stage('Tests') {
+                            steps {
+                                echo "TEST_LEVEL: ${params.TEST_LEVEL}"
+                                dir("${REPO_NAME}/tests") {
+                                    withTools(params.TOOLS_VERSION) {
+                                        createVenv(reqFile: "requirements.txt")
+                                        withVenv {
+                                            xcoreBuild(archiveBins: false)
+                                            dir("sdram_testbench") {
+                                                sh "xrun --io bin/sdram_testbench.xe"
+                                            }
+                                            dir("sdram_multi_client_test") {
+                                                sh "xrun --io bin/sdram_multi_client_test.xe"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        stage("Archive sandbox") {
+                            steps {
+                                archiveSandbox(REPO_NAME)
+                            }
+                        }
+                    } // stages
+                    post {
+                        cleanup {
+                            xcoreCleanSandbox()
+                        }
+                    }
+                } // stage 'build docs and test'
+            } // parallel
+        }
 
         stage('🚀 Release') {
             when {

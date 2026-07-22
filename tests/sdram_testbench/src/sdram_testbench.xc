@@ -10,16 +10,22 @@
 //For XS2 (xCORE200) put an SDRAM slice into the 'triangle' slot of tile 0 of the XP-SKC-X200 slice kit
 //If using 256Mb slice, then define USE_256Mb below, otherwise leave commented out
 
-#define VERBOSE_MSG 1
+#define VERBOSE_MSG 0
 
-#define SDRAM_256Mb   1 //Use IS42S16160D 256Mb
+#define SDRAM_256Mb   0//1 //Use IS42S16160D 256Mb
 #define SDRAM_128Mb   0 //Use IS42S16800D 128Mb
                         //othewise IS42S16400D 64Mb which is default on XMOS boards
+#define JTAG_TO_PRINT 1
+
 #define FAST_TEST     1 //Simplify read and wait only 12 seconds instead of 120 for refresh tests
 
 #define CAS_LATENCY   2
 #define REFRESH_MS    64
+#ifdef __XS2A__
 #define CLOCK_DIV     4 //Note clock div 4 gives (500 / (4*2)) = 62.5MHz
+#else
+#define CLOCK_DIV     5 // 600 / (5*2) = 60.0MHz
+#endif
 #define DATA_BITS     16
 
 #if SDRAM_256Mb
@@ -411,14 +417,14 @@ on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_
 on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1L;
 on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_2;
 #else
-//Square slot on A16 slicekit
+//on AH05_SDRAM board
 #define      SERVER_TILE            1
 on tile[SERVER_TILE] : out buffered port:32   sdram_dq_ah                 = XS1_PORT_16A;
-on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1B;
-on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1G;
-on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1C;
+on tile[SERVER_TILE] : out buffered port:32   sdram_cas                   = XS1_PORT_1A;
+on tile[SERVER_TILE] : out buffered port:32   sdram_ras                   = XS1_PORT_1P;
+on tile[SERVER_TILE] : out buffered port:8    sdram_we                    = XS1_PORT_1M;
 on tile[SERVER_TILE] : out port               sdram_clk                   = XS1_PORT_1F;
-on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_2;
+on tile[SERVER_TILE] : clock                  sdram_cb                    = XS1_CLKBLK_1;
 #endif
 
 int main() {
